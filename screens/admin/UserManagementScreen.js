@@ -94,16 +94,17 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Search and Filter */}
+      {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
-          style={styles.searchBox}
+          style={styles.input}
           placeholder="Tìm kiếm theo tên hoặc số điện thoại..."
           value={searchText}
           onChangeText={setSearchText}
         />
       </View>
 
+      {/* Filter */}
       <View style={styles.filterContainer}>
         <TouchableOpacity
           style={[styles.filterChip, filterRole === "all" && styles.activeFilterChip]}

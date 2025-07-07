@@ -5,7 +5,7 @@ import { AdminBottomNav } from "../../components/BottomNavigation"
 
 const AdminProfileScreen = ({ onTabPress, onLogout, currentUser, onMenuPress }) => {
   const handleMenuPress = (screen) => {
-    if (screen) {
+    if (screen && onMenuPress) {
       onMenuPress(screen)
     } else {
       Alert.alert("Thông báo", "Chức năng đang được phát triển")
@@ -21,7 +21,7 @@ const AdminProfileScreen = ({ onTabPress, onLogout, currentUser, onMenuPress }) 
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
           <View style={styles.profileInfo}>
             <Text style={styles.profileAvatar}>👨‍💼</Text>

@@ -129,7 +129,7 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
         data={filteredOrders}
         renderItem={renderOrder}
         keyExtractor={(item) => `${item.type}-${item.id}`}
-        contentContainerStyle={styles.ordersList}
+        contentContainerStyle={{ paddingBottom: 100, padding: 15 }}
         showsVerticalScrollIndicator={false}
       />
 

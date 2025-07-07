@@ -18,6 +18,15 @@ import AdminDashboardScreen from "./screens/admin/AdminDashboardScreen"
 import UserManagementScreen from "./screens/admin/UserManagementScreen"
 import OrderManagementScreen from "./screens/admin/OrderManagementScreen"
 import AdminProfileScreen from "./screens/admin/AdminProfileScreen"
+import CustomerManagementScreen from "./screens/admin/CustomerManagementScreen"
+import WorkerManagementScreen from "./screens/admin/WorkerManagementScreen"
+import ServiceManagementScreen from "./screens/admin/ServiceManagementScreen"
+import ReviewManagementScreen from "./screens/admin/ReviewManagementScreen"
+import PaymentManagementScreen from "./screens/admin/PaymentManagementScreen"
+import AreaManagementScreen from "./screens/admin/AreaManagementScreen"
+import AdminAccountManagementScreen from "./screens/admin/AdminAccountManagementScreen"
+import SystemSettingsScreen from "./screens/admin/SystemSettingsScreen"
+import SystemLogsScreen from "./screens/admin/SystemLogsScreen"
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState("login")
@@ -60,7 +69,9 @@ export default function App() {
 
   // Thêm handleMenuPress cho admin
   const handleMenuPress = (screen) => {
-    setCurrentScreen(screen)
+    if (screen) {
+      setCurrentScreen(screen)
+    }
   }
 
   // Cập nhật handleTabPress để thêm admin navigation
@@ -102,7 +113,19 @@ export default function App() {
       setCurrentScreen("home")
     } else if (currentScreen === "workerOrderDetail") {
       setCurrentScreen("workerOrders")
-    } else if (currentScreen === "userManagement" || currentScreen === "orderManagement") {
+    } else if (
+      currentScreen === "userManagement" ||
+      currentScreen === "orderManagement" ||
+      currentScreen === "customerManagement" ||
+      currentScreen === "workerManagement" ||
+      currentScreen === "serviceManagement" ||
+      currentScreen === "reviewManagement" ||
+      currentScreen === "paymentManagement" ||
+      currentScreen === "areaManagement" ||
+      currentScreen === "adminAccountManagement" ||
+      currentScreen === "systemSettings" ||
+      currentScreen === "systemLogs"
+    ) {
       setCurrentScreen("adminDashboard")
     }
   }
@@ -175,6 +198,24 @@ export default function App() {
             onMenuPress={handleMenuPress}
           />
         )
+      case "customerManagement":
+        return <CustomerManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerManagement":
+        return <WorkerManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "serviceManagement":
+        return <ServiceManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "reviewManagement":
+        return <ReviewManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "paymentManagement":
+        return <PaymentManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "areaManagement":
+        return <AreaManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "adminAccountManagement":
+        return <AdminAccountManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "systemSettings":
+        return <SystemSettingsScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "systemLogs":
+        return <SystemLogsScreen onTabPress={handleTabPress} onBack={handleBack} />
 
       default:
         return <LoginScreen onLogin={handleLogin} />

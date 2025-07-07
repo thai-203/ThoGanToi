@@ -12,6 +12,9 @@ export const users = [
     role: "customer",
     name: "Nguyễn Văn A",
     email: "customer1@example.com",
+    status: "active",
+    joinDate: "2024-01-01",
+    area: "Quận 1, TP.HCM",
   },
   {
     id: "4",
@@ -20,6 +23,9 @@ export const users = [
     role: "customer",
     name: "Trần Thị B",
     email: "customer2@example.com",
+    status: "active",
+    joinDate: "2024-01-05",
+    area: "Quận 3, TP.HCM",
   },
   {
     id: "5",
@@ -28,6 +34,9 @@ export const users = [
     role: "customer",
     name: "Lê Văn C",
     email: "customer3@example.com",
+    status: "blocked",
+    joinDate: "2024-01-10",
+    area: "Quận 7, TP.HCM",
   },
 
   // Worker users
@@ -39,6 +48,12 @@ export const users = [
     name: "Thợ Minh Tuấn",
     email: "worker1@example.com",
     specialty: "Thợ điện",
+    status: "active",
+    joinDate: "2024-01-02",
+    area: "Quận 1, TP.HCM",
+    rating: 4.8,
+    completedOrders: 127,
+    certificate: "Chứng chỉ điện công nghiệp",
   },
   {
     id: "7",
@@ -48,6 +63,12 @@ export const users = [
     name: "Thợ Văn Nam",
     email: "worker2@example.com",
     specialty: "Thợ nước",
+    status: "pending",
+    joinDate: "2024-01-15",
+    area: "Quận 3, TP.HCM",
+    rating: 4.6,
+    completedOrders: 89,
+    certificate: "Chứng chỉ kỹ thuật nước",
   },
   {
     id: "8",
@@ -57,18 +78,88 @@ export const users = [
     name: "Thợ Hoàng Long",
     email: "worker3@example.com",
     specialty: "Thợ máy lạnh",
+    status: "active",
+    joinDate: "2024-01-08",
+    area: "Quận 7, TP.HCM",
+    rating: 4.9,
+    completedOrders: 203,
+    certificate: "Chứng chỉ điện lạnh",
   },
 ]
 
 export const services = [
-  { id: "1", name: "Thợ điện", icon: "⚡", color: "#fbbf24" },
-  { id: "2", name: "Thợ nước", icon: "🚰", color: "#3b82f6" },
-  { id: "3", name: "Thợ máy lạnh", icon: "❄️", color: "#06b6d4" },
-  { id: "4", name: "Thợ IT", icon: "💻", color: "#8b5cf6" },
-  { id: "5", name: "Giặt ghế sofa", icon: "🛋️", color: "#10b981" },
-  { id: "6", name: "Vệ sinh nhà", icon: "🧹", color: "#f59e0b" },
-  { id: "7", name: "Sửa xe máy", icon: "🏍️", color: "#ef4444" },
-  { id: "8", name: "Thợ mộc", icon: "🔨", color: "#84cc16" },
+  {
+    id: "1",
+    name: "Thợ điện",
+    icon: "⚡",
+    color: "#fbbf24",
+    suggestedPrice: "150,000đ/giờ",
+    description: "Sửa chữa, lắp đặt hệ thống điện",
+    status: "active",
+  },
+  {
+    id: "2",
+    name: "Thợ nước",
+    icon: "🚰",
+    color: "#3b82f6",
+    suggestedPrice: "120,000đ/giờ",
+    description: "Sửa chữa đường ống nước, vòi sen",
+    status: "active",
+  },
+  {
+    id: "3",
+    name: "Thợ máy lạnh",
+    icon: "❄️",
+    color: "#06b6d4",
+    suggestedPrice: "200,000đ/giờ",
+    description: "Sửa chữa, bảo trì máy lạnh",
+    status: "active",
+  },
+  {
+    id: "4",
+    name: "Thợ IT",
+    icon: "💻",
+    color: "#8b5cf6",
+    suggestedPrice: "180,000đ/giờ",
+    description: "Sửa chữa máy tính, laptop",
+    status: "active",
+  },
+  {
+    id: "5",
+    name: "Giặt ghế sofa",
+    icon: "🛋️",
+    color: "#10b981",
+    suggestedPrice: "300,000đ/bộ",
+    description: "Vệ sinh ghế sofa chuyên nghiệp",
+    status: "active",
+  },
+  {
+    id: "6",
+    name: "Vệ sinh nhà",
+    icon: "🧹",
+    color: "#f59e0b",
+    suggestedPrice: "100,000đ/giờ",
+    description: "Dọn dẹp nhà cửa theo giờ",
+    status: "active",
+  },
+  {
+    id: "7",
+    name: "Sửa xe máy",
+    icon: "🏍️",
+    color: "#ef4444",
+    suggestedPrice: "80,000đ/lần",
+    description: "Sửa chữa xe máy tại nhà",
+    status: "inactive",
+  },
+  {
+    id: "8",
+    name: "Thợ mộc",
+    icon: "🔨",
+    color: "#84cc16",
+    suggestedPrice: "160,000đ/giờ",
+    description: "Làm đồ gỗ, sửa chữa nội thất",
+    status: "active",
+  },
 ]
 
 export const workers = [
@@ -238,14 +329,117 @@ export const adminStats = {
   pendingOrders: 158,
   totalRevenue: 45600000,
   monthlyRevenue: 8900000,
+  todayOrders: 23,
+  weeklyOrders: 156,
+  processingOrders: 45,
 }
 
-// Thêm menu items cho admin
+// Cập nhật menu items cho admin với đầy đủ tính năng
 export const adminMenuItems = [
-  { id: "1", title: "Quản lý người dùng", icon: "👥", action: "users", screen: "userManagement" },
-  { id: "2", title: "Quản lý dịch vụ", icon: "🔧", action: "services", screen: "serviceManagement" },
-  { id: "3", title: "Quản lý đơn hàng", icon: "📋", action: "orders", screen: "orderManagement" },
-  { id: "4", title: "Báo cáo thống kê", icon: "📊", action: "reports", screen: "reports" },
-  { id: "5", title: "Cài đặt hệ thống", icon: "⚙️", action: "settings", screen: "settings" },
-  { id: "6", title: "Hỗ trợ", icon: "💬", action: "support", screen: "support" },
+  { id: "1", title: "Quản lý khách hàng", icon: "👥", action: "customers", screen: "customerManagement" },
+  { id: "2", title: "Quản lý thợ", icon: "👨‍🔧", action: "workers", screen: "workerManagement" },
+  { id: "3", title: "Quản lý dịch vụ", icon: "🔧", action: "services", screen: "serviceManagement" },
+  { id: "4", title: "Quản lý đơn hàng", icon: "📋", action: "orders", screen: "orderManagement" },
+  { id: "5", title: "Đánh giá & phản hồi", icon: "⭐", action: "reviews", screen: "reviewManagement" },
+  { id: "6", title: "Thanh toán & hoa hồng", icon: "💰", action: "payments", screen: "paymentManagement" },
+  { id: "7", title: "Quản lý khu vực", icon: "📍", action: "areas", screen: "areaManagement" },
+  { id: "8", title: "Tài khoản admin", icon: "👨‍💼", action: "admins", screen: "adminAccountManagement" },
+  { id: "9", title: "Cài đặt hệ thống", icon: "⚙️", action: "settings", screen: "systemSettings" },
+  { id: "10", title: "Nhật ký hệ thống", icon: "📊", action: "logs", screen: "systemLogs" },
+]
+
+// Thêm dữ liệu đánh giá
+export const reviews = [
+  {
+    id: "1",
+    customer: "Nguyễn Văn A",
+    worker: "Thợ Minh Tuấn",
+    service: "Thợ điện",
+    rating: 5,
+    comment: "Thợ làm việc rất chuyên nghiệp, nhanh gọn",
+    date: "15/01/2024",
+    status: "approved",
+  },
+  {
+    id: "2",
+    customer: "Trần Thị B",
+    worker: "Thợ Văn Nam",
+    service: "Thợ nước",
+    rating: 4,
+    comment: "Làm việc tốt nhưng đến hơi muộn",
+    date: "16/01/2024",
+    status: "approved",
+  },
+  {
+    id: "3",
+    customer: "Lê Văn C",
+    worker: "Thợ Hoàng Long",
+    service: "Thợ máy lạnh",
+    rating: 1,
+    comment: "Thái độ không tốt, làm việc cẩu thả",
+    date: "17/01/2024",
+    status: "reported",
+  },
+]
+
+// Thêm dữ liệu giao dịch
+export const transactions = [
+  {
+    id: "1",
+    orderId: "ORD001",
+    customer: "Nguyễn Văn A",
+    worker: "Thợ Minh Tuấn",
+    amount: 300000,
+    commission: 30000,
+    workerReceived: 270000,
+    date: "15/01/2024",
+    status: "completed",
+  },
+  {
+    id: "2",
+    orderId: "ORD002",
+    customer: "Trần Thị B",
+    worker: "Thợ Văn Nam",
+    amount: 225000,
+    commission: 22500,
+    workerReceived: 202500,
+    date: "16/01/2024",
+    status: "completed",
+  },
+]
+
+// Thêm dữ liệu khu vực
+export const areas = [
+  { id: "1", name: "Quận 1", city: "TP.HCM", status: "active", workerCount: 15 },
+  { id: "2", name: "Quận 3", city: "TP.HCM", status: "active", workerCount: 12 },
+  { id: "3", name: "Quận 7", city: "TP.HCM", status: "active", workerCount: 18 },
+  { id: "4", name: "Quận Bình Thạnh", city: "TP.HCM", status: "active", workerCount: 8 },
+]
+
+// Thêm dữ liệu nhật ký hệ thống
+export const systemLogs = [
+  {
+    id: "1",
+    action: "Đăng nhập",
+    user: "Admin Nguyễn",
+    details: "Đăng nhập vào hệ thống",
+    timestamp: "18/01/2024 09:30:15",
+    ip: "192.168.1.100",
+  },
+  {
+    id: "2",
+    action: "Xóa người dùng",
+    user: "Admin Trần",
+    details: "Xóa tài khoản khách hàng ID: 10",
+    timestamp: "18/01/2024 10:15:22",
+    ip: "192.168.1.101",
+  },
+  {
+    id: "3",
+    action: "Cập nhật dịch vụ",
+    user: "Admin Nguyễn",
+    details: "Cập nhật giá dịch vụ Thợ điện",
+    timestamp: "18/01/2024 11:45:30",
+    ip: "192.168.1.100",
+  },
 ]

@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, FlatList } from "react-native"
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from "react-native"
 import { styles } from "../../styles/styles"
 import { adminStats, adminMenuItems } from "../../data/mockData"
 import { AdminBottomNav } from "../../components/BottomNavigation"
 
 const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
   const renderMenuItem = ({ item }) => (
-    <TouchableOpacity style={styles.adminMenuCard} onPress={() => onMenuPress(item.screen)}>
+    <TouchableOpacity style={styles.adminMenuCard} onPress={() => onMenuPress && onMenuPress(item.screen)}>
       <Text style={styles.adminMenuIcon}>{item.icon}</Text>
       <Text style={styles.adminMenuTitle}>{item.title}</Text>
       <Text style={styles.adminMenuDescription}>
@@ -24,7 +24,7 @@ const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
       <View style={styles.adminHeader}>
         <View>
           <Text style={styles.adminTitle}>Admin Dashboard</Text>
-          <Text style={{ color: "white", fontSize: 14 }}>Xin chào, {currentUser?.name}</Text>
+          <Text style={styles.adminSubtitle}>Xin chào, {currentUser?.name || "Admin"}</Text>
         </View>
         <TouchableOpacity style={styles.notificationButton}>
           <Text style={styles.notificationIcon}>🔔</Text>
@@ -34,7 +34,7 @@ const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Stats Grid */}
         <View style={styles.adminStatsGrid}>
           <View style={styles.adminStatCard}>
@@ -81,13 +81,23 @@ const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
         {/* Menu Grid */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quản lý hệ thống</Text>
-          <FlatList
-            data={adminMenuItems}
-            renderItem={renderMenuItem}
-            numColumns={2}
-            scrollEnabled={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          />
+          <View style={styles.adminMenuGrid}>
+            {adminMenuItems.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.adminMenuCard}
+                onPress={() => {
+                  console.log("Menu pressed:", item.screen)
+                  if (onMenuPress) {
+                    onMenuPress(item.screen)
+                  }
+                }}
+              >
+                <Text style={styles.adminMenuIcon}>{item.icon}</Text>
+                <Text style={styles.adminMenuTitle}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </ScrollView>
 
