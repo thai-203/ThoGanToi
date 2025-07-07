@@ -1,0 +1,1468 @@
+import { StyleSheet } from "react-native"
+
+export const styles = StyleSheet.create({
+  // Common Styles
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+  },
+
+  // Login Screen Styles
+  header: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  logo: {
+    fontSize: 60,
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#6b7280",
+  },
+  form: {
+    gap: 15,
+  },
+  input: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    fontSize: 16,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: "#1f2937",
+  },
+  loginButton: {
+    backgroundColor: "#2563eb",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  loginButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  registerButton: {
+    alignItems: "center",
+    marginTop: 15,
+  },
+  registerButtonText: {
+    color: "#2563eb",
+    fontSize: 14,
+  },
+  // Thêm styles cho login info
+  loginInfo: {
+    backgroundColor: "#f0f9ff",
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+    marginVertical: 10,
+  },
+  loginInfoText: {
+    fontSize: 14,
+    color: "#1e40af",
+    marginBottom: 2,
+  },
+
+  // Home Screen Styles
+  homeHeader: {
+    padding: 20,
+    paddingTop: 10,
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#1f2937",
+  },
+  question: {
+    fontSize: 16,
+    color: "#6b7280",
+    marginTop: 5,
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  searchBox: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  searchText: {
+    color: "#9ca3af",
+    fontSize: 16,
+  },
+  servicesContainer: {
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 15,
+  },
+  servicesList: {
+    gap: 10,
+  },
+  serviceCard: {
+    flex: 1,
+    padding: 20,
+    borderRadius: 15,
+    alignItems: "center",
+    margin: 5,
+    minHeight: 100,
+    justifyContent: "center",
+  },
+  serviceIcon: {
+    fontSize: 30,
+    marginBottom: 8,
+  },
+  serviceName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1f2937",
+    textAlign: "center",
+  },
+  promoContainer: {
+    padding: 20,
+    marginTop: 20,
+    marginBottom: 80,
+  },
+  promoCard: {
+    backgroundColor: "#2563eb",
+    padding: 20,
+    borderRadius: 15,
+    alignItems: "center",
+  },
+  promoTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 5,
+  },
+  promoText: {
+    fontSize: 14,
+    color: "#bfdbfe",
+    marginBottom: 15,
+  },
+  promoButton: {
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  promoButtonText: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+
+  // Screen Header Styles
+  screenHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  backButton: {
+    fontSize: 16,
+    color: "#2563eb",
+  },
+  screenTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+  },
+  filterButton: {
+    fontSize: 20,
+  },
+  favoriteButton: {
+    fontSize: 20,
+  },
+
+  // Filter Styles
+  filterContainer: {
+    flexDirection: "row",
+    padding: 15,
+    gap: 10,
+  },
+  filterChip: {
+    backgroundColor: "white",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  filterText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  // Thêm styles cho filter active state
+  activeFilterChip: {
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
+  },
+  activeFilterText: {
+    color: "white",
+    fontWeight: "600",
+  },
+
+  // Worker List Styles
+  workersList: {
+    padding: 15,
+    gap: 15,
+    paddingBottom: 100,
+  },
+  workerCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  workerHeader: {
+    flexDirection: "row",
+    marginBottom: 15,
+  },
+  avatar: {
+    fontSize: 40,
+    marginRight: 15,
+  },
+  workerInfo: {
+    flex: 1,
+  },
+  workerName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  experience: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 5,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  rating: {
+    fontSize: 14,
+    color: "#f59e0b",
+  },
+  reviews: {
+    fontSize: 12,
+    color: "#9ca3af",
+  },
+  workerMeta: {
+    alignItems: "flex-end",
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2563eb",
+    marginBottom: 5,
+  },
+  distance: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
+  workerFooter: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  contactButton: {
+    flex: 1,
+    backgroundColor: "#f3f4f6",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  contactButtonText: {
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "600",
+  },
+  bookButton: {
+    flex: 1,
+    backgroundColor: "#2563eb",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  bookButtonText: {
+    fontSize: 14,
+    color: "white",
+    fontWeight: "600",
+  },
+
+  // Worker Detail Styles
+  detailContent: {
+    flex: 1,
+    marginBottom: 140,
+  },
+  workerProfile: {
+    backgroundColor: "white",
+    padding: 20,
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  detailAvatar: {
+    fontSize: 60,
+    marginBottom: 10,
+  },
+  detailWorkerName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 5,
+  },
+  detailExperience: {
+    fontSize: 16,
+    color: "#6b7280",
+    marginBottom: 10,
+  },
+  detailRatingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginBottom: 10,
+  },
+  detailRating: {
+    fontSize: 16,
+    color: "#f59e0b",
+  },
+  detailReviews: {
+    fontSize: 14,
+    color: "#9ca3af",
+  },
+  detailPrice: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#2563eb",
+  },
+  section: {
+    backgroundColor: "white",
+    padding: 20,
+    marginTop: 10,
+  },
+  description: {
+    fontSize: 14,
+    color: "#6b7280",
+    lineHeight: 20,
+  },
+  serviceItem: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  dateContainer: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  dateButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    alignItems: "center",
+  },
+  selectedDate: {
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
+  },
+  dateText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  selectedDateText: {
+    color: "white",
+  },
+  timeContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  timeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  selectedTime: {
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
+  },
+  timeText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  selectedTimeText: {
+    color: "white",
+  },
+  detailFooter: {
+    position: "absolute",
+    bottom: 70,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    padding: 20,
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    gap: 15,
+  },
+  callButton: {
+    flex: 1,
+    backgroundColor: "#f3f4f6",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  callButtonText: {
+    fontSize: 16,
+    color: "#374151",
+    fontWeight: "600",
+  },
+
+  // History Screen Styles
+  historyHeader: {
+    padding: 20,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  historyTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#1f2937",
+  },
+  tabContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  activeTab: {
+    borderBottomColor: "#2563eb",
+  },
+  tabText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  activeTabText: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+  bookingsList: {
+    padding: 15,
+    gap: 15,
+    paddingBottom: 100,
+  },
+  bookingCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  bookingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 15,
+  },
+  bookingServiceName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  bookingWorkerName: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  bookingDetails: {
+    gap: 8,
+    marginBottom: 15,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  detailIcon: {
+    fontSize: 14,
+  },
+  detailText: {
+    fontSize: 14,
+    color: "#6b7280",
+    flex: 1,
+  },
+  bookingActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  reviewButton: {
+    flex: 1,
+    backgroundColor: "#f59e0b",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  reviewButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#ef4444",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  rebookButton: {
+    flex: 1,
+    backgroundColor: "#2563eb",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  rebookButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Profile Screen Styles
+  profileHeader: {
+    backgroundColor: "white",
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  profileInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  profileAvatar: {
+    fontSize: 50,
+    backgroundColor: "#f3f4f6",
+    width: 70,
+    height: 70,
+    textAlign: "center",
+    textAlignVertical: "center",
+    borderRadius: 35,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  userPhone: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  editButton: {
+    backgroundColor: "#2563eb",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  editButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  statsContainer: {
+    backgroundColor: "white",
+    flexDirection: "row",
+    paddingVertical: 20,
+    marginTop: 10,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#2563eb",
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: "#e5e7eb",
+  },
+  menuContainer: {
+    backgroundColor: "white",
+    marginTop: 10,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  menuLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  menuIcon: {
+    fontSize: 20,
+    width: 25,
+    textAlign: "center",
+  },
+  menuTitle: {
+    fontSize: 16,
+    color: "#1f2937",
+  },
+  menuArrow: {
+    fontSize: 18,
+    color: "#9ca3af",
+  },
+  promoIcon: {
+    fontSize: 30,
+  },
+  promoContent: {
+    flex: 1,
+  },
+  logoutButton: {
+    margin: 20,
+    backgroundColor: "#ef4444",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 100,
+  },
+  logoutButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  // Worker Dashboard Styles
+  workerHeader: {
+    backgroundColor: "white",
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  workerAvatar: {
+    fontSize: 50,
+  },
+  workerSpecialty: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 5,
+  },
+  workerRating: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  notificationButton: {
+    position: "relative",
+    padding: 10,
+  },
+  notificationIcon: {
+    fontSize: 24,
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "#ef4444",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notificationCount: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: 15,
+    gap: 10,
+  },
+  statCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    alignItems: "center",
+    width: "48%",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  statIcon: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  quickActions: {
+    backgroundColor: "white",
+    padding: 20,
+    marginTop: 10,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: 15,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  actionIcon: {
+    fontSize: 20,
+    marginBottom: 5,
+  },
+  actionText: {
+    fontSize: 12,
+    color: "#6b7280",
+    fontWeight: "600",
+  },
+  recentOrdersSection: {
+    backgroundColor: "white",
+    padding: 20,
+    marginTop: 10,
+    marginBottom: 100,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  seeAllText: {
+    color: "#2563eb",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  recentOrdersList: {
+    gap: 10,
+  },
+  recentOrderCard: {
+    backgroundColor: "#f8fafc",
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  recentOrderHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  recentOrderCustomer: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+  },
+  recentOrderService: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 5,
+  },
+  recentOrderTime: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginBottom: 5,
+  },
+  recentOrderPrice: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#2563eb",
+  },
+
+  // Worker Orders Styles
+  ordersList: {
+    padding: 15,
+    gap: 15,
+    paddingBottom: 100,
+  },
+  orderCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  orderHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 15,
+  },
+  customerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  customerAvatar: {
+    fontSize: 40,
+  },
+  customerName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  orderService: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 5,
+  },
+  orderTime: {
+    fontSize: 12,
+    color: "#9ca3af",
+  },
+  orderDetails: {
+    marginBottom: 15,
+  },
+  orderAddress: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 8,
+  },
+  orderDescription: {
+    fontSize: 14,
+    color: "#374151",
+    marginBottom: 10,
+    lineHeight: 20,
+  },
+  orderMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  orderDuration: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  orderPrice: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2563eb",
+  },
+  orderActions: {
+    gap: 10,
+  },
+  phoneButton: {
+    backgroundColor: "#f0f9ff",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  phoneButtonText: {
+    color: "#2563eb",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  pendingActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  rejectButton: {
+    flex: 1,
+    backgroundColor: "#fef2f2",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  rejectButtonText: {
+    color: "#ef4444",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  acceptButton: {
+    flex: 1,
+    backgroundColor: "#2563eb",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  acceptButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  completeButton: {
+    backgroundColor: "#10b981",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  completeButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Worker Order Detail Styles
+  orderDetailContent: {
+    flex: 1,
+    marginBottom: 160,
+  },
+  customerDetailInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  customerDetailAvatar: {
+    fontSize: 50,
+  },
+  customerDetails: {
+    flex: 1,
+  },
+  customerDetailName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 5,
+  },
+  customerDetailPhone: {
+    fontSize: 16,
+    color: "#2563eb",
+  },
+  orderDetailInfo: {
+    gap: 12,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: "#6b7280",
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: "#1f2937",
+    fontWeight: "600",
+    flex: 2,
+    textAlign: "right",
+  },
+  priceValue: {
+    color: "#2563eb",
+    fontSize: 16,
+  },
+  addressInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  addressIcon: {
+    fontSize: 16,
+  },
+  addressText: {
+    fontSize: 14,
+    color: "#374151",
+    flex: 1,
+    lineHeight: 20,
+  },
+  orderDetailDescription: {
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 20,
+  },
+  notesList: {
+    gap: 8,
+  },
+  noteItem: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  orderDetailFooter: {
+    position: "absolute",
+    bottom: 70,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    gap: 10,
+  },
+  callActionButton: {
+    backgroundColor: "#f0f9ff",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  callActionButtonText: {
+    color: "#2563eb",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  pendingActionButtons: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  rejectActionButton: {
+    flex: 1,
+    backgroundColor: "#ef4444",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  rejectActionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  acceptActionButton: {
+    flex: 1,
+    backgroundColor: "#2563eb",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  acceptActionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  completeActionButton: {
+    backgroundColor: "#10b981",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  completeActionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  // Worker Profile Styles
+  workerProfileHeader: {
+    backgroundColor: "white",
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  workerProfileInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  workerProfileAvatar: {
+    fontSize: 50,
+  },
+  workerProfileName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  workerProfilePhone: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 2,
+  },
+  workerProfileSpecialty: {
+    fontSize: 14,
+    color: "#2563eb",
+  },
+  availabilityContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  availabilityInfo: {
+    flex: 1,
+  },
+  availabilityTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  availabilitySubtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  workerStatsContainer: {
+    backgroundColor: "white",
+    flexDirection: "row",
+    paddingVertical: 20,
+    marginTop: 10,
+  },
+  workerStatItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  workerStatNumber: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#2563eb",
+    marginBottom: 2,
+  },
+  workerStatLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
+  earningsContainer: {
+    padding: 20,
+    marginTop: 10,
+  },
+  earningsCard: {
+    backgroundColor: "#2563eb",
+    borderRadius: 15,
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  earningsIcon: {
+    fontSize: 30,
+  },
+  earningsContent: {
+    flex: 1,
+  },
+  earningsTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 2,
+  },
+  earningsAmount: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 2,
+  },
+  earningsSubtext: {
+    fontSize: 12,
+    color: "#bfdbfe",
+  },
+  earningsButton: {
+    backgroundColor: "white",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  earningsButtonText: {
+    color: "#2563eb",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Bottom Navigation Styles
+  bottomNav: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 5,
+  },
+  navIcon: {
+    fontSize: 20,
+    marginBottom: 2,
+  },
+  navText: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
+  activeNavText: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+
+  // Thêm styles cho admin screens
+  adminHeader: {
+    backgroundColor: "#7c3aed",
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  adminTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+  },
+  adminStatsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: 15,
+    gap: 10,
+  },
+  adminStatCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    alignItems: "center",
+    width: "48%",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  adminStatIcon: {
+    fontSize: 28,
+    marginBottom: 8,
+  },
+  adminStatNumber: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#7c3aed",
+    marginBottom: 4,
+  },
+  adminStatLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center",
+  },
+  adminMenuCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 20,
+    margin: 10,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  adminMenuIcon: {
+    fontSize: 32,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  adminMenuTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  adminMenuDescription: {
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center",
+  },
+  userCard: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    marginHorizontal: 15,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  userCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  userAvatar: {
+    fontSize: 40,
+    marginRight: 15,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 2,
+  },
+  userPhone: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 2,
+  },
+  userRole: {
+    fontSize: 12,
+    fontWeight: "600",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  adminRole: {
+    backgroundColor: "#fef3c7",
+    color: "#92400e",
+  },
+  customerRole: {
+    backgroundColor: "#dbeafe",
+    color: "#1e40af",
+  },
+  workerRole: {
+    backgroundColor: "#d1fae5",
+    color: "#065f46",
+  },
+  userActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+  },
+  editUserButton: {
+    flex: 1,
+    backgroundColor: "#3b82f6",
+    padding: 8,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  editUserButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  deleteUserButton: {
+    flex: 1,
+    backgroundColor: "#ef4444",
+    padding: 8,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  deleteUserButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  // Thêm styles cho quick stats
+  quickStatsContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 15,
+    gap: 20,
+  },
+  quickStatItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  quickStatNumber: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#7c3aed",
+    marginBottom: 4,
+  },
+  quickStatLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center",
+  },
+})
