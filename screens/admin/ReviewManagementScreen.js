@@ -1,53 +1,72 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
-import { styles } from "../../styles/styles"
-import { reviews } from "../../data/mockData"
-import { AdminBottomNav } from "../../components/BottomNavigation"
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import reviewService from "../../services/reviewService";
+import { AdminBottomNav } from "../../components/BottomNavigation";
 
 const ReviewManagementScreen = ({ onTabPress, onBack }) => {
-  const [reviewList, setReviewList] = useState(reviews)
-  const [searchText, setSearchText] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [reviewList, setReviewList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
-  const filteredReviews = reviewList.filter((review) => {
-    const matchesSearch =
-      review.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      review.worker.toLowerCase().includes(searchText.toLowerCase()) ||
-      review.service.toLowerCase().includes(searchText.toLowerCase())
-    const matchesStatus = filterStatus === "all" || review.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const reviews = await reviewService.getAllReviews();
+        setReviewList(reviews);
+      } catch (error) {
+        Alert.alert("Lỗi", "Không thể tải đánh giá.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleApproveReview = (reviewId) => {
+    fetchData();
+  }, []);
+
+  const handleApproveReview = async (reviewId) => {
     Alert.alert("Duyệt đánh giá", "Bạn có chắc muốn duyệt đánh giá này?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Duyệt",
-        onPress: () => {
-          setReviewList(
-            reviewList.map((review) => (review.id === reviewId ? { ...review, status: "approved" } : review)),
-          )
-          Alert.alert("Thành công", "Đã duyệt đánh giá")
+        onPress: async () => {
+          await reviewService.updateReviewStatus(reviewId, "approved");
+          setReviewList((prev) =>
+            prev.map((r) => (r.id === reviewId ? { ...r, status: "approved" } : r))
+          );
+          Alert.alert("Thành công", "Đã duyệt đánh giá");
         },
       },
-    ])
-  }
+    ]);
+  };
 
-  const handleRejectReview = (reviewId) => {
+  const handleRejectReview = async (reviewId) => {
     Alert.alert("Từ chối đánh giá", "Bạn có chắc muốn từ chối đánh giá này?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Từ chối",
         style: "destructive",
-        onPress: () => {
-          setReviewList(
-            reviewList.map((review) => (review.id === reviewId ? { ...review, status: "rejected" } : review)),
-          )
-          Alert.alert("Đã từ chối", "Đánh giá đã bị từ chối")
+        onPress: async () => {
+          await reviewService.updateReviewStatus(reviewId, "rejected");
+          setReviewList((prev) =>
+            prev.map((r) => (r.id === reviewId ? { ...r, status: "rejected" } : r))
+          );
+          Alert.alert("Đã từ chối", "Đánh giá đã bị từ chối");
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleWarningWorker = (review) => {
     Alert.alert("Cảnh báo thợ", `Gửi cảnh báo đến ${review.worker} về vi phạm?`, [
@@ -55,45 +74,51 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
       {
         text: "Gửi cảnh báo",
         onPress: () => {
-          Alert.alert("Thành công", `Đã gửi cảnh báo đến ${review.worker}`)
+          Alert.alert("Thành công", `Đã gửi cảnh báo đến ${review.worker}`);
         },
       },
-    ])
-  }
+    ]);
+  };
 
-  const getRatingStars = (rating) => {
-    return "⭐".repeat(rating) + "☆".repeat(5 - rating)
-  }
+  const filteredReviews = reviewList.filter((review) => {
+    const matchesSearch =
+      review.customer?.toLowerCase().includes(searchText.toLowerCase()) ||
+      review.worker?.toLowerCase().includes(searchText.toLowerCase()) ||
+      review.service?.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus = filterStatus === "all" || review.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  const getRatingStars = (rating) => "⭐".repeat(rating) + "☆".repeat(5 - rating);
 
   const getStatusStyle = (status) => {
     switch (status) {
       case "approved":
-        return { backgroundColor: "#d1fae5", color: "#065f46" }
+        return { backgroundColor: "#d1fae5", color: "#065f46" };
       case "reported":
-        return { backgroundColor: "#fee2e2", color: "#dc2626" }
+        return { backgroundColor: "#fee2e2", color: "#dc2626" };
       case "rejected":
-        return { backgroundColor: "#f3f4f6", color: "#6b7280" }
+        return { backgroundColor: "#f3f4f6", color: "#6b7280" };
       default:
-        return { backgroundColor: "#fef3c7", color: "#92400e" }
+        return { backgroundColor: "#fef3c7", color: "#92400e" };
     }
-  }
+  };
 
   const getStatusText = (status) => {
     switch (status) {
       case "approved":
-        return "Đã duyệt"
+        return "Đã duyệt";
       case "reported":
-        return "Báo cáo vi phạm"
+        return "Báo cáo vi phạm";
       case "rejected":
-        return "Đã từ chối"
+        return "Đã từ chối";
       default:
-        return "Chờ duyệt"
+        return "Chờ duyệt";
     }
-  }
+  };
 
   const renderReview = ({ item }) => {
-    const statusStyle = getStatusStyle(item.status)
-
+    const statusStyle = getStatusStyle(item.status);
     return (
       <View style={styles.reviewCard}>
         <View style={styles.reviewHeader}>
@@ -104,7 +129,9 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
             <Text style={styles.reviewDate}>📅 {item.date}</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: statusStyle.backgroundColor }]}>
-            <Text style={[styles.statusText, { color: statusStyle.color }]}>{getStatusText(item.status)}</Text>
+            <Text style={[styles.statusText, { color: statusStyle.color }]}>
+              {getStatusText(item.status)}
+            </Text>
           </View>
         </View>
 
@@ -138,8 +165,8 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
           )}
         </View>
       </View>
-    )
-  }
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -153,7 +180,6 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.input}
@@ -162,46 +188,43 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
           onChangeText={setSearchText}
         />
       </View>
+    <View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterContainer}
+      >
+        {["all", "reported", "approved", "rejected", "pending"].map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={[styles.filterChip, filterStatus === status && styles.activeFilterChip]}
+            onPress={() => setFilterStatus(status)}
+          >
+            <Text
+              style={[styles.filterText, filterStatus === status && styles.activeFilterText]}
+            >
+              {getStatusText(status)} ({reviewList.filter((r) => status === "all" || r.status === status).length})
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
 
-      {/* Filter */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("all")}
-        >
-          <Text style={[styles.filterText, filterStatus === "all" && styles.activeFilterText]}>
-            Tất cả ({reviewList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "reported" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("reported")}
-        >
-          <Text style={[styles.filterText, filterStatus === "reported" && styles.activeFilterText]}>
-            Vi phạm ({reviewList.filter((r) => r.status === "reported").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "approved" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("approved")}
-        >
-          <Text style={[styles.filterText, filterStatus === "approved" && styles.activeFilterText]}>
-            Đã duyệt ({reviewList.filter((r) => r.status === "approved").length})
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={filteredReviews}
-        renderItem={renderReview}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" style={{ marginTop: 40 }} />
+      ) : (
+        <FlatList
+          data={filteredReviews}
+          renderItem={renderReview}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="reviewManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default ReviewManagementScreen
+export default ReviewManagementScreen;
