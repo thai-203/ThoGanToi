@@ -111,25 +111,25 @@ class FirebaseService {
   }
 
   // Query operations
-  async queryByField(path, field, value) {
-    try {
-      const dataRef = ref(database, path)
-      const queryRef = query(dataRef, orderByChild(field), equalTo(value))
-      const snapshot = await get(queryRef)
+  // async queryByField(path, field, value) {
+  //   try {
+  //     const dataRef = ref(database, path)
+  //     const queryRef = query(dataRef, orderByChild(field), equalTo(value))
+  //     const snapshot = await get(queryRef)
 
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        return Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-      }
-      return []
-    } catch (error) {
-      console.error("Error querying data:", error)
-      return [] // Return empty array instead of throwing
-    }
-  }
+  //     if (snapshot.exists()) {
+  //       const data = snapshot.val()
+  //       return Object.keys(data).map((key) => ({
+  //         ...data[key],
+  //         id: key,
+  //       }))
+  //     }
+  //     return []
+  //   } catch (error) {
+  //     console.error("Error querying data:", error)
+  //     return [] // Return empty array instead of throwing
+  //   }
+  // }
 
   // Check if Firebase is connected
   async checkConnection(timeoutMs = 3000) {
@@ -153,7 +153,7 @@ class FirebaseService {
 
 
   async queryByField(path, field, value) {
-    if (!value || typeof value !== "string") {
+    if (value === undefined || value === null || value === "") {
       console.warn(`⚠️ Invalid query value for field ${field}:`, value)
       return []
     }

@@ -108,7 +108,6 @@ export const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 20,
-    marginBottom: 20,
   },
   searchBox: {
     backgroundColor: "white",
@@ -477,6 +476,17 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#1f2937",
+  },
+  tabScroll: {
+    maxHeight: 50,
+    backgroundColor: "#ffffff",
+  },
+
+  tabContainerScroll: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    gap: 10, // cách giữa các tab
   },
   tabContainer: {
     flexDirection: "row",

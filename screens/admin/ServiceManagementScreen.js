@@ -1,13 +1,18 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
 import { styles } from "../../styles/styles"
-import { services } from "../../data/mockData"
 import { AdminBottomNav } from "../../components/BottomNavigation"
+import ServiceService from "../../services/serviceService"
 
 const ServiceManagementScreen = ({ onTabPress, onBack }) => {
-  const [serviceList, setServiceList] = useState(services)
+  const [serviceList, setServiceList] = useState([])
   const [searchText, setSearchText] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
+
+  useEffect(() => {
+    const unsubscribe = ServiceService.listenToServices(setServiceList)
+    return unsubscribe // Cleanup real-time listener on unmount
+  }, [])
 
   const filteredServices = serviceList.filter((service) => {
     const matchesSearch =
@@ -17,7 +22,7 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
     return matchesSearch && matchesStatus
   })
 
-  const handleToggleStatus = (serviceId, currentStatus) => {
+  const handleToggleStatus = async (serviceId, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active"
     const action = newStatus === "inactive" ? "tắt" : "bật"
 
@@ -25,11 +30,13 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
       { text: "Hủy", style: "cancel" },
       {
         text: "Xác nhận",
-        onPress: () => {
-          setServiceList(
-            serviceList.map((service) => (service.id === serviceId ? { ...service, status: newStatus } : service)),
-          )
-          Alert.alert("Thành công", `Đã ${action} dịch vụ`)
+        onPress: async () => {
+          try {
+            await ServiceService.updateServiceStatus(serviceId, newStatus)
+            Alert.alert("Thành công", `Đã ${action} dịch vụ`)
+          } catch (error) {
+            Alert.alert("Lỗi", "Không thể cập nhật trạng thái dịch vụ")
+          }
         },
       },
     ])
@@ -51,10 +58,14 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
         { text: "Hủy", style: "cancel" },
         {
           text: "Cập nhật",
-          onPress: (newPrice) => {
+          onPress: async (newPrice) => {
             if (newPrice) {
-              setServiceList(serviceList.map((s) => (s.id === service.id ? { ...s, suggestedPrice: newPrice } : s)))
-              Alert.alert("Thành công", "Đã cập nhật giá dịch vụ")
+              try {
+                await ServiceService.updateService(service.id, { suggestedPrice: newPrice })
+                Alert.alert("Thành công", "Đã cập nhật giá dịch vụ")
+              } catch (error) {
+                Alert.alert("Lỗi", "Không thể cập nhật giá dịch vụ")
+              }
             }
           },
         },
@@ -72,10 +83,14 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
         { text: "Hủy", style: "cancel" },
         {
           text: "Cập nhật",
-          onPress: (newDescription) => {
+          onPress: async (newDescription) => {
             if (newDescription) {
-              setServiceList(serviceList.map((s) => (s.id === service.id ? { ...s, description: newDescription } : s)))
-              Alert.alert("Thành công", "Đã cập nhật mô tả dịch vụ")
+              try {
+                await ServiceService.updateService(service.id, { description: newDescription })
+                Alert.alert("Thành công", "Đã cập nhật mô tả dịch vụ")
+              } catch (error) {
+                Alert.alert("Lỗi", "Không thể cập nhật mô tả dịch vụ")
+              }
             }
           },
         },
@@ -163,30 +178,21 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
 
       {/* Filter */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("all")}
-        >
-          <Text style={[styles.filterText, filterStatus === "all" && styles.activeFilterText]}>
-            Tất cả ({serviceList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "active" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("active")}
-        >
-          <Text style={[styles.filterText, filterStatus === "active" && styles.activeFilterText]}>
-            Hoạt động ({serviceList.filter((s) => s.status === "active").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "inactive" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("inactive")}
-        >
-          <Text style={[styles.filterText, filterStatus === "inactive" && styles.activeFilterText]}>
-            Tạm dừng ({serviceList.filter((s) => s.status === "inactive").length})
-          </Text>
-        </TouchableOpacity>
+        {["all", "active", "inactive"].map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={[styles.filterChip, filterStatus === status && styles.activeFilterChip]}
+            onPress={() => setFilterStatus(status)}
+          >
+            <Text style={[styles.filterText, filterStatus === status && styles.activeFilterText]}>
+              {status === "all"
+                ? `Tất cả (${serviceList.length})`
+                : `${status === "active" ? "Hoạt động" : "Tạm dừng"} (${
+                    serviceList.filter((s) => s.status === status).length
+                  })`}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <FlatList

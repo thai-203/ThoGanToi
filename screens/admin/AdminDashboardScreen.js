@@ -1,23 +1,79 @@
+import React, { useEffect, useState } from "react"
 import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from "react-native"
 import { styles } from "../../styles/styles"
-import { adminStats, adminMenuItems } from "../../data/mockData"
+import { adminMenuItems } from "../../data/mockData"
 import { AdminBottomNav } from "../../components/BottomNavigation"
+import FirebaseService from "../../services/firebaseService"
 
 const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
-  const renderMenuItem = ({ item }) => (
-    <TouchableOpacity style={styles.adminMenuCard} onPress={() => onMenuPress && onMenuPress(item.screen)}>
-      <Text style={styles.adminMenuIcon}>{item.icon}</Text>
-      <Text style={styles.adminMenuTitle}>{item.title}</Text>
-      <Text style={styles.adminMenuDescription}>
-        {item.action === "users" && "Quản lý tài khoản người dùng"}
-        {item.action === "services" && "Quản lý danh mục dịch vụ"}
-        {item.action === "orders" && "Theo dõi đơn hàng"}
-        {item.action === "reports" && "Xem báo cáo thống kê"}
-        {item.action === "settings" && "Cấu hình hệ thống"}
-        {item.action === "support" && "Hỗ trợ khách hàng"}
-      </Text>
-    </TouchableOpacity>
-  )
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalWorkers: 0,
+    totalOrders: 0,
+    completedOrders: 0,
+    pendingOrders: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+  })
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [users, workers, orders] = await Promise.all([
+          FirebaseService.readAll("users"),
+          FirebaseService.readAll("workers"),
+          FirebaseService.readAll("orders"),
+        ])
+
+        const currentMonth = new Date().getMonth()
+
+        // Tách đơn đã hoàn thành và đơn đang chờ
+        const completedOrders = orders.filter(o => o.status === "completed")
+        const pendingOrders = orders.filter(o => o.status === "pending")
+
+        // Chuyển đổi giá (string như "300,000đ") -> number
+        const parsePrice = (value) => {
+          if (typeof value === "string") {
+            return parseInt(value.replace(/[^\d]/g, "")) || 0
+          }
+          return typeof value === "number" ? value : 0
+        }
+
+        // Xác định tháng từ ngày
+        const extractMonth = (order) => {
+          if (order.date) {
+            const parts = order.date.split("/") // "dd/mm/yyyy"
+            return parseInt(parts[1], 10) - 1 // Trả về 0-based month
+          }
+          if (order.completedAt || order.updatedAt) {
+            return new Date(order.completedAt || order.updatedAt).getMonth()
+          }
+          return -1
+        }
+
+        const totalRevenue = completedOrders.reduce((sum, o) => sum + parsePrice(o.price), 0)
+
+        const monthlyRevenue = completedOrders.reduce((sum, o) => {
+          const orderMonth = extractMonth(o)
+          return orderMonth === currentMonth ? sum + parsePrice(o.price) : sum
+        }, 0)
+
+        setStats({
+          totalUsers: users.length,
+          totalWorkers: workers.length,
+          totalOrders: orders.length,
+          completedOrders: completedOrders.length,
+          pendingOrders: pendingOrders.length,
+          totalRevenue,
+          monthlyRevenue,
+        })
+      } catch (error) {
+        console.error("Error fetching admin stats:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,22 +95,24 @@ const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
         <View style={styles.adminStatsGrid}>
           <View style={styles.adminStatCard}>
             <Text style={styles.adminStatIcon}>👥</Text>
-            <Text style={styles.adminStatNumber}>{adminStats.totalUsers}</Text>
+            <Text style={styles.adminStatNumber}>{stats.totalUsers}</Text>
             <Text style={styles.adminStatLabel}>Tổng người dùng</Text>
           </View>
           <View style={styles.adminStatCard}>
             <Text style={styles.adminStatIcon}>🔧</Text>
-            <Text style={styles.adminStatNumber}>{adminStats.totalWorkers}</Text>
+            <Text style={styles.adminStatNumber}>{stats.totalWorkers}</Text>
             <Text style={styles.adminStatLabel}>Thợ sửa chữa</Text>
           </View>
           <View style={styles.adminStatCard}>
             <Text style={styles.adminStatIcon}>📋</Text>
-            <Text style={styles.adminStatNumber}>{adminStats.totalOrders}</Text>
+            <Text style={styles.adminStatNumber}>{stats.totalOrders}</Text>
             <Text style={styles.adminStatLabel}>Tổng đơn hàng</Text>
           </View>
           <View style={styles.adminStatCard}>
             <Text style={styles.adminStatIcon}>💰</Text>
-            <Text style={styles.adminStatNumber}>{(adminStats.totalRevenue / 1000000).toFixed(1)}M</Text>
+            <Text style={styles.adminStatNumber}>
+              {(stats.totalRevenue / 1_000_000).toFixed(1)}M
+            </Text>
             <Text style={styles.adminStatLabel}>Doanh thu (VNĐ)</Text>
           </View>
         </View>
@@ -64,15 +122,17 @@ const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
           <Text style={styles.sectionTitle}>Thống kê nhanh</Text>
           <View style={styles.quickStatsContainer}>
             <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>{adminStats.completedOrders}</Text>
+              <Text style={styles.quickStatNumber}>{stats.completedOrders}</Text>
               <Text style={styles.quickStatLabel}>Đơn hoàn thành</Text>
             </View>
             <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>{adminStats.pendingOrders}</Text>
+              <Text style={styles.quickStatNumber}>{stats.pendingOrders}</Text>
               <Text style={styles.quickStatLabel}>Đơn chờ xử lý</Text>
             </View>
             <View style={styles.quickStatItem}>
-              <Text style={styles.quickStatNumber}>{(adminStats.monthlyRevenue / 1000000).toFixed(1)}M</Text>
+              <Text style={styles.quickStatNumber}>
+                {(stats.monthlyRevenue / 1_000_000).toFixed(1)}M
+              </Text>
               <Text style={styles.quickStatLabel}>Doanh thu tháng</Text>
             </View>
           </View>
@@ -86,12 +146,7 @@ const AdminDashboardScreen = ({ onTabPress, onMenuPress, currentUser }) => {
               <TouchableOpacity
                 key={item.id}
                 style={styles.adminMenuCard}
-                onPress={() => {
-                  console.log("Menu pressed:", item.screen)
-                  if (onMenuPress) {
-                    onMenuPress(item.screen)
-                  }
-                }}
+                onPress={() => onMenuPress && onMenuPress(item.screen)}
               >
                 <Text style={styles.adminMenuIcon}>{item.icon}</Text>
                 <Text style={styles.adminMenuTitle}>{item.title}</Text>

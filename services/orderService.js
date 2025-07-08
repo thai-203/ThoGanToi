@@ -25,6 +25,17 @@ class OrderService {
     }
   }
 
+  async getOrdersByCustomerId(customerId) {
+    try {
+      const allOrders = await FirebaseService.readAll(this.basePath)
+      const orders = allOrders.filter((order) => order.customerId === customerId)
+      return orders
+    } catch (error) {
+      console.error("Error getting orders by customerId:", error)
+      throw error
+    }
+  }
+
   async getAllOrders() {
     try {
       const orders = await FirebaseService.readAll(this.basePath)

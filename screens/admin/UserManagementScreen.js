@@ -1,22 +1,50 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
+import React, { useState, useEffect } from "react"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+  ActivityIndicator,
+} from "react-native"
 import { styles } from "../../styles/styles"
-import { users } from "../../data/mockData"
 import { AdminBottomNav } from "../../components/BottomNavigation"
+import EditUserModal from "../../components/EditUserModal"
+import userService from "../../services/userService"
 
 const UserManagementScreen = ({ onTabPress, onBack }) => {
-  const [userList, setUserList] = useState(users)
+  const [userList, setUserList] = useState([])
   const [searchText, setSearchText] = useState("")
   const [filterRole, setFilterRole] = useState("all")
+  const [loading, setLoading] = useState(true)
+
+  const [editingUser, setEditingUser] = useState(null)
+  const [isEditModalVisible, setEditModalVisible] = useState(false)
+
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  const fetchUsers = async () => {
+    setLoading(true)
+    const users = await userService.getAllUsers()
+    setUserList(users)
+    setLoading(false)
+  }
 
   const filteredUsers = userList.filter((user) => {
-    const matchesSearch = user.name.toLowerCase().includes(searchText.toLowerCase()) || user.phone.includes(searchText)
+    const matchesSearch =
+      user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.phone?.includes(searchText)
     const matchesRole = filterRole === "all" || user.role === filterRole
     return matchesSearch && matchesRole
   })
 
   const handleEditUser = (user) => {
-    Alert.alert("Chỉnh sửa người dùng", `Chỉnh sửa thông tin của ${user.name}`)
+    setEditingUser(user)
+    setEditModalVisible(true)
   }
 
   const handleDeleteUser = (userId) => {
@@ -25,12 +53,21 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
       {
         text: "Xóa",
         style: "destructive",
-        onPress: () => {
-          setUserList(userList.filter((user) => user.id !== userId))
-          Alert.alert("Thành công", "Đã xóa người dùng")
+        onPress: async () => {
+          await userService.deleteUser(userId)
+          fetchUsers()
+          Alert.alert("Đã xóa", "Người dùng đã được xóa.")
         },
       },
     ])
+  }
+
+  const handleSaveUser = async (updatedUser) => {
+    await userService.updateUser(updatedUser.id, updatedUser)
+    setEditModalVisible(false)
+    setEditingUser(null)
+    fetchUsers()
+    Alert.alert("Thành công", "Đã cập nhật thông tin người dùng.")
   }
 
   const getRoleStyle = (role) => {
@@ -62,20 +99,30 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
   const renderUser = ({ item }) => (
     <View style={styles.userCard}>
       <View style={styles.userCardHeader}>
-        <Text style={styles.userAvatar}>{item.role === "admin" ? "👨‍💼" : item.role === "worker" ? "👨‍🔧" : "👤"}</Text>
+        <Text style={styles.userAvatar}>
+          {item.role === "admin" ? "👨‍💼" : item.role === "worker" ? "👨‍🔧" : "👤"}
+        </Text>
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{item.name}</Text>
           <Text style={styles.userPhone}>📞 {item.phone}</Text>
           <Text style={styles.userPhone}>✉️ {item.email}</Text>
-          {item.specialty && <Text style={styles.userPhone}>🔧 {item.specialty}</Text>}
+          {item.specialty && (
+            <Text style={styles.userPhone}>🔧 {item.specialty}</Text>
+          )}
         </View>
         <Text style={getRoleStyle(item.role)}>{getRoleText(item.role)}</Text>
       </View>
       <View style={styles.userActions}>
-        <TouchableOpacity style={styles.editUserButton} onPress={() => handleEditUser(item)}>
+        <TouchableOpacity
+          style={styles.editUserButton}
+          onPress={() => handleEditUser(item)}
+        >
           <Text style={styles.editUserButtonText}>Chỉnh sửa</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteUserButton} onPress={() => handleDeleteUser(item.id)}>
+        <TouchableOpacity
+          style={styles.deleteUserButton}
+          onPress={() => handleDeleteUser(item.id)}
+        >
           <Text style={styles.deleteUserButtonText}>Xóa</Text>
         </TouchableOpacity>
       </View>
@@ -94,7 +141,6 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.input}
@@ -104,48 +150,47 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
         />
       </View>
 
-      {/* Filter */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterRole === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterRole("all")}
-        >
-          <Text style={[styles.filterText, filterRole === "all" && styles.activeFilterText]}>
-            Tất cả ({userList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterRole === "admin" && styles.activeFilterChip]}
-          onPress={() => setFilterRole("admin")}
-        >
-          <Text style={[styles.filterText, filterRole === "admin" && styles.activeFilterText]}>
-            Admin ({userList.filter((u) => u.role === "admin").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterRole === "customer" && styles.activeFilterChip]}
-          onPress={() => setFilterRole("customer")}
-        >
-          <Text style={[styles.filterText, filterRole === "customer" && styles.activeFilterText]}>
-            Khách hàng ({userList.filter((u) => u.role === "customer").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterRole === "worker" && styles.activeFilterChip]}
-          onPress={() => setFilterRole("worker")}
-        >
-          <Text style={[styles.filterText, filterRole === "worker" && styles.activeFilterText]}>
-            Thợ ({userList.filter((u) => u.role === "worker").length})
-          </Text>
-        </TouchableOpacity>
+        {["all", "admin", "customer", "worker"].map((role) => (
+          <TouchableOpacity
+            key={role}
+            style={[
+              styles.filterChip,
+              filterRole === role && styles.activeFilterChip,
+            ]}
+            onPress={() => setFilterRole(role)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                filterRole === role && styles.activeFilterText,
+              ]}
+            >
+              {role === "all"
+                ? `Tất cả (${userList.length})`
+                : `${getRoleText(role)} (${userList.filter((u) => u.role === role).length})`}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <FlatList
-        data={filteredUsers}
-        renderItem={renderUser}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
+      {loading ? (
+        <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={filteredUsers}
+          renderItem={renderUser}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      <EditUserModal
+        visible={isEditModalVisible}
+        user={editingUser}
+        onClose={() => setEditModalVisible(false)}
+        onSave={handleSaveUser}
       />
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="userManagement" />
