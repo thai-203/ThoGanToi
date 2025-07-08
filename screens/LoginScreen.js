@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityI
 import { styles } from "../styles/styles"
 import UserService from "../services/userService"
 import DataInitializer from "../utils/dataInitializer"
-import { users } from "../data/mockData" // Fallback data
+import { users } from "../data/mockData" 
 
 const LoginScreen = ({ onLogin }) => {
   const [phone, setPhone] = useState("")

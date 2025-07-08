@@ -1,20 +1,32 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert } from "react-native"
+import React, { useEffect, useState } from "react"
+import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, ScrollView } from "react-native"
 import { styles } from "../../styles/styles"
-import { workerOrders, customerBookings } from "../../data/mockData"
-import { statusConfig } from "../../constants/statusConfig"
 import { AdminBottomNav } from "../../components/BottomNavigation"
+import { getDatabase, ref, onValue } from "firebase/database"
+import { statusConfig } from "../../constants/statusConfig"
 
 const OrderManagementScreen = ({ onTabPress, onBack }) => {
+  const [orders, setOrders] = useState([])
   const [activeTab, setActiveTab] = useState("all")
 
-  // Combine all orders from both worker and customer perspectives
-  const allOrders = [
-    ...workerOrders.map((order) => ({ ...order, type: "worker_order" })),
-    ...customerBookings.map((booking) => ({ ...booking, type: "customer_booking" })),
-  ]
+  useEffect(() => {
+    const db = getDatabase()
+    const ordersRef = ref(db, "orders")
+    const unsubscribe = onValue(ordersRef, (snapshot) => {
+      const data = snapshot.val()
+      if (data) {
+        const parsedOrders = Object.entries(data).map(([id, order]) => ({
+          id,
+          ...order,
+        }))
+        setOrders(parsedOrders)
+      }
+    })
 
-  const filteredOrders = allOrders.filter((order) => {
+    return () => unsubscribe()
+  }, [])
+
+  const filteredOrders = orders.filter((order) => {
     if (activeTab === "all") return true
     return order.status === activeTab
   })
@@ -32,23 +44,17 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
   }
 
   const renderOrder = ({ item }) => {
-    const status = statusConfig[item.status]
+    const status = statusConfig[item.status] || { label: "Không xác định", bg: "#e5e7eb", color: "#000" }
 
     return (
       <View style={styles.orderCard}>
         <View style={styles.orderHeader}>
           <View style={styles.customerInfo}>
-            <Text style={styles.customerAvatar}>{item.type === "worker_order" ? item.avatar : "👤"}</Text>
+            <Text style={styles.customerAvatar}>{item.avatar || "👤"}</Text>
             <View>
-              <Text style={styles.customerName}>
-                {item.type === "worker_order" ? item.customer : `Khách: ${item.service}`}
-              </Text>
-              <Text style={styles.orderService}>
-                {item.type === "worker_order" ? item.service : `Thợ: ${item.worker}`}
-              </Text>
-              <Text style={styles.orderTime}>
-                📅 {item.date} - {item.time}
-              </Text>
+              <Text style={styles.customerName}>{item.customer || "Không rõ"}</Text>
+              <Text style={styles.orderService}>{item.service}</Text>
+              <Text style={styles.orderTime}>📅 {item.date} - {item.time}</Text>
             </View>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
@@ -60,7 +66,7 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.orderAddress}>📍 {item.address}</Text>
           {item.description && <Text style={styles.orderDescription}>{item.description}</Text>}
           <View style={styles.orderMeta}>
-            <Text style={styles.orderDuration}>{item.estimatedHours ? `⏱️ ${item.estimatedHours}h` : "⏱️ N/A"}</Text>
+            <Text style={styles.orderDuration}>⏱️ {item.estimatedHours || "N/A"}h</Text>
             <Text style={styles.orderPrice}>💰 {item.price}</Text>
           </View>
         </View>
@@ -88,6 +94,16 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
     )
   }
 
+  const allTabs = [
+    { key: "all", label: "Tất cả" },
+    { key: "pending", label: "Chờ xác nhận" },
+    { key: "confirmed", label: "Đã xác nhận" },
+    { key: "accepted", label: "Đã nhận" },
+    { key: "completed", label: "Hoàn thành" },
+    { key: "cancelled", label: "Đã hủy" },
+    { key: "rejected", label: "Đã từ chối" },
+  ]
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screenHeader}>
@@ -99,36 +115,31 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.filterButton}>📊</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "all" && styles.activeTab]}
-          onPress={() => setActiveTab("all")}
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabScroll}
+          contentContainerStyle={styles.tabContainerScroll}
         >
-          <Text style={[styles.tabText, activeTab === "all" && styles.activeTabText]}>Tất cả ({allOrders.length})</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "pending" && styles.activeTab]}
-          onPress={() => setActiveTab("pending")}
-        >
-          <Text style={[styles.tabText, activeTab === "pending" && styles.activeTabText]}>
-            Chờ xử lý ({allOrders.filter((o) => o.status === "pending").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "completed" && styles.activeTab]}
-          onPress={() => setActiveTab("completed")}
-        >
-          <Text style={[styles.tabText, activeTab === "completed" && styles.activeTabText]}>
-            Hoàn thành ({allOrders.filter((o) => o.status === "completed").length})
-          </Text>
-        </TouchableOpacity>
+          {allTabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+              onPress={() => setActiveTab(tab.key)}
+            >
+              <Text style={[styles.tabText, activeTab === tab.key && styles.activeTabText]}>
+                {tab.label} ({tab.key === "all" ? orders.length : orders.filter((o) => o.status === tab.key).length})
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       <FlatList
         data={filteredOrders}
         renderItem={renderOrder}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100, padding: 15 }}
         showsVerticalScrollIndicator={false}
       />

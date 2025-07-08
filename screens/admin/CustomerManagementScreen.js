@@ -1,20 +1,41 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
+import { useState, useEffect } from "react"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+} from "react-native"
 import { styles } from "../../styles/styles"
-import { users } from "../../data/mockData"
 import { AdminBottomNav } from "../../components/BottomNavigation"
+import UserService from "../../services/userService"
+import OrderService from "../../services/orderService"
 
 const CustomerManagementScreen = ({ onTabPress, onBack }) => {
-  const [customerList, setCustomerList] = useState(users.filter((user) => user.role === "customer"))
+  const [customerList, setCustomerList] = useState([])
   const [searchText, setSearchText] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
 
+  useEffect(() => {
+    const unsubscribe = UserService.listenToUsers((users) => {
+      const customers = users.filter((u) => u.role === "customer")
+      setCustomerList(customers)
+    })
+
+    return () => unsubscribe() // clean listener
+  }, [])
+
   const filteredCustomers = customerList.filter((customer) => {
     const matchesSearch =
-      customer.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      customer.phone.includes(searchText) ||
+      customer.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      customer.phone?.includes(searchText) ||
       customer.area?.toLowerCase().includes(searchText.toLowerCase())
-    const matchesStatus = filterStatus === "all" || customer.status === filterStatus
+
+    const matchesStatus =
+      filterStatus === "all" || customer.status === filterStatus
+
     return matchesSearch && matchesStatus
   })
 
@@ -26,20 +47,37 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
       { text: "Hủy", style: "cancel" },
       {
         text: "Xác nhận",
-        onPress: () => {
-          setCustomerList(
-            customerList.map((customer) =>
-              customer.id === customerId ? { ...customer, status: newStatus } : customer,
-            ),
-          )
-          Alert.alert("Thành công", `Đã ${action} tài khoản`)
+        onPress: async () => {
+          try {
+            await UserService.updateUser(customerId, { status: newStatus })
+            Alert.alert("Thành công", `Đã ${action} tài khoản`)
+          } catch (error) {
+            Alert.alert("Lỗi", "Không thể cập nhật trạng thái người dùng.")
+          }
         },
       },
     ])
   }
 
-  const handleViewHistory = (customer) => {
-    Alert.alert("Lịch sử đặt dịch vụ", `Xem lịch sử của ${customer.name}`)
+  const handleViewHistory = async (customer) => {
+    try {
+      const orders = await OrderService.getOrdersByCustomerId(customer.id)
+      if (!orders || orders.length === 0) {
+        Alert.alert("Thông báo", `${customer.name} chưa có lịch sử đặt dịch vụ.`)
+      } else {
+        const list = orders
+          .map(
+            (o, i) =>
+              `${i + 1}. ${o.service || "Dịch vụ"} - ${o.status || "Trạng thái"} - ${
+                o.date || "N/A"
+              }`
+          )
+          .join("\n")
+        Alert.alert(`Lịch sử của ${customer.name}`, list)
+      }
+    } catch (err) {
+      Alert.alert("Lỗi", "Không thể tải lịch sử đơn hàng.")
+    }
   }
 
   const renderCustomer = ({ item }) => (
@@ -51,7 +89,7 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.userPhone}>📞 {item.phone}</Text>
           <Text style={styles.userPhone}>✉️ {item.email}</Text>
           <Text style={styles.userPhone}>📍 {item.area}</Text>
-          <Text style={styles.userPhone}>📅 Tham gia: {item.joinDate}</Text>
+          <Text style={styles.userPhone}>📅 Tham gia: {item.joinDate || "N/A"}</Text>
         </View>
         <View
           style={[
@@ -64,15 +102,14 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
           <Text
             style={[
               styles.statusText,
-              {
-                color: item.status === "active" ? "#065f46" : "#dc2626",
-              },
+              { color: item.status === "active" ? "#065f46" : "#dc2626" },
             ]}
           >
             {item.status === "active" ? "Hoạt động" : "Đã khóa"}
           </Text>
         </View>
       </View>
+
       <View style={styles.userActions}>
         <TouchableOpacity style={styles.editUserButton} onPress={() => handleViewHistory(item)}>
           <Text style={styles.editUserButtonText}>Lịch sử</Text>
@@ -86,7 +123,9 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
           ]}
           onPress={() => handleToggleStatus(item.id, item.status)}
         >
-          <Text style={styles.deleteUserButtonText}>{item.status === "active" ? "Khóa" : "Mở khóa"}</Text>
+          <Text style={styles.deleteUserButtonText}>
+            {item.status === "active" ? "Khóa" : "Mở khóa"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -104,42 +143,36 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Tìm kiếm theo tên, SĐT, khu vực..."
+          placeholder="Tìm theo tên, SĐT, khu vực..."
           value={searchText}
           onChangeText={setSearchText}
         />
       </View>
 
-      {/* Filter */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("all")}
-        >
-          <Text style={[styles.filterText, filterStatus === "all" && styles.activeFilterText]}>
-            Tất cả ({customerList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "active" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("active")}
-        >
-          <Text style={[styles.filterText, filterStatus === "active" && styles.activeFilterText]}>
-            Hoạt động ({customerList.filter((c) => c.status === "active").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "blocked" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("blocked")}
-        >
-          <Text style={[styles.filterText, filterStatus === "blocked" && styles.activeFilterText]}>
-            Đã khóa ({customerList.filter((c) => c.status === "blocked").length})
-          </Text>
-        </TouchableOpacity>
+        {["all", "active", "blocked"].map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={[styles.filterChip, filterStatus === status && styles.activeFilterChip]}
+            onPress={() => setFilterStatus(status)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                filterStatus === status && styles.activeFilterText,
+              ]}
+            >
+              {status === "all"
+                ? `Tất cả (${customerList.length})`
+                : `${status === "active" ? "Hoạt động" : "Đã khóa"} (${
+                    customerList.filter((c) => c.status === status).length
+                  })`}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <FlatList
