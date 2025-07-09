@@ -159,6 +159,7 @@ export default function App() {
       customerManagement: "adminDashboard",
       workerManagement: "adminDashboard",
       serviceManagement: "adminDashboard",
+      orderManagement: "adminDashboard",
       reviewManagement: "adminDashboard",
       paymentManagement: "adminDashboard",
       areaManagement: "adminDashboard",
@@ -216,7 +217,7 @@ export default function App() {
                 onTabPress={handleTabPress}
               />
       case "workerDetail":
-        return <WorkerDetailScreen worker={selectedWorker} service={selectedService} onBack={handleBack} />
+        return <WorkerDetailScreen worker={selectedWorker} service={selectedService} onBack={handleBack} onTabPress={handleTabPress}/>
       case "bookingHistory":
         return <BookingHistoryScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
       case "personalInfo":
@@ -277,7 +278,7 @@ export default function App() {
       case "userManagement":
         return <UserManagementScreen  onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} />
       case "orderManagement":
-        return <OrderManagementScreen  onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} />
+        return <OrderManagementScreen  onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} onBack={handleBack}/>
       case "adminProfile":
         return <AdminProfileScreen
             onTabPress={handleTabPress}

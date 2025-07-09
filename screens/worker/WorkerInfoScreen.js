@@ -1,36 +1,45 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Switch } from "react-native"
-import { styles } from "../../styles/additional"
-import { WorkerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  Switch,
+} from "react-native";
+import { styles } from "../../styles/additional";
+import { WorkerBottomNav } from "../../components/BottomNavigation";
 
 const WorkerInfoScreen = ({ onTabPress, onBack }) => {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
   const [workerInfo, setWorkerInfo] = useState({
     name: "Thợ Minh Tuấn",
     phone: "0901234567",
     email: "minhtuan@email.com",
     specialty: "Thợ điện chuyên nghiệp",
     experience: "5",
-    description: "Có 5 năm kinh nghiệm sửa chữa điện dân dụng và công nghiệp. Tận tâm, chuyên nghiệp.",
+    description:
+      "Có 5 năm kinh nghiệm sửa chữa điện dân dụng và công nghiệp. Tận tâm, chuyên nghiệp.",
     hourlyRate: "50000",
     address: "Quận 7, TP.HCM",
     workingAreas: ["Quận 1", "Quận 3", "Quận 7"],
     isAvailable: true,
-  })
+  });
 
   const handleSave = () => {
-    setIsEditing(false)
+    setIsEditing(false);
     // Save logic here
-  }
+  };
 
   const handleCancel = () => {
-    setIsEditing(false)
+    setIsEditing(false);
     // Reset changes
-  }
+  };
 
   const updateInfo = (field, value) => {
-    setWorkerInfo(prev => ({ ...prev, [field]: value }))
-  }
+    setWorkerInfo((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,14 +68,14 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
         {/* Basic Info */}
         <View style={styles.infoSection}>
           <Text style={styles.sectionTitle}>Thông tin cơ bản</Text>
-          
+
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Họ tên</Text>
             {isEditing ? (
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.name}
-                onChangeText={(text) => updateInfo('name', text)}
+                onChangeText={(text) => updateInfo("name", text)}
               />
             ) : (
               <Text style={styles.infoValue}>{workerInfo.name}</Text>
@@ -79,7 +88,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.phone}
-                onChangeText={(text) => updateInfo('phone', text)}
+                onChangeText={(text) => updateInfo("phone", text)}
               />
             ) : (
               <Text style={styles.infoValue}>{workerInfo.phone}</Text>
@@ -92,7 +101,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.email}
-                onChangeText={(text) => updateInfo('email', text)}
+                onChangeText={(text) => updateInfo("email", text)}
               />
             ) : (
               <Text style={styles.infoValue}>{workerInfo.email}</Text>
@@ -105,7 +114,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.address}
-                onChangeText={(text) => updateInfo('address', text)}
+                onChangeText={(text) => updateInfo("address", text)}
               />
             ) : (
               <Text style={styles.infoValue}>{workerInfo.address}</Text>
@@ -116,14 +125,14 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
         {/* Professional Info */}
         <View style={styles.infoSection}>
           <Text style={styles.sectionTitle}>Thông tin nghề nghiệp</Text>
-          
+
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Chuyên môn</Text>
             {isEditing ? (
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.specialty}
-                onChangeText={(text) => updateInfo('specialty', text)}
+                onChangeText={(text) => updateInfo("specialty", text)}
               />
             ) : (
               <Text style={styles.infoValue}>{workerInfo.specialty}</Text>
@@ -136,7 +145,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.experience}
-                onChangeText={(text) => updateInfo('experience', text)}
+                onChangeText={(text) => updateInfo("experience", text)}
                 keyboardType="numeric"
               />
             ) : (
@@ -150,7 +159,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
               <TextInput
                 style={[styles.infoInput, styles.infoTextArea]}
                 value={workerInfo.description}
-                onChangeText={(text) => updateInfo('description', text)}
+                onChangeText={(text) => updateInfo("description", text)}
                 multiline
               />
             ) : (
@@ -164,11 +173,13 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
               <TextInput
                 style={styles.infoInput}
                 value={workerInfo.hourlyRate}
-                onChangeText={(text) => updateInfo('hourlyRate', text)}
+                onChangeText={(text) => updateInfo("hourlyRate", text)}
                 keyboardType="numeric"
               />
             ) : (
-              <Text style={styles.infoValue}>{parseInt(workerInfo.hourlyRate).toLocaleString()}đ/giờ</Text>
+              <Text style={styles.infoValue}>
+                {parseInt(workerInfo.hourlyRate).toLocaleString()}đ/giờ
+              </Text>
             )}
           </View>
         </View>
@@ -215,7 +226,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
             <Text style={styles.infoLabel}>Sẵn sàng nhận việc</Text>
             <Switch
               value={workerInfo.isAvailable}
-              onValueChange={(value) => updateInfo('isAvailable', value)}
+              onValueChange={(value) => updateInfo("isAvailable", value)}
               trackColor={{ false: "#e5e7eb", true: "#10b981" }}
               thumbColor={workerInfo.isAvailable ? "#ffffff" : "#f3f4f6"}
             />
@@ -224,10 +235,16 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
 
         {isEditing && (
           <View style={styles.editActions}>
-            <TouchableOpacity style={styles.cancelEditButton} onPress={handleCancel}>
+            <TouchableOpacity
+              style={styles.cancelEditButton}
+              onPress={handleCancel}
+            >
               <Text style={styles.cancelEditButtonText}>Hủy</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveEditButton} onPress={handleSave}>
+            <TouchableOpacity
+              style={styles.saveEditButton}
+              onPress={handleSave}
+            >
               <Text style={styles.saveEditButtonText}>Lưu thay đổi</Text>
             </TouchableOpacity>
           </View>
@@ -236,7 +253,7 @@ const WorkerInfoScreen = ({ onTabPress, onBack }) => {
 
       <WorkerBottomNav onTabPress={onTabPress} activeTab="workerProfile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerInfoScreen
+export default WorkerInfoScreen;

@@ -1,47 +1,108 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native"
-import { styles } from "../../styles/additional"
-import { WorkerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { styles } from "../../styles/additional";
+import { WorkerBottomNav } from "../../components/BottomNavigation";
 
 const WorkerAreaScreen = ({ onTabPress, onBack }) => {
-  const [selectedRadius, setSelectedRadius] = useState("5")
-  const [selectedAreas, setSelectedAreas] = useState(["quan1", "quan3", "quan7"])
+  const [selectedRadius, setSelectedRadius] = useState("5");
+  const [selectedAreas, setSelectedAreas] = useState([
+    "quan1",
+    "quan3",
+    "quan7",
+  ]);
 
-  const radiusOptions = ["3", "5", "10", "15"]
-  
+  const radiusOptions = ["3", "5", "10", "15"];
+
   const areas = [
-    { id: "quan1", name: "Quận 1", district: "Trung tâm", distance: "2km", available: true },
-    { id: "quan3", name: "Quận 3", district: "Trung tâm", distance: "3km", available: true },
-    { id: "quan5", name: "Quận 5", district: "Trung tâm", distance: "4km", available: true },
-    { id: "quan7", name: "Quận 7", district: "Phía Nam", distance: "8km", available: true },
-    { id: "quan10", name: "Quận 10", district: "Trung tâm", distance: "5km", available: true },
-    { id: "binhtan", name: "Bình Tân", district: "Phía Tây", distance: "12km", available: false },
-    { id: "thuducv", name: "Thủ Đức", district: "Phía Đông", distance: "15km", available: true },
-    { id: "binhthanh", name: "Bình Thạnh", district: "Phía Đông", distance: "6km", available: true },
-  ]
+    {
+      id: "quan1",
+      name: "Quận 1",
+      district: "Trung tâm",
+      distance: "2km",
+      available: true,
+    },
+    {
+      id: "quan3",
+      name: "Quận 3",
+      district: "Trung tâm",
+      distance: "3km",
+      available: true,
+    },
+    {
+      id: "quan5",
+      name: "Quận 5",
+      district: "Trung tâm",
+      distance: "4km",
+      available: true,
+    },
+    {
+      id: "quan7",
+      name: "Quận 7",
+      district: "Phía Nam",
+      distance: "8km",
+      available: true,
+    },
+    {
+      id: "quan10",
+      name: "Quận 10",
+      district: "Trung tâm",
+      distance: "5km",
+      available: true,
+    },
+    {
+      id: "binhtan",
+      name: "Bình Tân",
+      district: "Phía Tây",
+      distance: "12km",
+      available: false,
+    },
+    {
+      id: "thuducv",
+      name: "Thủ Đức",
+      district: "Phía Đông",
+      distance: "15km",
+      available: true,
+    },
+    {
+      id: "binhthanh",
+      name: "Bình Thạnh",
+      district: "Phía Đông",
+      distance: "6km",
+      available: true,
+    },
+  ];
 
   const toggleArea = (areaId) => {
-    const area = areas.find(a => a.id === areaId)
+    const area = areas.find((a) => a.id === areaId);
     if (!area.available) {
-      Alert.alert("Thông báo", "Khu vực này hiện không khả dụng")
-      return
+      Alert.alert("Thông báo", "Khu vực này hiện không khả dụng");
+      return;
     }
 
-    setSelectedAreas(prev => 
-      prev.includes(areaId) 
-        ? prev.filter(id => id !== areaId)
+    setSelectedAreas((prev) =>
+      prev.includes(areaId)
+        ? prev.filter((id) => id !== areaId)
         : [...prev, areaId]
-    )
-  }
+    );
+  };
 
   const selectAllAreas = () => {
-    const availableAreas = areas.filter(area => area.available).map(area => area.id)
-    setSelectedAreas(availableAreas)
-  }
+    const availableAreas = areas
+      .filter((area) => area.available)
+      .map((area) => area.id);
+    setSelectedAreas(availableAreas);
+  };
 
   const clearAllAreas = () => {
-    setSelectedAreas([])
-  }
+    setSelectedAreas([]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,14 +150,17 @@ const WorkerAreaScreen = ({ onTabPress, onBack }) => {
                   key={radius}
                   style={[
                     styles.radiusButton,
-                    selectedRadius === radius && styles.selectedRadiusButton
+                    selectedRadius === radius && styles.selectedRadiusButton,
                   ]}
                   onPress={() => setSelectedRadius(radius)}
                 >
-                  <Text style={[
-                    styles.radiusButtonText,
-                    selectedRadius === radius && styles.selectedRadiusButtonText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.radiusButtonText,
+                      selectedRadius === radius &&
+                        styles.selectedRadiusButtonText,
+                    ]}
+                  >
                     {radius}km
                   </Text>
                 </TouchableOpacity>
@@ -109,12 +173,20 @@ const WorkerAreaScreen = ({ onTabPress, onBack }) => {
         <View style={styles.areaSection}>
           <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
           <View style={styles.quickAreaActions}>
-            <TouchableOpacity style={styles.quickAreaButton} onPress={selectAllAreas}>
+            <TouchableOpacity
+              style={styles.quickAreaButton}
+              onPress={selectAllAreas}
+            >
               <Text style={styles.quickAreaButtonIcon}>✅</Text>
               <Text style={styles.quickAreaButtonText}>Chọn tất cả</Text>
-              <Text style={styles.quickAreaButtonSubtext}>Khu vực khả dụng</Text>
+              <Text style={styles.quickAreaButtonSubtext}>
+                Khu vực khả dụng
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.quickAreaButton} onPress={clearAllAreas}>
+            <TouchableOpacity
+              style={styles.quickAreaButton}
+              onPress={clearAllAreas}
+            >
               <Text style={styles.quickAreaButtonIcon}>❌</Text>
               <Text style={styles.quickAreaButtonText}>Bỏ chọn tất cả</Text>
               <Text style={styles.quickAreaButtonSubtext}>Xóa lựa chọn</Text>
@@ -126,7 +198,8 @@ const WorkerAreaScreen = ({ onTabPress, onBack }) => {
         <View style={styles.areaSection}>
           <Text style={styles.sectionTitle}>Chọn khu vực</Text>
           <Text style={styles.sectionSubtitle}>
-            Chọn các khu vực bạn muốn nhận đơn hàng. Khu vực càng nhiều, cơ hội nhận việc càng cao.
+            Chọn các khu vực bạn muốn nhận đơn hàng. Khu vực càng nhiều, cơ hội
+            nhận việc càng cao.
           </Text>
           <View style={styles.areasGrid}>
             {areas.map((area) => (
@@ -135,31 +208,40 @@ const WorkerAreaScreen = ({ onTabPress, onBack }) => {
                 style={[
                   styles.areaCard,
                   selectedAreas.includes(area.id) && styles.selectedAreaCard,
-                  !area.available && styles.disabledAreaCard
+                  !area.available && styles.disabledAreaCard,
                 ]}
                 onPress={() => toggleArea(area.id)}
               >
                 <View style={styles.areaCardHeader}>
-                  <Text style={[
-                    styles.areaCardName,
-                    selectedAreas.includes(area.id) && styles.selectedAreaCardName
-                  ]}>
+                  <Text
+                    style={[
+                      styles.areaCardName,
+                      selectedAreas.includes(area.id) &&
+                        styles.selectedAreaCardName,
+                    ]}
+                  >
                     {area.name}
                   </Text>
                   {selectedAreas.includes(area.id) && (
                     <Text style={styles.areaCardCheck}>✓</Text>
                   )}
                 </View>
-                <Text style={[
-                  styles.areaCardDistrict,
-                  selectedAreas.includes(area.id) && styles.selectedAreaCardDistrict
-                ]}>
+                <Text
+                  style={[
+                    styles.areaCardDistrict,
+                    selectedAreas.includes(area.id) &&
+                      styles.selectedAreaCardDistrict,
+                  ]}
+                >
                   {area.district}
                 </Text>
-                <Text style={[
-                  styles.areaCardDistance,
-                  selectedAreas.includes(area.id) && styles.selectedAreaCardDistance
-                ]}>
+                <Text
+                  style={[
+                    styles.areaCardDistance,
+                    selectedAreas.includes(area.id) &&
+                      styles.selectedAreaCardDistance,
+                  ]}
+                >
                   Cách {area.distance}
                 </Text>
                 {!area.available && (
@@ -175,9 +257,9 @@ const WorkerAreaScreen = ({ onTabPress, onBack }) => {
           <View style={styles.areaTips}>
             <Text style={styles.areaTipsTitle}>💡 Mẹo tối ưu khu vực</Text>
             <Text style={styles.areaTipsText}>
-              • Chọn nhiều khu vực gần nhau để tăng cơ hội nhận đơn{'\n'}
-              • Ưu tiên các khu vực có mật độ dân cư cao{'\n'}
-              • Cập nhật khu vực thường xuyên theo lịch trình của bạn
+              • Chọn nhiều khu vực gần nhau để tăng cơ hội nhận đơn{"\n"}• Ưu
+              tiên các khu vực có mật độ dân cư cao{"\n"}• Cập nhật khu vực
+              thường xuyên theo lịch trình của bạn
             </Text>
           </View>
         </View>
@@ -185,7 +267,7 @@ const WorkerAreaScreen = ({ onTabPress, onBack }) => {
 
       <WorkerBottomNav onTabPress={onTabPress} activeTab="workerProfile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerAreaScreen
+export default WorkerAreaScreen;

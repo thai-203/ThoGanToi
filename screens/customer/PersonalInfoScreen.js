@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,66 +7,66 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
-} from "react-native"
-import { styles } from "../../styles/additional"
-import { CustomerBottomNav } from "../../components/BottomNavigation"
-import userService from "../../services/userService"
-import { getCurrentUserId } from "../../utils/auth"
+} from "react-native";
+import { styles } from "../../styles/additional";
+import { CustomerBottomNav } from "../../components/BottomNavigation";
+import userService from "../../services/userService";
+import { getCurrentUserId } from "../../utils/auth";
 
 const PersonalInfoScreen = ({ onTabPress, onBack }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [personalInfo, setPersonalInfo] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [userId, setUserId] = useState(null)
+  const [isEditing, setIsEditing] = useState(false);
+  const [personalInfo, setPersonalInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
-  const genderOptions = ["Nam", "Nữ", "Khác"]
+  const genderOptions = ["Nam", "Nữ", "Khác"];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const uid = await getCurrentUserId()
-        setUserId(uid)
+        const uid = await getCurrentUserId();
+        setUserId(uid);
 
-        const userData = await userService.getUserById(uid)
+        const userData = await userService.getUserById(uid);
         if (userData) {
-          setPersonalInfo(userData)
+          setPersonalInfo(userData);
         }
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu người dùng:", error)
-        Alert.alert("Lỗi", "Không thể tải thông tin người dùng.")
+        console.error("Lỗi khi tải dữ liệu người dùng:", error);
+        Alert.alert("Lỗi", "Không thể tải thông tin người dùng.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   const updateInfo = (field, value) => {
-    setPersonalInfo((prev) => ({ ...prev, [field]: value }))
-  }
+    setPersonalInfo((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSave = async () => {
     try {
-      await userService.updateUser(userId, personalInfo)
-      setIsEditing(false)
-      Alert.alert("Thành công", "Thông tin đã được cập nhật.")
+      await userService.updateUser(userId, personalInfo);
+      setIsEditing(false);
+      Alert.alert("Thành công", "Thông tin đã được cập nhật.");
     } catch (error) {
-      console.error("Lỗi khi cập nhật:", error)
-      Alert.alert("Lỗi", "Không thể lưu thay đổi.")
+      console.error("Lỗi khi cập nhật:", error);
+      Alert.alert("Lỗi", "Không thể lưu thay đổi.");
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsEditing(false)
-  }
+    setIsEditing(false);
+  };
 
   if (loading || !personalInfo) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={{ padding: 20 }}>Đang tải thông tin...</Text>
       </SafeAreaView>
-    )
+    );
   }
 
   return (
@@ -98,9 +98,17 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.sectionTitle}>Thông tin cơ bản</Text>
           {[
             { label: "Họ tên", field: "name" },
-            { label: "Số điện thoại", field: "phone", keyboardType: "phone-pad" },
+            {
+              label: "Số điện thoại",
+              field: "phone",
+              keyboardType: "phone-pad",
+            },
             { label: "Email", field: "email", keyboardType: "email-address" },
-            { label: "Ngày sinh", field: "dateOfBirth", placeholder: "DD/MM/YYYY" },
+            {
+              label: "Ngày sinh",
+              field: "dateOfBirth",
+              placeholder: "DD/MM/YYYY",
+            },
           ].map(({ label, field, keyboardType, placeholder }) => (
             <View key={field} style={styles.personalInfoRow}>
               <Text style={styles.personalInfoLabel}>{label}</Text>
@@ -113,7 +121,9 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
                   placeholder={placeholder}
                 />
               ) : (
-                <Text style={styles.personalInfoValue}>{personalInfo[field]}</Text>
+                <Text style={styles.personalInfoValue}>
+                  {personalInfo[field]}
+                </Text>
               )}
             </View>
           ))}
@@ -128,14 +138,16 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
                     key={gender}
                     style={[
                       styles.genderOption,
-                      personalInfo.gender === gender && styles.selectedGenderOption,
+                      personalInfo.gender === gender &&
+                        styles.selectedGenderOption,
                     ]}
                     onPress={() => updateInfo("gender", gender)}
                   >
                     <Text
                       style={[
                         styles.genderOptionText,
-                        personalInfo.gender === gender && styles.selectedGenderOptionText,
+                        personalInfo.gender === gender &&
+                          styles.selectedGenderOptionText,
                       ]}
                     >
                       {gender}
@@ -144,7 +156,9 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
                 ))}
               </View>
             ) : (
-              <Text style={styles.personalInfoValue}>{personalInfo.gender}</Text>
+              <Text style={styles.personalInfoValue}>
+                {personalInfo.gender}
+              </Text>
             )}
           </View>
         </View>
@@ -162,7 +176,9 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
                 multiline
               />
             ) : (
-              <Text style={styles.personalInfoValue}>{personalInfo.address}</Text>
+              <Text style={styles.personalInfoValue}>
+                {personalInfo.address}
+              </Text>
             )}
           </View>
         </View>
@@ -172,7 +188,11 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.sectionTitle}>Liên hệ khẩn cấp</Text>
           {[
             { label: "Tên người liên hệ", field: "emergencyName" },
-            { label: "Số điện thoại", field: "emergencyContact", keyboardType: "phone-pad" },
+            {
+              label: "Số điện thoại",
+              field: "emergencyContact",
+              keyboardType: "phone-pad",
+            },
           ].map(({ label, field, keyboardType }) => (
             <View key={field} style={styles.personalInfoRow}>
               <Text style={styles.personalInfoLabel}>{label}</Text>
@@ -184,7 +204,9 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
                   keyboardType={keyboardType}
                 />
               ) : (
-                <Text style={styles.personalInfoValue}>{personalInfo[field]}</Text>
+                <Text style={styles.personalInfoValue}>
+                  {personalInfo[field]}
+                </Text>
               )}
             </View>
           ))}
@@ -193,10 +215,16 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
         {/* Save / Cancel Buttons */}
         {isEditing && (
           <View style={styles.editActions}>
-            <TouchableOpacity style={styles.cancelEditButton} onPress={handleCancel}>
+            <TouchableOpacity
+              style={styles.cancelEditButton}
+              onPress={handleCancel}
+            >
               <Text style={styles.cancelEditButtonText}>Hủy</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveEditButton} onPress={handleSave}>
+            <TouchableOpacity
+              style={styles.saveEditButton}
+              onPress={handleSave}
+            >
               <Text style={styles.saveEditButtonText}>Lưu thay đổi</Text>
             </TouchableOpacity>
           </View>
@@ -205,7 +233,7 @@ const PersonalInfoScreen = ({ onTabPress, onBack }) => {
 
       <CustomerBottomNav onTabPress={onTabPress} activeTab="profile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default PersonalInfoScreen
+export default PersonalInfoScreen;

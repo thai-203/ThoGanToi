@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { styles } from "../../styles/styles";
 import { dates, times } from "../../data/mockData";
 import { CustomerBottomNav } from "../../components/BottomNavigation";
@@ -63,7 +70,9 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
           <Text style={styles.detailExperience}>{worker.experience}</Text>
           <View style={styles.detailRatingContainer}>
             <Text style={styles.detailRating}>⭐ {worker.rating}</Text>
-            <Text style={styles.detailReviews}>({worker.reviews} đánh giá)</Text>
+            <Text style={styles.detailReviews}>
+              ({worker.reviews} đánh giá)
+            </Text>
           </View>
           <Text style={styles.detailPrice}>{worker.price}</Text>
         </View>
@@ -71,8 +80,9 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Về tôi</Text>
           <Text style={styles.description}>
-            Tôi là thợ {service.name.toLowerCase()} với {worker.experience}. Cam kết làm việc chuyên nghiệp, tận tâm và
-            đảm bảo chất lượng. Phục vụ 24/7, có thể đến tận nơi trong vòng 30 phút.
+            Tôi là thợ {service.name.toLowerCase()} với {worker.experience}. Cam
+            kết làm việc chuyên nghiệp, tận tâm và đảm bảo chất lượng. Phục vụ
+            24/7, có thể đến tận nơi trong vòng 30 phút.
           </Text>
         </View>
 
@@ -92,10 +102,18 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
             {dates.map((date) => (
               <TouchableOpacity
                 key={date.id}
-                style={[styles.dateButton, selectedDate === date.value && styles.selectedDate]}
+                style={[
+                  styles.dateButton,
+                  selectedDate === date.value && styles.selectedDate,
+                ]}
                 onPress={() => setSelectedDate(date.value)}
               >
-                <Text style={[styles.dateText, selectedDate === date.value && styles.selectedDateText]}>
+                <Text
+                  style={[
+                    styles.dateText,
+                    selectedDate === date.value && styles.selectedDateText,
+                  ]}
+                >
                   {date.label}
                 </Text>
               </TouchableOpacity>
@@ -109,10 +127,20 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
             {times.map((time) => (
               <TouchableOpacity
                 key={time}
-                style={[styles.timeButton, selectedTime === time && styles.selectedTime]}
+                style={[
+                  styles.timeButton,
+                  selectedTime === time && styles.selectedTime,
+                ]}
                 onPress={() => setSelectedTime(time)}
               >
-                <Text style={[styles.timeText, selectedTime === time && styles.selectedTimeText]}>{time}</Text>
+                <Text
+                  style={[
+                    styles.timeText,
+                    selectedTime === time && styles.selectedTimeText,
+                  ]}
+                >
+                  {time}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,38 +7,45 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
-} from "react-native"
-import { styles } from "../../styles/styles"
-import { CustomerBottomNav } from "../../components/BottomNavigation"
-import workerService from "../../services/workerService"
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { CustomerBottomNav } from "../../components/BottomNavigation";
+import workerService from "../../services/workerService";
 
 const WorkerListScreen = ({ service, onWorkerPress, onBack, onTabPress }) => {
-  const [workers, setWorkers] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [workers, setWorkers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchWorkers = async () => {
       try {
-        const filteredWorkers = await workerService.getWorkersByService(service.id)
-        setWorkers(filteredWorkers)
+        const filteredWorkers = await workerService.getWorkersByService(
+          service.id
+        );
+        setWorkers(filteredWorkers);
       } catch (error) {
-        console.error("Lỗi tải danh sách thợ:", error)
-        Alert.alert("Lỗi", "Không thể tải danh sách thợ.")
+        console.error("Lỗi tải danh sách thợ:", error);
+        Alert.alert("Lỗi", "Không thể tải danh sách thợ.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchWorkers()
-  }, [service])
+    fetchWorkers();
+  }, [service]);
 
   const renderWorker = ({ item }) => (
-    <TouchableOpacity style={styles.workerCard} onPress={() => onWorkerPress(item, service)}>
+    <TouchableOpacity
+      style={styles.workerCard}
+      onPress={() => onWorkerPress(item, service)}
+    >
       <View style={styles.workerHeader}>
         <Text style={styles.avatar}>{item.avatar || "👷"}</Text>
         <View style={styles.workerInfo}>
           <Text style={styles.workerName}>{item.name || "Chưa rõ tên"}</Text>
-          <Text style={styles.experience}>{item.experience || "Kinh nghiệm chưa rõ"}</Text>
+          <Text style={styles.experience}>
+            {item.experience || "Kinh nghiệm chưa rõ"}
+          </Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.rating}>⭐ {item.rating || "5.0"}</Text>
             <Text style={styles.reviews}>({item.reviews || 0} đánh giá)</Text>
@@ -58,14 +65,14 @@ const WorkerListScreen = ({ service, onWorkerPress, onBack, onTabPress }) => {
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
-  )
+  );
 
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <ActivityIndicator size="large" style={{ marginTop: 50 }} />
       </SafeAreaView>
-    )
+    );
   }
 
   return (
@@ -102,7 +109,7 @@ const WorkerListScreen = ({ service, onWorkerPress, onBack, onTabPress }) => {
 
       <CustomerBottomNav onTabPress={onTabPress} activeTab="home" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerListScreen
+export default WorkerListScreen;
