@@ -1953,4 +1953,36 @@ export const styles = StyleSheet.create({
     color: "#047857",
     lineHeight: 18,
   },
+
+  // Worker Info styles
+infoSection: {
+  backgroundColor: "white",
+  padding: 20,
+  marginHorizontal: 15,
+  marginVertical: 10,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: "#e5e7eb",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.05,
+  shadowRadius: 2,
+  elevation: 1,
+},
+sectionTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#1f2937",
+  marginBottom: 10,
+},
+infoLabel: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#374151",
+  marginBottom: 2,
+},
+infoValue: {
+  fontSize: 14,
+  color: "#6b7280",
+},
 })

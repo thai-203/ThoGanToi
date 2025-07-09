@@ -190,6 +190,26 @@ class FirebaseService {
       });
     });
   }
+
+  // Lấy tất cả node + key Firebase
+async readAllWithKeys(path) {
+  try {
+    const dataRef = ref(database, path)
+    const snapshot = await get(dataRef)
+    if (snapshot.exists()) {
+      const data = snapshot.val()
+      return Object.entries(data).map(([firebaseKey, item]) => ({
+        firebaseKey,
+        ...item,
+      }))
+    }
+    return []
+  } catch (error) {
+    console.error("❌ Error reading all data with keys:", error)
+    return []
+  }
+}
+
 }
 
 export default new FirebaseService();

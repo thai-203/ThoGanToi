@@ -254,7 +254,7 @@ export default function App() {
             onMenuPress={handleMenuPress}
           />
       case "workerInfo":
-        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} />
+        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} currentUser={currentUser} />
       case "workerArea":
         return <WorkerAreaScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerSkills":
@@ -262,7 +262,7 @@ export default function App() {
       case "workerSchedule":
         return <WorkerScheduleScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerIncome":
-        return <WorkerIncomeScreen onTabPress={handleTabPress} onBack={handleBack} />
+        return <WorkerIncomeScreen onTabPress={handleTabPress} onBack={handleBack} currentUser={currentUser}/>
       case "workerReviews":
         return <WorkerReviewsScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerEditProfile":

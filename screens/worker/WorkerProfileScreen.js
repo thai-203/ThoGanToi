@@ -1,55 +1,119 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert, Switch } from "react-native"
+import { useState, useEffect } from "react"
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert, Switch, ActivityIndicator } from "react-native"
 import { styles } from "../../styles/styles"
 import { workerMenuItems } from "../../data/mockData"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
 import WorkerEditProfileScreen from "./WorkerEditProfileScreen"
+import WorkerService from "../../services/workerService"
+import ServiceService from "../../services/serviceService"
+import TransactionService from "../../services/transactionService"
 
-const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
+const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress }) => {
   const [isAvailable, setIsAvailable] = useState(true)
   const [showEditProfile, setShowEditProfile] = useState(false)
-  const [userInfo, setUserInfo] = useState({
-    name: "Thợ Minh Tuấn",
-    phone: "0901234567",
-    email: "minhtuan@email.com",
-    specialty: "Thợ điện chuyên nghiệp",
-    experience: "5",
-    description: "Có 5 năm kinh nghiệm sửa chữa điện dân dụng và công nghiệp. Tận tâm, chuyên nghiệp.",
-    hourlyRate: "50000",
-    address: "Quận 7, TP.HCM",
-    skills: ["Sửa chữa điện", "Lắp đặt thiết bị", "Bảo trì hệ thống"],
-  })
+  const [loading, setLoading] = useState(true)
+  const [userInfo, setUserInfo] = useState(null)
+  const [monthlyIncome, setMonthlyIncome] = useState(0)
 
-  const handleMenuPress = (action) => {
-    if (action === "profile" && onMenuPress) {
-      onMenuPress("workerInfo")
-    } else if (action === "area" && onMenuPress) {
-      onMenuPress("workerArea")
-    } else if (action === "schedule" && onMenuPress) {
-      onMenuPress("workerSchedule")
-    } else if (action === "income" && onMenuPress) {
-      onMenuPress("workerIncome")
-    } else if (action === "reviews" && onMenuPress) {
-      onMenuPress("workerReviews")
-    } else if (action === "support" && onMenuPress) {
-      onMenuPress("workerSupport")
-    } else if (action === "settings" && onMenuPress) {
-      onMenuPress("workerSettings")
-    } else {
-      Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
+  useEffect(() => {
+    const loadWorkerInfo = async () => {
+      if (!currentUser?.id) {
+        console.log("🚨 Không tìm thấy currentUser")
+        return
+      }
+      setLoading(true)
+      try {
+        const [allWorkers, allServices] = await Promise.all([
+          WorkerService.getAllWorkers(),
+          ServiceService.getAllServices()
+        ])
+        console.log("📦 Loaded workers:", allWorkers)
+        console.log("🛠 Loaded services:", allServices)
+
+        const worker = allWorkers.find(w => String(w.userId) === String(currentUser.id))
+        console.log("🎯 Matched worker:", worker)
+
+        if (worker) {
+          const serviceNames = (worker.serviceId || [])
+            .map(id => {
+              const svc = allServices.find(s => String(s.id) === String(id))
+              return svc ? svc.name : `#${id}`
+            })
+            .join(", ")
+
+          setUserInfo({
+            id: worker.id,
+            name: worker.name,
+            phone: worker.phone,
+            specialty: serviceNames || "N/A",
+            experience: worker.experience,
+            hourlyRate: worker.price,
+            address: worker.area,
+            rating: worker.rating,
+            completedOrders: worker.reviews,
+            isAvailable: worker.status === "active" || worker.status === true,
+          })
+          setIsAvailable(worker.status === "active" || worker.status === true)
+
+          // 🎯 Tính thu nhập tháng này
+          const now = new Date()
+          const transactions = await TransactionService.getTransactionsByWorkerAndMonth(
+            worker.id, now.getMonth() + 1, now.getFullYear()
+          )
+          console.log("💸 Transactions this month:", transactions)
+          const income = transactions.reduce((acc, tx) => acc + (tx.workerReceived || 0), 0)
+          console.log("💵 Monthly income:", income)
+          setMonthlyIncome(income)
+        } else {
+          console.log("⚠️ Không tìm thấy worker tương ứng userId")
+        }
+      } catch (err) {
+        console.error("❌ Lỗi load worker:", err)
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
+    loadWorkerInfo()
+  }, [currentUser])
 
-  const handleLogout = () => {
-    Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
-      { text: "Hủy", style: "cancel" },
-      { text: "Đăng xuất", style: "destructive", onPress: onLogout },
-    ])
+  const handleToggleAvailability = async (value) => {
+    setIsAvailable(value)
+    if (!userInfo) return
+    try {
+      await WorkerService.updateWorker(userInfo.id, { status: value ? true : false })
+    } catch (err) {
+      console.error("❌ Error updating availability:", err)
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái làm việc.")
+    }
   }
 
   const handleSaveProfile = (newUserInfo) => {
     setUserInfo(newUserInfo)
+  }
+
+  const handleMenuPress = (action) => {
+    if (onMenuPress) {
+      onMenuPress(action)
+    } else {
+      Alert.alert("Thông báo", `Chức năng ${action} đang phát triển.`)
+    }
+  }
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#10b981" />
+      </SafeAreaView>
+    )
+  }
+
+  if (!userInfo) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: "center", marginTop: 20 }}>Không tìm thấy thông tin thợ.</Text>
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -69,7 +133,6 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Availability Toggle */}
         <View style={styles.availabilityContainer}>
           <View style={styles.availabilityInfo}>
             <Text style={styles.availabilityTitle}>Trạng thái làm việc</Text>
@@ -79,31 +142,29 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
           </View>
           <Switch
             value={isAvailable}
-            onValueChange={setIsAvailable}
+            onValueChange={handleToggleAvailability}
             trackColor={{ false: "#e5e7eb", true: "#10b981" }}
             thumbColor={isAvailable ? "#ffffff" : "#f3f4f6"}
           />
         </View>
 
-        {/* Stats */}
         <View style={styles.workerStatsContainer}>
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>4.8</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.rating ?? "-"}</Text>
             <Text style={styles.workerStatLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>127</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.completedOrders ?? "0"}</Text>
             <Text style={styles.workerStatLabel}>Đơn hoàn thành</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>5</Text>
-            <Text style={styles.workerStatLabel}>Năm kinh nghiệm</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.experience ?? "-"}</Text>
+            <Text style={styles.workerStatLabel}>Kinh nghiệm</Text>
           </View>
         </View>
 
-        {/* Menu */}
         <View style={styles.menuContainer}>
           {workerMenuItems.map((item) => (
             <TouchableOpacity key={item.id} style={styles.menuItem} onPress={() => handleMenuPress(item.action)}>
@@ -116,22 +177,28 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
           ))}
         </View>
 
-        {/* Earnings Summary */}
         <View style={styles.earningsContainer}>
           <View style={styles.earningsCard}>
             <Text style={styles.earningsIcon}>💰</Text>
             <View style={styles.earningsContent}>
               <Text style={styles.earningsTitle}>Thu nhập tháng này</Text>
-              <Text style={styles.earningsAmount}>2.450.000đ</Text>
-              <Text style={styles.earningsSubtext}>+15% so với tháng trước</Text>
+              <Text style={styles.earningsAmount}>
+                {monthlyIncome.toLocaleString("vi-VN")}đ
+              </Text>
+              
             </View>
-            <TouchableOpacity style={styles.earningsButton} onPress={() => handleMenuPress("income")}>
+            <TouchableOpacity style={styles.earningsButton} onPress={() => handleMenuPress("workerIncome")}>
               <Text style={styles.earningsButtonText}>Chi tiết</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {
+          Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
+            { text: "Hủy", style: "cancel" },
+            { text: "Đăng xuất", style: "destructive", onPress: onLogout },
+          ])
+        }}>
           <Text style={styles.logoutButtonText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -62,15 +62,22 @@ class WorkerService {
     }
   }
 
-  async updateWorker(workerId, workerData) {
+  
+
+  async updateWorker(innerId, workerData) {
     try {
-      await FirebaseService.update(`${this.basePath}/${workerId}`, workerData)
+      const allWorkers = await FirebaseService.readAllWithKeys(this.basePath)
+      const target = allWorkers.find(w => String(w.id) === String(innerId))
+      if (!target) throw new Error("Worker not found by id: " + innerId)
+  
+      await FirebaseService.update(`${this.basePath}/${target.firebaseKey}`, workerData)
       return true
     } catch (error) {
-      console.error("Error updating worker:", error)
+      console.error("❌ Error updating worker:", error)
       throw error
     }
   }
+  
 
   async deleteWorker(workerId) {
     try {

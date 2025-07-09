@@ -1,57 +1,66 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert } from "react-native"
+import { useState, useEffect } from "react"
+import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, ActivityIndicator } from "react-native"
 import { styles } from "../../styles/styles"
-import { workerOrders } from "../../data/mockData"
+// import { workerOrders } from "../../data/mockData" // XÓA: Không dùng mock data nữa
 import { statusConfig } from "../../constants/statusConfig"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
 
-const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
-  const [activeTab, setActiveTab] = useState("all")
+// IMPORT: Thêm các service cần thiết
+import OrderService from "../../services/orderService" 
 
-  const filteredOrders = workerOrders.filter((order) => {
+const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
+  // GIẢ ĐỊNH: ID của thợ đang đăng nhập. Trong ứng dụng thực tế, bạn sẽ lấy ID này từ
+  // global state (Context/Redux) hoặc từ route params sau khi đăng nhập.
+  const loggedInWorkerId = "1" 
+
+  const [activeTab, setActiveTab] = useState("all")
+  const [orders, setOrders] = useState([]) // State để lưu danh sách đơn hàng từ Firebase
+  const [loading, setLoading] = useState(true) // State để quản lý trạng thái loading
+
+  // Lấy dữ liệu từ Firebase khi component được mount
+  useEffect(() => {
+    setLoading(true)
+    // Sử dụng listener để dữ liệu tự động cập nhật khi có thay đổi trên Firebase
+    const unsubscribe = OrderService.listenToWorkerOrders(loggedInWorkerId, (workerOrders) => {
+      // Sắp xếp đơn hàng mới nhất lên đầu
+      const sortedOrders = workerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      setOrders(sortedOrders)
+      setLoading(false)
+    })
+
+    // Cleanup listener khi component unmount
+    return () => unsubscribe()
+  }, [loggedInWorkerId]) // Chạy lại effect nếu workerId thay đổi
+
+  // Lọc dữ liệu từ state 'orders' thay vì mock data
+  const filteredOrders = orders.filter((order) => {
     if (activeTab === "all") return true
     return order.status === activeTab
   })
 
-  const handleAcceptOrder = (orderId) => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn nhận đơn hàng này?", [
+  // Hàm cập nhật trạng thái chung
+  const handleUpdateStatus = async (orderId, newStatus, confirmation) => {
+    Alert.alert(confirmation.title, confirmation.message, [
       { text: "Hủy", style: "cancel" },
       {
-        text: "Nhận đơn",
-        onPress: () => {
-          Alert.alert("Thành công", "Đã nhận đơn hàng!")
-        },
-      },
-    ])
-  }
-
-  const handleRejectOrder = (orderId) => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn từ chối đơn hàng này?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Từ chối",
-        style: "destructive",
-        onPress: () => {
-          Alert.alert("Đã từ chối", "Đơn hàng đã được từ chối")
-        },
-      },
-    ])
-  }
-
-  const handleCompleteOrder = (orderId) => {
-    Alert.alert("Hoàn thành công việc", "Xác nhận đã hoàn thành công việc?", [
-      { text: "Chưa xong", style: "cancel" },
-      {
-        text: "Hoàn thành",
-        onPress: () => {
-          Alert.alert("Thành công", "Đã cập nhật trạng thái hoàn thành!")
+        text: confirmation.confirmText,
+        style: newStatus === "rejected" ? "destructive" : "default", // 'rejected' is a custom status, not in your data
+        onPress: async () => {
+          try {
+            await OrderService.updateOrderStatus(orderId, newStatus)
+            Alert.alert("Thành công", `Đã cập nhật trạng thái đơn hàng thành công!`)
+            // Không cần làm gì thêm, listener sẽ tự động cập nhật lại UI
+          } catch (error) {
+            console.error("Failed to update order status:", error)
+            Alert.alert("Lỗi", "Không thể cập nhật trạng thái. Vui lòng thử lại.")
+          }
         },
       },
     ])
   }
 
   const renderOrder = ({ item }) => {
-    const status = statusConfig[item.status]
+    const status = statusConfig[item.status] || statusConfig.default
 
     return (
       <TouchableOpacity style={styles.orderCard} onPress={() => onOrderPress(item)}>
@@ -84,16 +93,37 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
           </TouchableOpacity>
           {item.status === "pending" && (
             <View style={styles.pendingActions}>
-              <TouchableOpacity style={styles.rejectButton} onPress={() => handleRejectOrder(item.id)}>
+              <TouchableOpacity
+                style={styles.rejectButton}
+                onPress={() => handleUpdateStatus(item.id, "rejected", {
+                    title: "Từ chối đơn",
+                    message: "Bạn có chắc muốn từ chối đơn hàng này?",
+                    confirmText: "Từ chối"
+                })}
+              >
                 <Text style={styles.rejectButtonText}>Từ chối</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.acceptButton} onPress={() => handleAcceptOrder(item.id)}>
+              <TouchableOpacity
+                style={styles.acceptButton}
+                onPress={() => handleUpdateStatus(item.id, "accepted", {
+                    title: "Nhận đơn",
+                    message: "Bạn có chắc muốn nhận đơn hàng này?",
+                    confirmText: "Nhận đơn"
+                })}
+              >
                 <Text style={styles.acceptButtonText}>Nhận đơn</Text>
               </TouchableOpacity>
             </View>
           )}
           {item.status === "accepted" && (
-            <TouchableOpacity style={styles.completeButton} onPress={() => handleCompleteOrder(item.id)}>
+            <TouchableOpacity
+              style={styles.completeButton}
+              onPress={() => handleUpdateStatus(item.id, "completed", {
+                  title: "Hoàn thành công việc",
+                  message: "Xác nhận đã hoàn thành công việc?",
+                  confirmText: "Hoàn thành"
+              })}
+            >
               <Text style={styles.completeButtonText}>Hoàn thành</Text>
             </TouchableOpacity>
           )}
@@ -108,6 +138,7 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
         <Text style={styles.historyTitle}>Quản lý đơn hàng</Text>
       </View>
       <View style={styles.tabContainer}>
+        {/* Các tab không đổi */}
         <TouchableOpacity
           style={[styles.tab, activeTab === "all" && styles.activeTab]}
           onPress={() => setActiveTab("all")}
@@ -133,12 +164,18 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
           <Text style={[styles.tabText, activeTab === "completed" && styles.activeTabText]}>Hoàn thành</Text>
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={filteredOrders}
-        renderItem={renderOrder}
-        contentContainerStyle={styles.ordersList}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={filteredOrders}
+          renderItem={renderOrder}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.ordersList}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={<Text style={styles.emptyListText}>Không có đơn hàng nào.</Text>}
+        />
+      )}
       <WorkerBottomNav onTabPress={onTabPress} activeTab="orders" />
     </SafeAreaView>
   )
