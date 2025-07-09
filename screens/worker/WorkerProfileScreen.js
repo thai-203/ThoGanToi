@@ -22,7 +22,7 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
 
   const handleMenuPress = (action) => {
     if (action === "profile" && onMenuPress) {
-      onMenuPress("workerProfile")
+      onMenuPress("workerInfo")
     } else if (action === "area" && onMenuPress) {
       onMenuPress("workerArea")
     } else if (action === "schedule" && onMenuPress) {

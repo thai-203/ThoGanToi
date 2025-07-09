@@ -1,36 +1,47 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native"
-import { styles } from "../../styles/styles"
-import { dates, times } from "../../data/mockData"
-import { CustomerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native";
+import { styles } from "../../styles/styles";
+import { dates, times } from "../../data/mockData";
+import { CustomerBottomNav } from "../../components/BottomNavigation";
 
 const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
-  const [selectedDate, setSelectedDate] = useState("")
-  const [selectedTime, setSelectedTime] = useState("")
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
 
   const handleBooking = () => {
     if (!selectedDate || !selectedTime) {
-      Alert.alert("Thông báo", "Vui lòng chọn ngày và giờ")
-      return
+      Alert.alert("Thông báo", "Vui lòng chọn ngày và giờ");
+      return;
     }
+
     Alert.alert(
       "Xác nhận đặt lịch",
-      `Đặt lịch với ${worker.name}\nDịch vụ: ${service.name}\nNgày: ${selectedDate}\nGiờ: ${selectedTime}`,
+      `Đặt lịch với ${worker?.name}\nDịch vụ: ${service?.name}\nNgày: ${selectedDate}\nGiờ: ${selectedTime}`,
       [
         { text: "Hủy", style: "cancel" },
         {
           text: "Xác nhận",
           onPress: () => {
-            Alert.alert("Thành công", "Đặt lịch thành công!")
-            onBack()
+            Alert.alert("Thành công", "Đặt lịch thành công!");
+            onBack && onBack();
           },
         },
-      ],
-    )
-  }
+      ]
+    );
+  };
 
   const handleCall = () => {
-    Alert.alert("Gọi điện", `Gọi cho ${worker.name}: ${worker.phone}`)
+    Alert.alert("Gọi điện", `Gọi cho ${worker?.name}: ${worker?.phone}`);
+  };
+
+  if (!worker || !service) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ padding: 20 }}>
+          <Text>Thiếu thông tin thợ hoặc dịch vụ.</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -44,6 +55,7 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
           <Text style={styles.favoriteButton}>❤️</Text>
         </TouchableOpacity>
       </View>
+
       <ScrollView style={styles.detailContent}>
         <View style={styles.workerProfile}>
           <Text style={styles.detailAvatar}>{worker.avatar}</Text>
@@ -55,6 +67,7 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
           </View>
           <Text style={styles.detailPrice}>{worker.price}</Text>
         </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Về tôi</Text>
           <Text style={styles.description}>
@@ -62,6 +75,7 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
             đảm bảo chất lượng. Phục vụ 24/7, có thể đến tận nơi trong vòng 30 phút.
           </Text>
         </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Dịch vụ</Text>
           <View style={styles.servicesList}>
@@ -71,6 +85,7 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
             <Text style={styles.serviceItem}>• Bảo hành 6 tháng</Text>
           </View>
         </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chọn ngày</Text>
           <View style={styles.dateContainer}>
@@ -87,6 +102,7 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
             ))}
           </View>
         </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chọn giờ</Text>
           <View style={styles.timeContainer}>
@@ -102,6 +118,7 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
           </View>
         </View>
       </ScrollView>
+
       <View style={styles.detailFooter}>
         <TouchableOpacity style={styles.callButton} onPress={handleCall}>
           <Text style={styles.callButtonText}>📞 Gọi</Text>
@@ -110,9 +127,10 @@ const WorkerDetailScreen = ({ worker, service, onBack, onTabPress }) => {
           <Text style={styles.bookButtonText}>Đặt lịch ngay</Text>
         </TouchableOpacity>
       </View>
+
       <CustomerBottomNav onTabPress={onTabPress} activeTab="home" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerDetailScreen
+export default WorkerDetailScreen;

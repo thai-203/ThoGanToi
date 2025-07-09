@@ -209,9 +209,14 @@ export default function App() {
       case "home":
         return <HomeScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
       case "workerList":
-        return <WorkerListScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+        return <WorkerListScreen
+                service={selectedService}
+                onWorkerPress={handleWorkerPress}
+                onBack={handleBack}
+                onTabPress={handleTabPress}
+              />
       case "workerDetail":
-        return <WorkerDetailScreen worker={selectedWorker} onTabPress={handleTabPress} onBack={handleBack} />
+        return <WorkerDetailScreen worker={selectedWorker} service={selectedService} onBack={handleBack} />
       case "bookingHistory":
         return <BookingHistoryScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
       case "personalInfo":
