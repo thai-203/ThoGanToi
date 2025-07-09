@@ -1,92 +1,44 @@
-import { useState, useEffect } from "react"
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Switch, ActivityIndicator, Alert } from "react-native"
-import UserService from "../../services/userService"
-import FirebaseService from "../../services/firebaseService"
+import { useState } from "react"
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert, Switch } from "react-native"
 import { styles } from "../../styles/styles"
+import { workerMenuItems } from "../../data/mockData"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
 import WorkerEditProfileScreen from "./WorkerEditProfileScreen"
-import { workerMenuItems } from "../../data/mockData"
+import FirebaseService from "../../services/firebaseService"
 
 const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress, currentUser }) => {
-  const [isAvailable, setIsAvailable] = useState(true)
+  // fallback nếu chưa có currentUser
+  const userInfo = currentUser || {
+    id: "",
+    name: "N/A",
+    phone: "N/A",
+    email: "N/A",
+    specialty: "N/A",
+    completedOrders: 0,
+    rating: 0,
+    experience: "0",
+    area: "N/A",
+    status: false,
+  }
+
+  const [isAvailable, setIsAvailable] = useState(userInfo.status === true)
   const [showEditProfile, setShowEditProfile] = useState(false)
-  const [userInfo, setUserInfo] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [workerId, setWorkerId] = useState(null)
 
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       setLoading(true)
-  //       if (currentUser?.id) {
-  //         const data = await UserService.getUserById(currentUser.id)
-  //         setUserInfo(data)
-  
-  //         const workers = await FirebaseService.readAll("workers")
-  //         console.log("Workers loaded:", workers)
-  //         console.log("Looking for userId:", data.id)
-  //         const worker = workers.find(w => String(w.userId) === String(data.id))
-  //         if (worker) {
-  //           setWorkerId(worker.id)
-  //           setIsAvailable(worker.status ?? true)
-  //           console.log("Matched worker:", worker)
-  //         } else {
-  //           console.log("No matching worker found for userId:", data.id)
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching worker profile:", error)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-  //   fetchProfile()
-  // }, [currentUser])
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true)
-        if (currentUser?.id) {
-          const data = await UserService.getUserById(currentUser.id)
-          setUserInfo(data)
-  
-          const workers = await FirebaseService.readAll("workers")
-          const worker = workers.find(w => String(w.userId) === String(data.id))
-          if (worker) {
-            setWorkerId(worker.id)
-            setIsAvailable(worker.status ?? true)
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching worker profile:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchProfile()
-  }, [currentUser])
-  
-  
-
-  const handleAvailabilityChange = async (value) => {
-    console.log("Toggle clicked:", value)
+  const handleToggleAvailability = async (value) => {
     setIsAvailable(value)
     try {
-      console.log("Current workerId:", workerId)
-      if (workerId) {
-        await FirebaseService.update(`workers/${workerId}`, { status: value })
-        console.log("Updated status in workers:", value)
-      } else {
-        console.log("workerId is not set!")
-      }
-    } catch (error) {
-      console.error("Error updating worker status:", error)
+      await FirebaseService.update(`workers/${userInfo.id}`, {
+        status: value
+      })
+      console.log("✅ Đã cập nhật trạng thái workers trên Firebase:", value)
+    } catch (err) {
+      console.error("❌ Lỗi khi cập nhật trạng thái workers:", err)
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái, vui lòng thử lại.")
     }
   }
-  
 
   const handleMenuPress = (action) => {
-    if (action && onMenuPress) {
+    if (onMenuPress) {
       onMenuPress(action)
     } else {
       Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
@@ -101,15 +53,7 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress, currentUser })
   }
 
   const handleSaveProfile = (newUserInfo) => {
-    setUserInfo(newUserInfo)
-  }
-
-  if (loading || !userInfo) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#10b981" />
-      </SafeAreaView>
-    )
+    console.log("Đã lưu hồ sơ:", newUserInfo)
   }
 
   return (
@@ -139,7 +83,7 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress, currentUser })
           </View>
           <Switch
             value={isAvailable}
-            onValueChange={handleAvailabilityChange}
+            onValueChange={handleToggleAvailability}
             trackColor={{ false: "#e5e7eb", true: "#10b981" }}
             thumbColor={isAvailable ? "#ffffff" : "#f3f4f6"}
           />
@@ -148,17 +92,17 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress, currentUser })
         {/* Stats */}
         <View style={styles.workerStatsContainer}>
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>{userInfo.rating ?? "4.8"}</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.rating || "0"}</Text>
             <Text style={styles.workerStatLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>{userInfo.completedOrders ?? "0"}</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.completedOrders || "0"}</Text>
             <Text style={styles.workerStatLabel}>Đơn hoàn thành</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>{userInfo.experience ?? "0"}</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.experience || "0"}</Text>
             <Text style={styles.workerStatLabel}>Năm kinh nghiệm</Text>
           </View>
         </View>

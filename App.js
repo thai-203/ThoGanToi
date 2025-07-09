@@ -62,7 +62,6 @@ export default function App() {
 
   // Cập nhật handleLogin để nhận user data
   const handleLogin = (role, user) => {
-    console.log("🟢 handleLogin called with:", role, user)
     setUserType(role)
     setCurrentUser(user)
     if (role === "customer") {
@@ -183,7 +182,6 @@ export default function App() {
       }
     }
   }
-  
 
   // Cập nhật handleLogout để reset currentUser
   const handleLogout = () => {
@@ -191,13 +189,6 @@ export default function App() {
     setUserType("customer")
     setCurrentUser(null)
   }
-
-  const handleNavigate = (screen, data) => {
-    if (screen === "workerProfileDetail") {
-      setSelectedWorker(data.worker)
-    }
-    setCurrentScreen(screen)
-  }  
 
   // Render current screen
   const renderCurrentScreen = () => {
@@ -218,9 +209,14 @@ export default function App() {
       case "home":
         return <HomeScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
       case "workerList":
-        return <WorkerListScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+        return <WorkerListScreen
+                service={selectedService}
+                onWorkerPress={handleWorkerPress}
+                onBack={handleBack}
+                onTabPress={handleTabPress}
+              />
       case "workerDetail":
-        return <WorkerDetailScreen worker={selectedWorker} onTabPress={handleTabPress} onBack={handleBack} />
+        return <WorkerDetailScreen worker={selectedWorker} service={selectedService} onBack={handleBack} />
       case "bookingHistory":
         return <BookingHistoryScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
       case "personalInfo":
@@ -257,7 +253,7 @@ export default function App() {
             onMenuPress={handleMenuPress}
           />
       case "workerInfo":
-        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} currentUser={currentUser} />
+        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerArea":
         return <WorkerAreaScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerSkills":
