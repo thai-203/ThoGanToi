@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,41 +7,41 @@ import {
   FlatList,
   Alert,
   TextInput,
-} from "react-native"
-import { styles } from "../../styles/styles"
-import { AdminBottomNav } from "../../components/BottomNavigation"
-import UserService from "../../services/userService"
-import OrderService from "../../services/orderService"
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import UserService from "../../services/userService";
+import OrderService from "../../services/orderService";
 
 const CustomerManagementScreen = ({ onTabPress, onBack }) => {
-  const [customerList, setCustomerList] = useState([])
-  const [searchText, setSearchText] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [customerList, setCustomerList] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
     const unsubscribe = UserService.listenToUsers((users) => {
-      const customers = users.filter((u) => u.role === "customer")
-      setCustomerList(customers)
-    })
+      const customers = users.filter((u) => u.role === "customer");
+      setCustomerList(customers);
+    });
 
-    return () => unsubscribe() // clean listener
-  }, [])
+    return () => unsubscribe(); // clean listener
+  }, []);
 
   const filteredCustomers = customerList.filter((customer) => {
     const matchesSearch =
       customer.name?.toLowerCase().includes(searchText.toLowerCase()) ||
       customer.phone?.includes(searchText) ||
-      customer.area?.toLowerCase().includes(searchText.toLowerCase())
+      customer.area?.toLowerCase().includes(searchText.toLowerCase());
 
     const matchesStatus =
-      filterStatus === "all" || customer.status === filterStatus
+      filterStatus === "all" || customer.status === filterStatus;
 
-    return matchesSearch && matchesStatus
-  })
+    return matchesSearch && matchesStatus;
+  });
 
   const handleToggleStatus = (customerId, currentStatus) => {
-    const newStatus = currentStatus === "active" ? "blocked" : "active"
-    const action = newStatus === "blocked" ? "khóa" : "mở khóa"
+    const newStatus = currentStatus === "active" ? "blocked" : "active";
+    const action = newStatus === "blocked" ? "khóa" : "mở khóa";
 
     Alert.alert("Xác nhận", `Bạn có chắc muốn ${action} tài khoản này?`, [
       { text: "Hủy", style: "cancel" },
@@ -49,36 +49,39 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
         text: "Xác nhận",
         onPress: async () => {
           try {
-            await UserService.updateUser(customerId, { status: newStatus })
-            Alert.alert("Thành công", `Đã ${action} tài khoản`)
+            await UserService.updateUser(customerId, { status: newStatus });
+            Alert.alert("Thành công", `Đã ${action} tài khoản`);
           } catch (error) {
-            Alert.alert("Lỗi", "Không thể cập nhật trạng thái người dùng.")
+            Alert.alert("Lỗi", "Không thể cập nhật trạng thái người dùng.");
           }
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleViewHistory = async (customer) => {
     try {
-      const orders = await OrderService.getOrdersByCustomerId(customer.id)
+      const orders = await OrderService.getOrdersByCustomerId(customer.id);
       if (!orders || orders.length === 0) {
-        Alert.alert("Thông báo", `${customer.name} chưa có lịch sử đặt dịch vụ.`)
+        Alert.alert(
+          "Thông báo",
+          `${customer.name} chưa có lịch sử đặt dịch vụ.`
+        );
       } else {
         const list = orders
           .map(
             (o, i) =>
-              `${i + 1}. ${o.service || "Dịch vụ"} - ${o.status || "Trạng thái"} - ${
-                o.date || "N/A"
-              }`
+              `${i + 1}. ${o.service || "Dịch vụ"} - ${
+                o.status || "Trạng thái"
+              } - ${o.date || "N/A"}`
           )
-          .join("\n")
-        Alert.alert(`Lịch sử của ${customer.name}`, list)
+          .join("\n");
+        Alert.alert(`Lịch sử của ${customer.name}`, list);
       }
     } catch (err) {
-      Alert.alert("Lỗi", "Không thể tải lịch sử đơn hàng.")
+      Alert.alert("Lỗi", "Không thể tải lịch sử đơn hàng.");
     }
-  }
+  };
 
   const renderCustomer = ({ item }) => (
     <View style={styles.userCard}>
@@ -89,7 +92,9 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.userPhone}>📞 {item.phone}</Text>
           <Text style={styles.userPhone}>✉️ {item.email}</Text>
           <Text style={styles.userPhone}>📍 {item.area}</Text>
-          <Text style={styles.userPhone}>📅 Tham gia: {item.joinDate || "N/A"}</Text>
+          <Text style={styles.userPhone}>
+            📅 Tham gia: {item.joinDate || "N/A"}
+          </Text>
         </View>
         <View
           style={[
@@ -111,7 +116,10 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
       </View>
 
       <View style={styles.userActions}>
-        <TouchableOpacity style={styles.editUserButton} onPress={() => handleViewHistory(item)}>
+        <TouchableOpacity
+          style={styles.editUserButton}
+          onPress={() => handleViewHistory(item)}
+        >
           <Text style={styles.editUserButtonText}>Lịch sử</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -129,7 +137,7 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -156,7 +164,10 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
         {["all", "active", "blocked"].map((status) => (
           <TouchableOpacity
             key={status}
-            style={[styles.filterChip, filterStatus === status && styles.activeFilterChip]}
+            style={[
+              styles.filterChip,
+              filterStatus === status && styles.activeFilterChip,
+            ]}
             onPress={() => setFilterStatus(status)}
           >
             <Text
@@ -185,7 +196,7 @@ const CustomerManagementScreen = ({ onTabPress, onBack }) => {
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="customerManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default CustomerManagementScreen
+export default CustomerManagementScreen;

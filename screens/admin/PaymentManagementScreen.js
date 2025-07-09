@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,58 +7,58 @@ import {
   FlatList,
   Alert,
   TextInput,
-} from "react-native"
-import { styles } from "../../styles/styles"
-import { AdminBottomNav } from "../../components/BottomNavigation"
-import orderService from "../../services/orderService"
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import orderService from "../../services/orderService";
 
 const PaymentManagementScreen = ({ onTabPress, onBack }) => {
-  const [orders, setOrders] = useState([])
-  const [searchText, setSearchText] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
-  const [commissionRate, setCommissionRate] = useState(10)
+  const [orders, setOrders] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [commissionRate, setCommissionRate] = useState(10);
 
   useEffect(() => {
-    fetchData()
-  }, [commissionRate])
+    fetchData();
+  }, [commissionRate]);
 
   const fetchData = async () => {
-    const data = await orderService.getAllOrders()
+    const data = await orderService.getAllOrders();
     const transactions = data.map((order) => {
-      const amount = parseInt(order.price.replace(/[^\d]/g, ""))
-      const commission = Math.round((amount * commissionRate) / 100)
-      const workerReceived = amount - commission
+      const amount = parseInt(order.price.replace(/[^\d]/g, ""));
+      const commission = Math.round((amount * commissionRate) / 100);
+      const workerReceived = amount - commission;
       return {
         ...order,
         amount,
         commission,
         workerReceived,
         orderId: order.id,
-      }
-    })
-    setOrders(transactions)
-  }
+      };
+    });
+    setOrders(transactions);
+  };
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.orderId.toLowerCase().includes(searchText.toLowerCase())
-    const matchesStatus = filterStatus === "all" || order.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+      order.orderId.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus =
+      filterStatus === "all" || order.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(value)
-  }
+    }).format(value);
+  };
 
-  const getTotalRevenue = () =>
-    orders.reduce((sum, o) => sum + o.amount, 0)
+  const getTotalRevenue = () => orders.reduce((sum, o) => sum + o.amount, 0);
 
   const getTotalCommission = () =>
-    orders.reduce((sum, o) => sum + o.commission, 0)
+    orders.reduce((sum, o) => sum + o.commission, 0);
 
   const handleUpdateCommission = () => {
     Alert.prompt(
@@ -69,20 +69,20 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
         {
           text: "Cập nhật",
           onPress: (input) => {
-            const rate = parseFloat(input)
+            const rate = parseFloat(input);
             if (!isNaN(rate) && rate >= 0 && rate <= 50) {
-              setCommissionRate(rate)
-              Alert.alert("Thành công", `Đã cập nhật: ${rate}%`)
+              setCommissionRate(rate);
+              Alert.alert("Thành công", `Đã cập nhật: ${rate}%`);
             } else {
-              Alert.alert("Lỗi", "Vui lòng nhập số từ 0 đến 50")
+              Alert.alert("Lỗi", "Vui lòng nhập số từ 0 đến 50");
             }
           },
         },
       ],
       "numeric",
       commissionRate.toString()
-    )
-  }
+    );
+  };
 
   const handleProcessWithdrawal = (order) => {
     Alert.alert("Xử lý rút tiền", `Xác nhận xử lý đơn ${order.orderId}?`, [
@@ -90,13 +90,13 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
       {
         text: "Xác nhận",
         onPress: async () => {
-          await orderService.updateOrder(order.id, { status: "completed" })
-          fetchData()
-          Alert.alert("Thành công", "Đơn đã được cập nhật")
+          await orderService.updateOrder(order.id, { status: "completed" });
+          fetchData();
+          Alert.alert("Thành công", "Đơn đã được cập nhật");
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.transactionCard}>
@@ -104,8 +104,12 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
         <View>
           <Text style={styles.transactionId}>#{item.orderId}</Text>
           <Text style={styles.transactionCustomer}>👤 {item.customer}</Text>
-          <Text style={styles.transactionWorker}>👨‍🔧 Thợ ID: {item.workerId}</Text>
-          <Text style={styles.transactionDate}>📅 {item.date} {item.time}</Text>
+          <Text style={styles.transactionWorker}>
+            👨‍🔧 Thợ ID: {item.workerId}
+          </Text>
+          <Text style={styles.transactionDate}>
+            📅 {item.date} {item.time}
+          </Text>
         </View>
         <View
           style={[
@@ -120,8 +124,7 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
             style={[
               styles.statusText,
               {
-                color:
-                  item.status === "completed" ? "#065f46" : "#92400e",
+                color: item.status === "completed" ? "#065f46" : "#92400e",
               },
             ]}
           >
@@ -164,7 +167,7 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
         </View>
       )}
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -226,7 +229,9 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
             >
               {status === "all"
                 ? `Tất cả (${orders.length})`
-                : `${status === "completed" ? "Hoàn thành" : "Chờ xử lý"} (${orders.filter((o) => o.status === status).length})`}
+                : `${status === "completed" ? "Hoàn thành" : "Chờ xử lý"} (${
+                    orders.filter((o) => o.status === status).length
+                  })`}
             </Text>
           </TouchableOpacity>
         ))}
@@ -243,7 +248,7 @@ const PaymentManagementScreen = ({ onTabPress, onBack }) => {
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="paymentManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default PaymentManagementScreen
+export default PaymentManagementScreen;

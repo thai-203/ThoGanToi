@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,44 +8,44 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
-} from "react-native"
-import { styles } from "../../styles/styles"
-import { AdminBottomNav } from "../../components/BottomNavigation"
-import EditUserModal from "../../components/EditUserModal"
-import userService from "../../services/userService"
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import EditUserModal from "../../components/EditUserModal";
+import userService from "../../services/userService";
 
 const UserManagementScreen = ({ onTabPress, onBack }) => {
-  const [userList, setUserList] = useState([])
-  const [searchText, setSearchText] = useState("")
-  const [filterRole, setFilterRole] = useState("all")
-  const [loading, setLoading] = useState(true)
+  const [userList, setUserList] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filterRole, setFilterRole] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  const [editingUser, setEditingUser] = useState(null)
-  const [isEditModalVisible, setEditModalVisible] = useState(false)
+  const [editingUser, setEditingUser] = useState(null);
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   const fetchUsers = async () => {
-    setLoading(true)
-    const users = await userService.getAllUsers()
-    setUserList(users)
-    setLoading(false)
-  }
+    setLoading(true);
+    const users = await userService.getAllUsers();
+    setUserList(users);
+    setLoading(false);
+  };
 
   const filteredUsers = userList.filter((user) => {
     const matchesSearch =
       user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.phone?.includes(searchText)
-    const matchesRole = filterRole === "all" || user.role === filterRole
-    return matchesSearch && matchesRole
-  })
+      user.phone?.includes(searchText);
+    const matchesRole = filterRole === "all" || user.role === filterRole;
+    return matchesSearch && matchesRole;
+  });
 
   const handleEditUser = (user) => {
-    setEditingUser(user)
-    setEditModalVisible(true)
-  }
+    setEditingUser(user);
+    setEditModalVisible(true);
+  };
 
   const handleDeleteUser = (userId) => {
     Alert.alert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa người dùng này?", [
@@ -54,47 +54,47 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
         text: "Xóa",
         style: "destructive",
         onPress: async () => {
-          await userService.deleteUser(userId)
-          fetchUsers()
-          Alert.alert("Đã xóa", "Người dùng đã được xóa.")
+          await userService.deleteUser(userId);
+          fetchUsers();
+          Alert.alert("Đã xóa", "Người dùng đã được xóa.");
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleSaveUser = async (updatedUser) => {
-    await userService.updateUser(updatedUser.id, updatedUser)
-    setEditModalVisible(false)
-    setEditingUser(null)
-    fetchUsers()
-    Alert.alert("Thành công", "Đã cập nhật thông tin người dùng.")
-  }
+    await userService.updateUser(updatedUser.id, updatedUser);
+    setEditModalVisible(false);
+    setEditingUser(null);
+    fetchUsers();
+    Alert.alert("Thành công", "Đã cập nhật thông tin người dùng.");
+  };
 
   const getRoleStyle = (role) => {
     switch (role) {
       case "admin":
-        return [styles.userRole, styles.adminRole]
+        return [styles.userRole, styles.adminRole];
       case "customer":
-        return [styles.userRole, styles.customerRole]
+        return [styles.userRole, styles.customerRole];
       case "worker":
-        return [styles.userRole, styles.workerRole]
+        return [styles.userRole, styles.workerRole];
       default:
-        return styles.userRole
+        return styles.userRole;
     }
-  }
+  };
 
   const getRoleText = (role) => {
     switch (role) {
       case "admin":
-        return "Quản trị viên"
+        return "Quản trị viên";
       case "customer":
-        return "Khách hàng"
+        return "Khách hàng";
       case "worker":
-        return "Thợ sửa chữa"
+        return "Thợ sửa chữa";
       default:
-        return role
+        return role;
     }
-  }
+  };
 
   const renderUser = ({ item }) => (
     <View style={styles.userCard}>
@@ -127,7 +127,7 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -168,14 +168,20 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
             >
               {role === "all"
                 ? `Tất cả (${userList.length})`
-                : `${getRoleText(role)} (${userList.filter((u) => u.role === role).length})`}
+                : `${getRoleText(role)} (${
+                    userList.filter((u) => u.role === role).length
+                  })`}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 20 }} />
+        <ActivityIndicator
+          size="large"
+          color="#3b82f6"
+          style={{ marginTop: 20 }}
+        />
       ) : (
         <FlatList
           data={filteredUsers}
@@ -195,7 +201,7 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="userManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default UserManagementScreen
+export default UserManagementScreen;

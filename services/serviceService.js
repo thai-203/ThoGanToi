@@ -1,95 +1,103 @@
-import FirebaseService from "./firebaseService"
+import FirebaseService from "./firebaseService";
 
 class ServiceService {
   constructor() {
-    this.basePath = "services"
+    this.basePath = "services";
   }
 
   async createService(serviceData) {
     try {
-      const serviceId = await FirebaseService.create(this.basePath, serviceData)
-      return serviceId
+      const serviceId = await FirebaseService.create(this.basePath, serviceData);
+      return serviceId;
     } catch (error) {
-      console.error("Error creating service:", error)
-      throw error
+      console.error("Error creating service:", error);
+      throw error;
     }
   }
 
   async getServiceById(serviceId) {
     try {
-      const service = await FirebaseService.read(`${this.basePath}/${serviceId}`)
-      return service
+      const service = await FirebaseService.read(`${this.basePath}/${serviceId}`);
+      return service;
     } catch (error) {
-      console.error("Error getting service:", error)
-      throw error
+      console.error("Error getting service:", error);
+      throw error;
     }
   }
 
   async getAllServices() {
     try {
-      const services = await FirebaseService.readAll(this.basePath)
-      return services
+      const services = await FirebaseService.readAll(this.basePath);
+      return services;
     } catch (error) {
-      console.error("Error getting all services:", error)
-      throw error
+      console.error("Error getting all services:", error);
+      throw error;
     }
   }
 
   async getActiveServices() {
     try {
-      const services = await FirebaseService.queryByField(this.basePath, "status", "active")
-      return services
+      const services = await FirebaseService.queryByField(this.basePath, "status", "active");
+      return services;
     } catch (error) {
-      console.error("Error getting active services:", error)
-      throw error
+      console.error("Error getting active services:", error);
+      throw error;
     }
   }
 
-  async updateService(serviceId, serviceData) {
+  async updateService(serviceKey, serviceData) {
     try {
-      await FirebaseService.update(`${this.basePath}/${serviceId}`, serviceData)
-      return true
+      await FirebaseService.update(`${this.basePath}/${serviceKey}`, serviceData);
+      return true;
     } catch (error) {
-      console.error("Error updating service:", error)
-      throw error
+      console.error("Error updating service:", error);
+      throw error;
     }
   }
 
-  async updateServiceStatus(serviceId, status) {
+  // ✅ Đã sửa: tìm theo service.id bên trong thay vì key bên ngoài
+  async updateServiceStatus(serviceId, newStatus) {
     try {
-      await FirebaseService.update(`${this.basePath}/${serviceId}`, { status })
-      return true
+      const allServices = await FirebaseService.read(this.basePath);
+
+      if (!allServices) {
+        throw new Error("Không có dữ liệu dịch vụ.");
+      }
+
+      const keyToUpdate = Object.keys(allServices).find((key) => {
+        return String(allServices[key].id) === String(serviceId);
+      });
+
+      if (!keyToUpdate) {
+        throw new Error(`Không tìm thấy dịch vụ với id = ${serviceId}`);
+      }
+
+      const path = `${this.basePath}/${keyToUpdate}`;
+      await FirebaseService.update(path, { status: newStatus });
+      return true;
     } catch (error) {
-      console.error("Error updating service status:", error)
-      throw error
+      console.error("❌ Error updating service status:", error);
+      throw error;
     }
   }
 
-  async deleteService(serviceId) {
+  async deleteService(serviceKey) {
     try {
-      await FirebaseService.delete(`${this.basePath}/${serviceId}`)
-      return true
+      await FirebaseService.delete(`${this.basePath}/${serviceKey}`);
+      return true;
     } catch (error) {
-      console.error("Error deleting service:", error)
-      throw error
+      console.error("Error deleting service:", error);
+      throw error;
     }
   }
 
   // Real-time listener for services
   listenToServices(callback) {
-    return FirebaseService.listen(this.basePath, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        const services = Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-        callback(services)
-      } else {
-        callback([])
-      }
-    })
+    return FirebaseService.listen(this.basePath, (dataArray) => {
+      const safeArray = Array.isArray(dataArray) ? dataArray : [];
+      callback(safeArray);
+    });
   }
 }
 
-export default new ServiceService()
+export default new ServiceService();

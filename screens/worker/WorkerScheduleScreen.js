@@ -1,7 +1,14 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native"
-import { styles } from "../../styles/styles"
-import { WorkerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { WorkerBottomNav } from "../../components/BottomNavigation";
 
 const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
   const [schedule, setSchedule] = useState({
@@ -12,7 +19,7 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
     friday: { enabled: true, start: "08:00", end: "18:00" },
     saturday: { enabled: true, start: "09:00", end: "17:00" },
     sunday: { enabled: false, start: "09:00", end: "17:00" },
-  })
+  });
 
   const [workingAreas, setWorkingAreas] = useState([
     { id: "1", name: "Quận 1", enabled: true },
@@ -20,7 +27,7 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
     { id: "3", name: "Quận 5", enabled: false },
     { id: "4", name: "Quận 7", enabled: true },
     { id: "5", name: "Quận Bình Thạnh", enabled: false },
-  ])
+  ]);
 
   const dayNames = {
     monday: "Thứ 2",
@@ -30,7 +37,7 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
     friday: "Thứ 6",
     saturday: "Thứ 7",
     sunday: "Chủ nhật",
-  }
+  };
 
   const timeSlots = [
     "06:00",
@@ -50,7 +57,7 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
     "20:00",
     "21:00",
     "22:00",
-  ]
+  ];
 
   const handleToggleDay = (day) => {
     setSchedule({
@@ -59,8 +66,8 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
         ...schedule[day],
         enabled: !schedule[day].enabled,
       },
-    })
-  }
+    });
+  };
 
   const handleTimeChange = (day, type, time) => {
     setSchedule({
@@ -69,33 +76,53 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
         ...schedule[day],
         [type]: time,
       },
-    })
-  }
+    });
+  };
 
   const handleToggleArea = (areaId) => {
-    setWorkingAreas(workingAreas.map((area) => (area.id === areaId ? { ...area, enabled: !area.enabled } : area)))
-  }
+    setWorkingAreas(
+      workingAreas.map((area) =>
+        area.id === areaId ? { ...area, enabled: !area.enabled } : area
+      )
+    );
+  };
 
   const handleSaveSchedule = () => {
-    Alert.alert("Thành công", "Đã cập nhật lịch làm việc")
-  }
+    Alert.alert("Thành công", "Đã cập nhật lịch làm việc");
+  };
 
   const renderTimeSelector = (day, type, currentTime) => (
     <View style={styles.timeSelector}>
-      <Text style={styles.timeSelectorLabel}>{type === "start" ? "Từ" : "Đến"}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScrollView}>
+      <Text style={styles.timeSelectorLabel}>
+        {type === "start" ? "Từ" : "Đến"}
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.timeScrollView}
+      >
         {timeSlots.map((time) => (
           <TouchableOpacity
             key={time}
-            style={[styles.timeSlot, currentTime === time && styles.selectedTimeSlot]}
+            style={[
+              styles.timeSlot,
+              currentTime === time && styles.selectedTimeSlot,
+            ]}
             onPress={() => handleTimeChange(day, type, time)}
           >
-            <Text style={[styles.timeSlotText, currentTime === time && styles.selectedTimeSlotText]}>{time}</Text>
+            <Text
+              style={[
+                styles.timeSlotText,
+                currentTime === time && styles.selectedTimeSlotText,
+              ]}
+            >
+              {time}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,7 +136,10 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scheduleContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scheduleContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Working Hours */}
         <View style={styles.scheduleSection}>
           <Text style={styles.scheduleSectionTitle}>Giờ làm việc</Text>
@@ -119,10 +149,18 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
                 <View style={styles.dayInfo}>
                   <Text style={styles.dayName}>{dayNames[day]}</Text>
                   <TouchableOpacity
-                    style={[styles.dayToggle, daySchedule.enabled && styles.dayToggleActive]}
+                    style={[
+                      styles.dayToggle,
+                      daySchedule.enabled && styles.dayToggleActive,
+                    ]}
                     onPress={() => handleToggleDay(day)}
                   >
-                    <Text style={[styles.dayToggleText, daySchedule.enabled && styles.dayToggleActiveText]}>
+                    <Text
+                      style={[
+                        styles.dayToggleText,
+                        daySchedule.enabled && styles.dayToggleActiveText,
+                      ]}
+                    >
                       {daySchedule.enabled ? "Mở" : "Đóng"}
                     </Text>
                   </TouchableOpacity>
@@ -149,7 +187,14 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
                 style={[styles.areaChip, area.enabled && styles.areaChipActive]}
                 onPress={() => handleToggleArea(area.id)}
               >
-                <Text style={[styles.areaChipText, area.enabled && styles.areaChipActiveText]}>{area.name}</Text>
+                <Text
+                  style={[
+                    styles.areaChipText,
+                    area.enabled && styles.areaChipActiveText,
+                  ]}
+                >
+                  {area.name}
+                </Text>
                 {area.enabled && <Text style={styles.areaChipCheck}>✓</Text>}
               </TouchableOpacity>
             ))}
@@ -163,33 +208,50 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
             <TouchableOpacity
               style={styles.quickSettingButton}
               onPress={() => {
-                const newSchedule = { ...schedule }
+                const newSchedule = { ...schedule };
                 Object.keys(newSchedule).forEach((day) => {
                   if (day !== "sunday") {
-                    newSchedule[day] = { enabled: true, start: "08:00", end: "18:00" }
+                    newSchedule[day] = {
+                      enabled: true,
+                      start: "08:00",
+                      end: "18:00",
+                    };
                   }
-                })
-                setSchedule(newSchedule)
-                Alert.alert("Thành công", "Đã áp dụng lịch làm việc hành chính")
+                });
+                setSchedule(newSchedule);
+                Alert.alert(
+                  "Thành công",
+                  "Đã áp dụng lịch làm việc hành chính"
+                );
               }}
             >
-              <Text style={styles.quickSettingButtonText}>🕘 Giờ hành chính</Text>
-              <Text style={styles.quickSettingButtonSubtext}>T2-T6: 8:00-18:00</Text>
+              <Text style={styles.quickSettingButtonText}>
+                🕘 Giờ hành chính
+              </Text>
+              <Text style={styles.quickSettingButtonSubtext}>
+                T2-T6: 8:00-18:00
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.quickSettingButton}
               onPress={() => {
-                const newSchedule = { ...schedule }
+                const newSchedule = { ...schedule };
                 Object.keys(newSchedule).forEach((day) => {
-                  newSchedule[day] = { enabled: true, start: "06:00", end: "22:00" }
-                })
-                setSchedule(newSchedule)
-                Alert.alert("Thành công", "Đã áp dụng lịch làm việc cả tuần")
+                  newSchedule[day] = {
+                    enabled: true,
+                    start: "06:00",
+                    end: "22:00",
+                  };
+                });
+                setSchedule(newSchedule);
+                Alert.alert("Thành công", "Đã áp dụng lịch làm việc cả tuần");
               }}
             >
               <Text style={styles.quickSettingButtonText}>🌅 Cả tuần</Text>
-              <Text style={styles.quickSettingButtonSubtext}>Tất cả: 6:00-22:00</Text>
+              <Text style={styles.quickSettingButtonSubtext}>
+                Tất cả: 6:00-22:00
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -205,7 +267,9 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
               <Text style={styles.scheduleStatLabel}>Ngày làm việc</Text>
             </View>
             <View style={styles.scheduleStatItem}>
-              <Text style={styles.scheduleStatNumber}>{workingAreas.filter((area) => area.enabled).length}</Text>
+              <Text style={styles.scheduleStatNumber}>
+                {workingAreas.filter((area) => area.enabled).length}
+              </Text>
               <Text style={styles.scheduleStatLabel}>Khu vực phục vụ</Text>
             </View>
             <View style={styles.scheduleStatItem}>
@@ -213,9 +277,9 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
                 {Object.values(schedule)
                   .filter((day) => day.enabled)
                   .reduce((total, day) => {
-                    const start = Number.parseInt(day.start.split(":")[0])
-                    const end = Number.parseInt(day.end.split(":")[0])
-                    return total + (end - start)
+                    const start = Number.parseInt(day.start.split(":")[0]);
+                    const end = Number.parseInt(day.end.split(":")[0]);
+                    return total + (end - start);
                   }, 0)}
                 h
               </Text>
@@ -227,7 +291,7 @@ const WorkerScheduleScreen = ({ onTabPress, onBack }) => {
 
       <WorkerBottomNav onTabPress={onTabPress} activeTab="workerProfile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerScheduleScreen
+export default WorkerScheduleScreen;

@@ -4,6 +4,7 @@ import { styles } from "../styles/styles"
 import UserService from "../services/userService"
 import DataInitializer from "../utils/dataInitializer"
 import { users } from "../data/mockData" 
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const LoginScreen = ({ onLogin }) => {
   const [phone, setPhone] = useState("")
@@ -51,6 +52,8 @@ const LoginScreen = ({ onLogin }) => {
         // Try Firebase first
         try {
           user = await UserService.authenticateUser(phone, password)
+          await AsyncStorage.setItem("currentUserId", user.id)
+
         } catch (error) {
           console.error("Firebase authentication error:", error)
           // Fall back to mock data

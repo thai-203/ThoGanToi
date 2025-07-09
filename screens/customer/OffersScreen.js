@@ -1,7 +1,14 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert } from "react-native"
-import { styles } from "../../styles/styles"
-import { CustomerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { CustomerBottomNav } from "../../components/BottomNavigation";
 
 const OffersScreen = ({ onTabPress, onBack }) => {
   const [offers, setOffers] = useState([
@@ -49,19 +56,19 @@ const OffersScreen = ({ onTabPress, onBack }) => {
       status: "expired",
       type: "cashback",
     },
-  ])
+  ]);
 
-  const [activeTab, setActiveTab] = useState("available")
+  const [activeTab, setActiveTab] = useState("available");
 
   const filteredOffers = offers.filter((offer) => {
-    if (activeTab === "all") return true
-    return offer.status === activeTab
-  })
+    if (activeTab === "all") return true;
+    return offer.status === activeTab;
+  });
 
   const handleUseOffer = (offer) => {
     if (offer.status !== "available") {
-      Alert.alert("Không thể sử dụng", "Ưu đãi này không còn khả dụng")
-      return
+      Alert.alert("Không thể sử dụng", "Ưu đãi này không còn khả dụng");
+      return;
     }
 
     Alert.alert("Sử dụng ưu đãi", `Bạn có muốn sử dụng mã "${offer.code}"?`, [
@@ -70,55 +77,63 @@ const OffersScreen = ({ onTabPress, onBack }) => {
         text: "Sử dụng",
         onPress: () => {
           // Copy to clipboard or navigate to booking
-          Alert.alert("Đã sao chép", `Mã "${offer.code}" đã được sao chép vào clipboard`)
+          Alert.alert(
+            "Đã sao chép",
+            `Mã "${offer.code}" đã được sao chép vào clipboard`
+          );
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const getOfferIcon = (type) => {
     switch (type) {
       case "percentage":
-        return "🎯"
+        return "🎯";
       case "fixed":
-        return "💰"
+        return "💰";
       case "shipping":
-        return "🚚"
+        return "🚚";
       case "cashback":
-        return "💸"
+        return "💸";
       default:
-        return "🎁"
+        return "🎁";
     }
-  }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
       case "available":
-        return "#10b981"
+        return "#10b981";
       case "used":
-        return "#6b7280"
+        return "#6b7280";
       case "expired":
-        return "#ef4444"
+        return "#ef4444";
       default:
-        return "#6b7280"
+        return "#6b7280";
     }
-  }
+  };
 
   const getStatusText = (status) => {
     switch (status) {
       case "available":
-        return "Có thể sử dụng"
+        return "Có thể sử dụng";
       case "used":
-        return "Đã sử dụng"
+        return "Đã sử dụng";
       case "expired":
-        return "Đã hết hạn"
+        return "Đã hết hạn";
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   const renderOffer = ({ item }) => (
-    <View style={[styles.offerCard, item.status !== "available" && styles.disabledOfferCard]}>
+    <View
+      style={[
+        styles.offerCard,
+        item.status !== "available" && styles.disabledOfferCard,
+      ]}
+    >
       <View style={styles.offerHeader}>
         <Text style={styles.offerIcon}>{getOfferIcon(item.type)}</Text>
         <View style={styles.offerInfo}>
@@ -146,19 +161,32 @@ const OffersScreen = ({ onTabPress, onBack }) => {
       </View>
 
       <View style={styles.offerFooter}>
-        <View style={[styles.offerStatus, { backgroundColor: getStatusColor(item.status) + "20" }]}>
-          <Text style={[styles.offerStatusText, { color: getStatusColor(item.status) }]}>
+        <View
+          style={[
+            styles.offerStatus,
+            { backgroundColor: getStatusColor(item.status) + "20" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.offerStatusText,
+              { color: getStatusColor(item.status) },
+            ]}
+          >
             {getStatusText(item.status)}
           </Text>
         </View>
         {item.status === "available" && (
-          <TouchableOpacity style={styles.useOfferButton} onPress={() => handleUseOffer(item)}>
+          <TouchableOpacity
+            style={styles.useOfferButton}
+            onPress={() => handleUseOffer(item)}
+          >
             <Text style={styles.useOfferButtonText}>Sử dụng</Text>
           </TouchableOpacity>
         )}
       </View>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -178,15 +206,26 @@ const OffersScreen = ({ onTabPress, onBack }) => {
           style={[styles.tab, activeTab === "available" && styles.activeTab]}
           onPress={() => setActiveTab("available")}
         >
-          <Text style={[styles.tabText, activeTab === "available" && styles.activeTabText]}>
-            Có thể dùng ({offers.filter((o) => o.status === "available").length})
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "available" && styles.activeTabText,
+            ]}
+          >
+            Có thể dùng ({offers.filter((o) => o.status === "available").length}
+            )
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === "used" && styles.activeTab]}
           onPress={() => setActiveTab("used")}
         >
-          <Text style={[styles.tabText, activeTab === "used" && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "used" && styles.activeTabText,
+            ]}
+          >
             Đã dùng ({offers.filter((o) => o.status === "used").length})
           </Text>
         </TouchableOpacity>
@@ -194,7 +233,12 @@ const OffersScreen = ({ onTabPress, onBack }) => {
           style={[styles.tab, activeTab === "expired" && styles.activeTab]}
           onPress={() => setActiveTab("expired")}
         >
-          <Text style={[styles.tabText, activeTab === "expired" && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "expired" && styles.activeTabText,
+            ]}
+          >
             Hết hạn ({offers.filter((o) => o.status === "expired").length})
           </Text>
         </TouchableOpacity>
@@ -210,7 +254,7 @@ const OffersScreen = ({ onTabPress, onBack }) => {
 
       <CustomerBottomNav onTabPress={onTabPress} activeTab="profile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default OffersScreen
+export default OffersScreen;

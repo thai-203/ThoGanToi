@@ -1,7 +1,16 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput, Modal } from "react-native"
-import { styles } from "../../styles/styles"
-import { CustomerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+  Modal,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { CustomerBottomNav } from "../../components/BottomNavigation";
 
 const AddressManagementScreen = ({ onTabPress, onBack }) => {
   const [addresses, setAddresses] = useState([
@@ -19,35 +28,35 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
       phone: "0987654321",
       isDefault: false,
     },
-  ])
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [editingAddress, setEditingAddress] = useState(null)
+  ]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     address: "",
     phone: "",
-  })
+  });
 
   const handleAddAddress = () => {
-    setFormData({ title: "", address: "", phone: "" })
-    setEditingAddress(null)
-    setShowAddModal(true)
-  }
+    setFormData({ title: "", address: "", phone: "" });
+    setEditingAddress(null);
+    setShowAddModal(true);
+  };
 
   const handleEditAddress = (address) => {
     setFormData({
       title: address.title,
       address: address.address,
       phone: address.phone,
-    })
-    setEditingAddress(address)
-    setShowAddModal(true)
-  }
+    });
+    setEditingAddress(address);
+    setShowAddModal(true);
+  };
 
   const handleSaveAddress = () => {
     if (!formData.title || !formData.address || !formData.phone) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin")
-      return
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
+      return;
     }
 
     if (editingAddress) {
@@ -55,11 +64,16 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
       setAddresses(
         addresses.map((addr) =>
           addr.id === editingAddress.id
-            ? { ...addr, title: formData.title, address: formData.address, phone: formData.phone }
-            : addr,
-        ),
-      )
-      Alert.alert("Thành công", "Đã cập nhật địa chỉ")
+            ? {
+                ...addr,
+                title: formData.title,
+                address: formData.address,
+                phone: formData.phone,
+              }
+            : addr
+        )
+      );
+      Alert.alert("Thành công", "Đã cập nhật địa chỉ");
     } else {
       // Add new address
       const newAddress = {
@@ -68,13 +82,13 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
         address: formData.address,
         phone: formData.phone,
         isDefault: addresses.length === 0,
-      }
-      setAddresses([...addresses, newAddress])
-      Alert.alert("Thành công", "Đã thêm địa chỉ mới")
+      };
+      setAddresses([...addresses, newAddress]);
+      Alert.alert("Thành công", "Đã thêm địa chỉ mới");
     }
 
-    setShowAddModal(false)
-  }
+    setShowAddModal(false);
+  };
 
   const handleDeleteAddress = (addressId) => {
     Alert.alert("Xác nhận xóa", "Bạn có chắc muốn xóa địa chỉ này?", [
@@ -83,22 +97,22 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
         text: "Xóa",
         style: "destructive",
         onPress: () => {
-          setAddresses(addresses.filter((addr) => addr.id !== addressId))
-          Alert.alert("Thành công", "Đã xóa địa chỉ")
+          setAddresses(addresses.filter((addr) => addr.id !== addressId));
+          Alert.alert("Thành công", "Đã xóa địa chỉ");
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleSetDefault = (addressId) => {
     setAddresses(
       addresses.map((addr) => ({
         ...addr,
         isDefault: addr.id === addressId,
-      })),
-    )
-    Alert.alert("Thành công", "Đã đặt làm địa chỉ mặc định")
-  }
+      }))
+    );
+    Alert.alert("Thành công", "Đã đặt làm địa chỉ mặc định");
+  };
 
   const renderAddress = ({ item }) => (
     <View style={styles.addressCard}>
@@ -115,16 +129,22 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
       <Text style={styles.addressPhone}>📞 {item.phone}</Text>
       <View style={styles.addressActions}>
         {!item.isDefault && (
-          <TouchableOpacity style={styles.setDefaultButton} onPress={() => handleSetDefault(item.id)}>
+          <TouchableOpacity
+            style={styles.setDefaultButton}
+            onPress={() => handleSetDefault(item.id)}
+          >
             <Text style={styles.setDefaultButtonText}>Đặt mặc định</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity style={styles.deleteAddressButton} onPress={() => handleDeleteAddress(item.id)}>
+        <TouchableOpacity
+          style={styles.deleteAddressButton}
+          onPress={() => handleDeleteAddress(item.id)}
+        >
           <Text style={styles.deleteAddressButtonText}>Xóa</Text>
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -151,7 +171,9 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingAddress ? "Sửa địa chỉ" : "Thêm địa chỉ mới"}</Text>
+              <Text style={styles.modalTitle}>
+                {editingAddress ? "Sửa địa chỉ" : "Thêm địa chỉ mới"}
+              </Text>
               <TouchableOpacity onPress={() => setShowAddModal(false)}>
                 <Text style={styles.modalCloseButton}>✕</Text>
               </TouchableOpacity>
@@ -164,7 +186,9 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
                   style={styles.formInput}
                   placeholder="VD: Nhà riêng, Văn phòng..."
                   value={formData.title}
-                  onChangeText={(text) => setFormData({ ...formData, title: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, title: text })
+                  }
                 />
               </View>
 
@@ -174,7 +198,9 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
                   style={[styles.formInput, styles.textArea]}
                   placeholder="Nhập địa chỉ đầy đủ..."
                   value={formData.address}
-                  onChangeText={(text) => setFormData({ ...formData, address: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, address: text })
+                  }
                   multiline
                   numberOfLines={3}
                 />
@@ -186,16 +212,24 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
                   style={styles.formInput}
                   placeholder="Số điện thoại liên hệ"
                   value={formData.phone}
-                  onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, phone: text })
+                  }
                   keyboardType="phone-pad"
                 />
               </View>
 
               <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAddModal(false)}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setShowAddModal(false)}
+                >
                   <Text style={styles.cancelButtonText}>Hủy</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddress}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSaveAddress}
+                >
                   <Text style={styles.saveButtonText}>Lưu</Text>
                 </TouchableOpacity>
               </View>
@@ -206,7 +240,7 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
 
       <CustomerBottomNav onTabPress={onTabPress} activeTab="profile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default AddressManagementScreen
+export default AddressManagementScreen;

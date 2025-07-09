@@ -43,7 +43,9 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
         onPress: async () => {
           await reviewService.updateReviewStatus(reviewId, "approved");
           setReviewList((prev) =>
-            prev.map((r) => (r.id === reviewId ? { ...r, status: "approved" } : r))
+            prev.map((r) =>
+              r.id === reviewId ? { ...r, status: "approved" } : r
+            )
           );
           Alert.alert("Thành công", "Đã duyệt đánh giá");
         },
@@ -60,7 +62,9 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
         onPress: async () => {
           await reviewService.updateReviewStatus(reviewId, "rejected");
           setReviewList((prev) =>
-            prev.map((r) => (r.id === reviewId ? { ...r, status: "rejected" } : r))
+            prev.map((r) =>
+              r.id === reviewId ? { ...r, status: "rejected" } : r
+            )
           );
           Alert.alert("Đã từ chối", "Đánh giá đã bị từ chối");
         },
@@ -69,15 +73,19 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
   };
 
   const handleWarningWorker = (review) => {
-    Alert.alert("Cảnh báo thợ", `Gửi cảnh báo đến ${review.worker} về vi phạm?`, [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Gửi cảnh báo",
-        onPress: () => {
-          Alert.alert("Thành công", `Đã gửi cảnh báo đến ${review.worker}`);
+    Alert.alert(
+      "Cảnh báo thợ",
+      `Gửi cảnh báo đến ${review.worker} về vi phạm?`,
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Gửi cảnh báo",
+          onPress: () => {
+            Alert.alert("Thành công", `Đã gửi cảnh báo đến ${review.worker}`);
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const filteredReviews = reviewList.filter((review) => {
@@ -85,11 +93,13 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
       review.customer?.toLowerCase().includes(searchText.toLowerCase()) ||
       review.worker?.toLowerCase().includes(searchText.toLowerCase()) ||
       review.service?.toLowerCase().includes(searchText.toLowerCase());
-    const matchesStatus = filterStatus === "all" || review.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || review.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
-  const getRatingStars = (rating) => "⭐".repeat(rating) + "☆".repeat(5 - rating);
+  const getRatingStars = (rating) =>
+    "⭐".repeat(rating) + "☆".repeat(5 - rating);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -128,7 +138,12 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
             <Text style={styles.reviewService}>🔧 {item.service}</Text>
             <Text style={styles.reviewDate}>📅 {item.date}</Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusStyle.backgroundColor }]}>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: statusStyle.backgroundColor },
+            ]}
+          >
             <Text style={[styles.statusText, { color: statusStyle.color }]}>
               {getStatusText(item.status)}
             </Text>
@@ -145,20 +160,32 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
         <View style={styles.reviewActions}>
           {item.status === "reported" && (
             <>
-              <TouchableOpacity style={styles.warningButton} onPress={() => handleWarningWorker(item)}>
+              <TouchableOpacity
+                style={styles.warningButton}
+                onPress={() => handleWarningWorker(item)}
+              >
                 <Text style={styles.warningButtonText}>Cảnh báo thợ</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.approveButton} onPress={() => handleApproveReview(item.id)}>
+              <TouchableOpacity
+                style={styles.approveButton}
+                onPress={() => handleApproveReview(item.id)}
+              >
                 <Text style={styles.approveButtonText}>Duyệt</Text>
               </TouchableOpacity>
             </>
           )}
           {item.status === "pending" && (
             <>
-              <TouchableOpacity style={styles.rejectButton} onPress={() => handleRejectReview(item.id)}>
+              <TouchableOpacity
+                style={styles.rejectButton}
+                onPress={() => handleRejectReview(item.id)}
+              >
                 <Text style={styles.rejectButtonText}>Từ chối</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.approveButton} onPress={() => handleApproveReview(item.id)}>
+              <TouchableOpacity
+                style={styles.approveButton}
+                onPress={() => handleApproveReview(item.id)}
+              >
                 <Text style={styles.approveButtonText}>Duyệt</Text>
               </TouchableOpacity>
             </>
@@ -188,27 +215,41 @@ const ReviewManagementScreen = ({ onTabPress, onBack }) => {
           onChangeText={setSearchText}
         />
       </View>
-    <View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterContainer}
-      >
-        {["all", "reported", "approved", "rejected", "pending"].map((status) => (
-          <TouchableOpacity
-            key={status}
-            style={[styles.filterChip, filterStatus === status && styles.activeFilterChip]}
-            onPress={() => setFilterStatus(status)}
-          >
-            <Text
-              style={[styles.filterText, filterStatus === status && styles.activeFilterText]}
-            >
-              {getStatusText(status)} ({reviewList.filter((r) => status === "all" || r.status === status).length})
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContainer}
+        >
+          {["all", "reported", "approved", "rejected", "pending"].map(
+            (status) => (
+              <TouchableOpacity
+                key={status}
+                style={[
+                  styles.filterChip,
+                  filterStatus === status && styles.activeFilterChip,
+                ]}
+                onPress={() => setFilterStatus(status)}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    filterStatus === status && styles.activeFilterText,
+                  ]}
+                >
+                  {getStatusText(status)} (
+                  {
+                    reviewList.filter(
+                      (r) => status === "all" || r.status === status
+                    ).length
+                  }
+                  )
+                </Text>
+              </TouchableOpacity>
+            )
+          )}
+        </ScrollView>
+      </View>
 
       {loading ? (
         <ActivityIndicator size="large" style={{ marginTop: 40 }} />

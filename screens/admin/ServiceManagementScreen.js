@@ -1,30 +1,51 @@
-import { useEffect, useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
-import { styles } from "../../styles/styles"
-import { AdminBottomNav } from "../../components/BottomNavigation"
-import ServiceService from "../../services/serviceService"
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import ServiceService from "../../services/serviceService";
 
 const ServiceManagementScreen = ({ onTabPress, onBack }) => {
-  const [serviceList, setServiceList] = useState([])
-  const [searchText, setSearchText] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [serviceList, setServiceList] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
-    const unsubscribe = ServiceService.listenToServices(setServiceList)
-    return unsubscribe // Cleanup real-time listener on unmount
-  }, [])
+    const unsubscribe = ServiceService.listenToServices(setServiceList);
+    return unsubscribe; // Cleanup real-time listener on unmount
+  }, []);
 
   const filteredServices = serviceList.filter((service) => {
+    const name = typeof service.name === "string" ? service.name : "";
+    const description = typeof service.description === "string" ? service.description : "";
+    const search = typeof searchText === "string" ? searchText.toLowerCase() : "";
+
     const matchesSearch =
-      service.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      service.description?.toLowerCase().includes(searchText.toLowerCase())
-    const matchesStatus = filterStatus === "all" || service.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+      name.toLowerCase().includes(search) ||
+      description.toLowerCase().includes(search);
+
+    const matchesStatus =
+      filterStatus === "all" || service.status === filterStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
 
   const handleToggleStatus = async (serviceId, currentStatus) => {
-    const newStatus = currentStatus === "active" ? "inactive" : "active"
-    const action = newStatus === "inactive" ? "tắt" : "bật"
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    const action = newStatus === "inactive" ? "tắt" : "bật";
+
+    // console.log(serviceId)
+    // console.log(currentStatus)
+    // console.log(newStatus)
+    // console.log(action)
 
     Alert.alert("Xác nhận", `Bạn có chắc muốn ${action} dịch vụ này?`, [
       { text: "Hủy", style: "cancel" },
@@ -32,23 +53,23 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
         text: "Xác nhận",
         onPress: async () => {
           try {
-            await ServiceService.updateServiceStatus(serviceId, newStatus)
-            Alert.alert("Thành công", `Đã ${action} dịch vụ`)
+            await ServiceService.updateServiceStatus(serviceId, newStatus);
+            Alert.alert("Thành công", `Đã ${action} dịch vụ`);
           } catch (error) {
-            Alert.alert("Lỗi", "Không thể cập nhật trạng thái dịch vụ")
+            Alert.alert("Lỗi", "Không thể cập nhật trạng thái dịch vụ");
           }
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleEditService = (service) => {
     Alert.alert("Chỉnh sửa dịch vụ", `Chỉnh sửa: ${service.name}`, [
       { text: "Hủy", style: "cancel" },
       { text: "Sửa giá", onPress: () => handleEditPrice(service) },
       { text: "Sửa mô tả", onPress: () => handleEditDescription(service) },
-    ])
-  }
+    ]);
+  };
 
   const handleEditPrice = (service) => {
     Alert.prompt(
@@ -61,19 +82,21 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
           onPress: async (newPrice) => {
             if (newPrice) {
               try {
-                await ServiceService.updateService(service.id, { suggestedPrice: newPrice })
-                Alert.alert("Thành công", "Đã cập nhật giá dịch vụ")
+                await ServiceService.updateService(service.id, {
+                  suggestedPrice: newPrice,
+                });
+                Alert.alert("Thành công", "Đã cập nhật giá dịch vụ");
               } catch (error) {
-                Alert.alert("Lỗi", "Không thể cập nhật giá dịch vụ")
+                Alert.alert("Lỗi", "Không thể cập nhật giá dịch vụ");
               }
             }
           },
         },
       ],
       "plain-text",
-      service.suggestedPrice,
-    )
-  }
+      service.suggestedPrice
+    );
+  };
 
   const handleEditDescription = (service) => {
     Alert.prompt(
@@ -86,28 +109,35 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
           onPress: async (newDescription) => {
             if (newDescription) {
               try {
-                await ServiceService.updateService(service.id, { description: newDescription })
-                Alert.alert("Thành công", "Đã cập nhật mô tả dịch vụ")
+                await ServiceService.updateService(service.id, {
+                  description: newDescription,
+                });
+                Alert.alert("Thành công", "Đã cập nhật mô tả dịch vụ");
               } catch (error) {
-                Alert.alert("Lỗi", "Không thể cập nhật mô tả dịch vụ")
+                Alert.alert("Lỗi", "Không thể cập nhật mô tả dịch vụ");
               }
             }
           },
         },
       ],
       "plain-text",
-      service.description,
-    )
-  }
+      service.description
+    );
+  };
 
   const handleAddService = () => {
-    Alert.alert("Thêm dịch vụ mới", "Chức năng đang được phát triển")
-  }
+    Alert.alert("Thêm dịch vụ mới", "Chức năng đang được phát triển");
+  };
 
   const renderService = ({ item }) => (
     <View style={styles.serviceManagementCard}>
       <View style={styles.serviceCardHeader}>
-        <View style={[styles.serviceIconContainer, { backgroundColor: item.color + "20" }]}>
+        <View
+          style={[
+            styles.serviceIconContainer,
+            { backgroundColor: item.color + "20" },
+          ]}
+        >
           <Text style={styles.serviceManagementIcon}>{item.icon}</Text>
         </View>
         <View style={styles.serviceInfo}>
@@ -136,7 +166,10 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
         </View>
       </View>
       <View style={styles.serviceActions}>
-        <TouchableOpacity style={styles.editServiceButton} onPress={() => handleEditService(item)}>
+        <TouchableOpacity
+          style={styles.editServiceButton}
+          onPress={() => handleEditService(item)}
+        >
           <Text style={styles.editServiceButtonText}>Chỉnh sửa</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -148,11 +181,13 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
           ]}
           onPress={() => handleToggleStatus(item.id, item.status)}
         >
-          <Text style={styles.toggleServiceButtonText}>{item.status === "active" ? "Tắt" : "Bật"}</Text>
+          <Text style={styles.toggleServiceButtonText}>
+            {item.status === "active" ? "Tắt" : "Bật"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -181,10 +216,18 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
         {["all", "active", "inactive"].map((status) => (
           <TouchableOpacity
             key={status}
-            style={[styles.filterChip, filterStatus === status && styles.activeFilterChip]}
+            style={[
+              styles.filterChip,
+              filterStatus === status && styles.activeFilterChip,
+            ]}
             onPress={() => setFilterStatus(status)}
           >
-            <Text style={[styles.filterText, filterStatus === status && styles.activeFilterText]}>
+            <Text
+              style={[
+                styles.filterText,
+                filterStatus === status && styles.activeFilterText,
+              ]}
+            >
               {status === "all"
                 ? `Tất cả (${serviceList.length})`
                 : `${status === "active" ? "Hoạt động" : "Tạm dừng"} (${
@@ -205,7 +248,7 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="serviceManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default ServiceManagementScreen
+export default ServiceManagementScreen;
