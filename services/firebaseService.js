@@ -54,9 +54,18 @@ class FirebaseService {
   // Đọc một mục
   async read(path) {
     try {
-      const dataRef = ref(database, path);
+      const dataRef = ref(database, path.split("/").slice(0, -1).join("/"));
       const snapshot = await get(dataRef);
-      return snapshot.exists() ? snapshot.val() : null;
+      if (!snapshot.exists()) return null;
+      const data = snapshot.val();
+      const targetId = path.split("/").pop();
+      if (typeof data === "object") {
+        const items = Object.values(data);
+        const matchedItem = items.find((item) => item?.id == targetId);
+        return matchedItem ? { ...matchedItem, id: matchedItem.id ?? null } : null;
+      }
+
+      return null;
     } catch (error) {
       console.error("❌ Error reading data:", error);
       throw error;
