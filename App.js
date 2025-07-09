@@ -3,15 +3,37 @@ import { StatusBar } from "react-native"
 
 // Screen imports
 import LoginScreen from "./screens/LoginScreen"
+
+// Customer screens
 import HomeScreen from "./screens/customer/HomeScreen"
 import WorkerListScreen from "./screens/customer/WorkerListScreen"
 import WorkerDetailScreen from "./screens/customer/WorkerDetailScreen"
 import BookingHistoryScreen from "./screens/customer/BookingHistoryScreen"
 import ProfileScreen from "./screens/customer/ProfileScreen"
+import PersonalInfoScreen from "./screens/customer/PersonalInfoScreen"
+import AddressManagementScreen from "./screens/customer/AddressManagementScreen"
+import PaymentMethodScreen from "./screens/customer/PaymentMethodScreen"
+import OffersScreen from "./screens/customer/OffersScreen"
+import EditProfileScreen from "./screens/customer/EditProfileScreen"
+import NotificationScreen from "./screens/customer/NotificationScreen"
+import HelpSupportScreen from "./screens/customer/HelpSupportScreen"
+import CustomerSettingsScreen from "./screens/customer/CustomerSettingsScreen"
+import AboutUsScreen from "./screens/customer/AboutUsScreen"
+
+// Worker screens
 import WorkerDashboardScreen from "./screens/worker/WorkerDashboardScreen"
 import WorkerOrdersScreen from "./screens/worker/WorkerOrdersScreen"
 import WorkerOrderDetailScreen from "./screens/worker/WorkerOrderDetailScreen"
 import WorkerProfileScreen from "./screens/worker/WorkerProfileScreen"
+import WorkerInfoScreen from "./screens/worker/WorkerInfoScreen"
+import WorkerAreaScreen from "./screens/worker/WorkerAreaScreen"
+import WorkerSkillsScreen from "./screens/worker/WorkerSkillsScreen"
+import WorkerScheduleScreen from "./screens/worker/WorkerScheduleScreen"
+import WorkerIncomeScreen from "./screens/worker/WorkerIncomeScreen"
+import WorkerReviewsScreen from "./screens/worker/WorkerReviewsScreen"
+import WorkerEditProfileScreen from "./screens/worker/WorkerEditProfileScreen"
+import WorkerSupportScreen from "./screens/worker/WorkerSupportScreen"
+import WorkerSettingsScreen from "./screens/worker/WorkerSettingsScreen"
 
 // Cập nhật imports để thêm admin screens
 import AdminDashboardScreen from "./screens/admin/AdminDashboardScreen"
@@ -67,7 +89,7 @@ export default function App() {
     setCurrentScreen("workerOrderDetail")
   }
 
-  // Thêm handleMenuPress cho admin
+  // Thêm handleMenuPress cho customer và worker profile navigation
   const handleMenuPress = (screen) => {
     if (screen) {
       setCurrentScreen(screen)
@@ -105,28 +127,59 @@ export default function App() {
     }
   }
 
-  // Cập nhật handleBack để thêm admin navigation
+  // Cập nhật handleBack để thêm navigation cho các trang mới
   const handleBack = () => {
-    if (currentScreen === "workerDetail") {
-      setCurrentScreen("workerList")
-    } else if (currentScreen === "workerList") {
-      setCurrentScreen("home")
-    } else if (currentScreen === "workerOrderDetail") {
-      setCurrentScreen("workerOrders")
-    } else if (
-      currentScreen === "userManagement" ||
-      currentScreen === "orderManagement" ||
-      currentScreen === "customerManagement" ||
-      currentScreen === "workerManagement" ||
-      currentScreen === "serviceManagement" ||
-      currentScreen === "reviewManagement" ||
-      currentScreen === "paymentManagement" ||
-      currentScreen === "areaManagement" ||
-      currentScreen === "adminAccountManagement" ||
-      currentScreen === "systemSettings" ||
-      currentScreen === "systemLogs"
-    ) {
-      setCurrentScreen("adminDashboard")
+    // Define back navigation logic based on current screen
+    const backNavigation = {
+      // Customer screens
+      workerDetail: "workerList",
+      personalInfo: "profile",
+      addressManagement: "profile",
+      paymentMethod: "profile",
+      offers: "profile",
+      editProfile: "profile",
+      notification: "profile",
+      helpSupport: "profile",
+      customerSettings: "profile",
+      aboutUs: "profile",
+
+      // Worker screens
+      workerOrderDetail: "workerOrders",
+      workerInfo: "workerProfile",
+      workerArea: "workerProfile",
+      workerSkills: "workerProfile",
+      workerSchedule: "workerProfile",
+      workerIncome: "workerProfile",
+      workerReviews: "workerProfile",
+      workerEditProfile: "workerProfile",
+      workerSupport: "workerProfile",
+      workerSettings: "workerProfile",
+
+      // Admin screens
+      customerManagement: "adminDashboard",
+      workerManagement: "adminDashboard",
+      serviceManagement: "adminDashboard",
+      reviewManagement: "adminDashboard",
+      paymentManagement: "adminDashboard",
+      areaManagement: "adminDashboard",
+      adminAccountManagement: "adminDashboard",
+      systemSettings: "adminDashboard",
+      systemLogs: "adminDashboard",
+    }
+
+    const backScreen = backNavigation[currentScreen]
+    console.log(backScreen)
+    if (backScreen) {
+      setCurrentScreen(backScreen)
+    } else {
+      // Default back behavior
+      if (userType === "customer") {
+        setCurrentScreen("home")
+      } else if (userType === "worker") {
+        setCurrentScreen("workerDashboard")
+      } else if (userType === "admin") {
+        setCurrentScreen("adminDashboard")
+      }
     }
   }
 
@@ -142,62 +195,91 @@ export default function App() {
     switch (currentScreen) {
       case "login":
         return <LoginScreen onLogin={handleLogin} />
-
-      // Customer Screens
-      case "home":
-        return <HomeScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
-      case "workerList":
-        return (
-          <WorkerListScreen
-            service={selectedService}
-            onWorkerPress={handleWorkerPress}
-            onBack={handleBack}
-            onTabPress={handleTabPress}
-          />
-        )
-      case "workerDetail":
-        return (
-          <WorkerDetailScreen
-            worker={selectedWorker}
-            service={selectedService}
-            onBack={handleBack}
-            onTabPress={handleTabPress}
-          />
-        )
       case "history":
         return <BookingHistoryScreen onTabPress={handleTabPress} />
       case "profile":
-        return <ProfileScreen onTabPress={handleTabPress} onLogout={handleLogout} />
-
-      // Worker Screens
-      case "workerDashboard":
-        return <WorkerDashboardScreen onTabPress={handleTabPress} onOrderPress={handleOrderPress} />
-      case "workerOrders":
-        return <WorkerOrdersScreen onTabPress={handleTabPress} onOrderPress={handleOrderPress} />
-      case "workerOrderDetail":
-        return <WorkerOrderDetailScreen order={selectedOrder} onBack={handleBack} onTabPress={handleTabPress} />
-      case "workerProfile":
-        return <WorkerProfileScreen onTabPress={handleTabPress} onLogout={handleLogout} />
-
-      // Thêm admin screens vào renderCurrentScreen
-      // Admin Screens
-      case "adminDashboard":
-        return (
-          <AdminDashboardScreen onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} />
-        )
-      case "userManagement":
-        return <UserManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
-      case "orderManagement":
-        return <OrderManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
-      case "adminProfile":
-        return (
-          <AdminProfileScreen
+        return <ProfileScreen
             onTabPress={handleTabPress}
             onLogout={handleLogout}
             currentUser={currentUser}
             onMenuPress={handleMenuPress}
           />
-        )
+
+      // Customer screens
+      case "home":
+        return <HomeScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+      case "workerList":
+        return <WorkerListScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+      case "workerDetail":
+        return <WorkerDetailScreen worker={selectedWorker} onTabPress={handleTabPress} onBack={handleBack} />
+      case "bookingHistory":
+        return <BookingHistoryScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+      case "personalInfo":
+        return <PersonalInfoScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "addressManagement":
+        return <AddressManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "paymentMethod":
+        return <PaymentMethodScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "offers":
+        return <OffersScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "editProfile":
+        return <EditProfileScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "notification":
+        return <NotificationScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "helpSupport":
+        return <HelpSupportScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "customerSettings":
+        return <CustomerSettingsScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "aboutUs":
+        return <AboutUsScreen onTabPress={handleTabPress} onBack={handleBack} />
+
+      // Worker screens
+      case "workerDashboard":
+        return <WorkerDashboardScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+      case "workerOrders":
+        return <WorkerOrdersScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+      case "workerOrderDetail":
+        return <WorkerOrderDetailScreen order={selectedOrder} onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerProfile":
+        return <WorkerProfileScreen
+            onTabPress={handleTabPress}
+            onLogout={handleLogout}
+            currentUser={currentUser}
+            onMenuPress={handleMenuPress}
+          />
+      case "workerInfo":
+        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerArea":
+        return <WorkerAreaScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerSkills":
+        return <WorkerSkillsScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerSchedule":
+        return <WorkerScheduleScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerIncome":
+        return <WorkerIncomeScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerReviews":
+        return <WorkerReviewsScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerEditProfile":
+        return <WorkerEditProfileScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerSupport":
+        return <WorkerSupportScreen onTabPress={handleTabPress} onBack={handleBack} />
+      case "workerSettings":
+        return <WorkerSettingsScreen onTabPress={handleTabPress} onBack={handleBack} />
+
+      // Admin screens
+      case "adminDashboard":
+        return <AdminDashboardScreen  onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} />
+      case "userManagement":
+        return <UserManagementScreen  onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} />
+      case "orderManagement":
+        return <OrderManagementScreen  onTabPress={handleTabPress} onMenuPress={handleMenuPress} currentUser={currentUser} />
+      case "adminProfile":
+        return <AdminProfileScreen
+            onTabPress={handleTabPress}
+            onLogout={handleLogout}
+            currentUser={currentUser}
+            onMenuPress={handleMenuPress}
+          />
       case "customerManagement":
         return <CustomerManagementScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerManagement":

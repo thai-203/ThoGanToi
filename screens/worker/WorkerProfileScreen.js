@@ -3,19 +3,53 @@ import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert, Switch }
 import { styles } from "../../styles/styles"
 import { workerMenuItems } from "../../data/mockData"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
+import WorkerEditProfileScreen from "./WorkerEditProfileScreen"
 
-const WorkerProfileScreen = ({ onTabPress, onLogout }) => {
+const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
   const [isAvailable, setIsAvailable] = useState(true)
+  const [showEditProfile, setShowEditProfile] = useState(false)
+  const [userInfo, setUserInfo] = useState({
+    name: "Thợ Minh Tuấn",
+    phone: "0901234567",
+    email: "minhtuan@email.com",
+    specialty: "Thợ điện chuyên nghiệp",
+    experience: "5",
+    description: "Có 5 năm kinh nghiệm sửa chữa điện dân dụng và công nghiệp. Tận tâm, chuyên nghiệp.",
+    hourlyRate: "50000",
+    address: "Quận 7, TP.HCM",
+    skills: ["Sửa chữa điện", "Lắp đặt thiết bị", "Bảo trì hệ thống"],
+  })
 
   const handleMenuPress = (action) => {
-    Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
+    if (action === "profile" && onMenuPress) {
+      onMenuPress("workerProfile")
+    } else if (action === "area" && onMenuPress) {
+      onMenuPress("workerArea")
+    } else if (action === "schedule" && onMenuPress) {
+      onMenuPress("workerSchedule")
+    } else if (action === "income" && onMenuPress) {
+      onMenuPress("workerIncome")
+    } else if (action === "reviews" && onMenuPress) {
+      onMenuPress("workerReviews")
+    } else if (action === "support" && onMenuPress) {
+      onMenuPress("workerSupport")
+    } else if (action === "settings" && onMenuPress) {
+      onMenuPress("workerSettings")
+    } else {
+      Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
+    }
   }
+
 
   const handleLogout = () => {
     Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
       { text: "Hủy", style: "cancel" },
       { text: "Đăng xuất", style: "destructive", onPress: onLogout },
     ])
+  }
+
+  const handleSaveProfile = (newUserInfo) => {
+    setUserInfo(newUserInfo)
   }
 
   return (
@@ -25,12 +59,12 @@ const WorkerProfileScreen = ({ onTabPress, onLogout }) => {
           <View style={styles.workerProfileInfo}>
             <Text style={styles.workerProfileAvatar}>👨‍🔧</Text>
             <View>
-              <Text style={styles.workerProfileName}>Thợ Minh Tuấn</Text>
-              <Text style={styles.workerProfilePhone}>0901234567</Text>
-              <Text style={styles.workerProfileSpecialty}>Thợ điện chuyên nghiệp</Text>
+              <Text style={styles.workerProfileName}>{userInfo.name}</Text>
+              <Text style={styles.workerProfilePhone}>{userInfo.phone}</Text>
+              <Text style={styles.workerProfileSpecialty}>{userInfo.specialty}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={() => setShowEditProfile(true)}>
             <Text style={styles.editButtonText}>Sửa</Text>
           </TouchableOpacity>
         </View>
@@ -91,7 +125,7 @@ const WorkerProfileScreen = ({ onTabPress, onLogout }) => {
               <Text style={styles.earningsAmount}>2.450.000đ</Text>
               <Text style={styles.earningsSubtext}>+15% so với tháng trước</Text>
             </View>
-            <TouchableOpacity style={styles.earningsButton}>
+            <TouchableOpacity style={styles.earningsButton} onPress={() => handleMenuPress("income")}>
               <Text style={styles.earningsButtonText}>Chi tiết</Text>
             </TouchableOpacity>
           </View>
@@ -101,6 +135,14 @@ const WorkerProfileScreen = ({ onTabPress, onLogout }) => {
           <Text style={styles.logoutButtonText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <WorkerEditProfileScreen
+        visible={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        onSave={handleSaveProfile}
+        userInfo={userInfo}
+      />
+
       <WorkerBottomNav onTabPress={onTabPress} activeTab="workerProfile" />
     </SafeAreaView>
   )
