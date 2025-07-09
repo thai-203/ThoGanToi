@@ -1,45 +1,97 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert, Switch } from "react-native"
+import { useState, useEffect } from "react"
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Switch, ActivityIndicator, Alert } from "react-native"
+import UserService from "../../services/userService"
+import FirebaseService from "../../services/firebaseService"
 import { styles } from "../../styles/styles"
-import { workerMenuItems } from "../../data/mockData"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
 import WorkerEditProfileScreen from "./WorkerEditProfileScreen"
+import { workerMenuItems } from "../../data/mockData"
 
-const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
+const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress, currentUser }) => {
   const [isAvailable, setIsAvailable] = useState(true)
   const [showEditProfile, setShowEditProfile] = useState(false)
-  const [userInfo, setUserInfo] = useState({
-    name: "Thợ Minh Tuấn",
-    phone: "0901234567",
-    email: "minhtuan@email.com",
-    specialty: "Thợ điện chuyên nghiệp",
-    experience: "5",
-    description: "Có 5 năm kinh nghiệm sửa chữa điện dân dụng và công nghiệp. Tận tâm, chuyên nghiệp.",
-    hourlyRate: "50000",
-    address: "Quận 7, TP.HCM",
-    skills: ["Sửa chữa điện", "Lắp đặt thiết bị", "Bảo trì hệ thống"],
-  })
+  const [userInfo, setUserInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [workerId, setWorkerId] = useState(null)
+
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       setLoading(true)
+  //       if (currentUser?.id) {
+  //         const data = await UserService.getUserById(currentUser.id)
+  //         setUserInfo(data)
+  
+  //         const workers = await FirebaseService.readAll("workers")
+  //         console.log("Workers loaded:", workers)
+  //         console.log("Looking for userId:", data.id)
+  //         const worker = workers.find(w => String(w.userId) === String(data.id))
+  //         if (worker) {
+  //           setWorkerId(worker.id)
+  //           setIsAvailable(worker.status ?? true)
+  //           console.log("Matched worker:", worker)
+  //         } else {
+  //           console.log("No matching worker found for userId:", data.id)
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching worker profile:", error)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+  //   fetchProfile()
+  // }, [currentUser])
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true)
+        if (currentUser?.id) {
+          const data = await UserService.getUserById(currentUser.id)
+          setUserInfo(data)
+  
+          const workers = await FirebaseService.readAll("workers")
+          const worker = workers.find(w => String(w.userId) === String(data.id))
+          if (worker) {
+            setWorkerId(worker.id)
+            setIsAvailable(worker.status ?? true)
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching worker profile:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProfile()
+  }, [currentUser])
+  
+  
+
+  const handleAvailabilityChange = async (value) => {
+    console.log("Toggle clicked:", value)
+    setIsAvailable(value)
+    try {
+      console.log("Current workerId:", workerId)
+      if (workerId) {
+        await FirebaseService.update(`workers/${workerId}`, { status: value })
+        console.log("Updated status in workers:", value)
+      } else {
+        console.log("workerId is not set!")
+      }
+    } catch (error) {
+      console.error("Error updating worker status:", error)
+    }
+  }
+  
 
   const handleMenuPress = (action) => {
-    if (action === "profile" && onMenuPress) {
-      onMenuPress("workerProfile")
-    } else if (action === "area" && onMenuPress) {
-      onMenuPress("workerArea")
-    } else if (action === "schedule" && onMenuPress) {
-      onMenuPress("workerSchedule")
-    } else if (action === "income" && onMenuPress) {
-      onMenuPress("workerIncome")
-    } else if (action === "reviews" && onMenuPress) {
-      onMenuPress("workerReviews")
-    } else if (action === "support" && onMenuPress) {
-      onMenuPress("workerSupport")
-    } else if (action === "settings" && onMenuPress) {
-      onMenuPress("workerSettings")
+    if (action && onMenuPress) {
+      onMenuPress(action)
     } else {
       Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
     }
   }
-
 
   const handleLogout = () => {
     Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
@@ -50,6 +102,14 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
 
   const handleSaveProfile = (newUserInfo) => {
     setUserInfo(newUserInfo)
+  }
+
+  if (loading || !userInfo) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#10b981" />
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -79,7 +139,7 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
           </View>
           <Switch
             value={isAvailable}
-            onValueChange={setIsAvailable}
+            onValueChange={handleAvailabilityChange}
             trackColor={{ false: "#e5e7eb", true: "#10b981" }}
             thumbColor={isAvailable ? "#ffffff" : "#f3f4f6"}
           />
@@ -88,17 +148,17 @@ const WorkerProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
         {/* Stats */}
         <View style={styles.workerStatsContainer}>
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>4.8</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.rating ?? "4.8"}</Text>
             <Text style={styles.workerStatLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>127</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.completedOrders ?? "0"}</Text>
             <Text style={styles.workerStatLabel}>Đơn hoàn thành</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>5</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.experience ?? "0"}</Text>
             <Text style={styles.workerStatLabel}>Năm kinh nghiệm</Text>
           </View>
         </View>

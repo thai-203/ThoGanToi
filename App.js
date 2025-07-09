@@ -62,6 +62,7 @@ export default function App() {
 
   // Cập nhật handleLogin để nhận user data
   const handleLogin = (role, user) => {
+    console.log("🟢 handleLogin called with:", role, user)
     setUserType(role)
     setCurrentUser(user)
     if (role === "customer") {
@@ -182,6 +183,7 @@ export default function App() {
       }
     }
   }
+  
 
   // Cập nhật handleLogout để reset currentUser
   const handleLogout = () => {
@@ -189,6 +191,13 @@ export default function App() {
     setUserType("customer")
     setCurrentUser(null)
   }
+
+  const handleNavigate = (screen, data) => {
+    if (screen === "workerProfileDetail") {
+      setSelectedWorker(data.worker)
+    }
+    setCurrentScreen(screen)
+  }  
 
   // Render current screen
   const renderCurrentScreen = () => {
@@ -248,7 +257,7 @@ export default function App() {
             onMenuPress={handleMenuPress}
           />
       case "workerInfo":
-        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} />
+        return <WorkerInfoScreen onTabPress={handleTabPress} onBack={handleBack} currentUser={currentUser} />
       case "workerArea":
         return <WorkerAreaScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "workerSkills":

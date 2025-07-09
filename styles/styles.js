@@ -3666,6 +3666,40 @@ export const styles = StyleSheet.create({
     color: "#ef4444",
     marginTop: 4,
   },
-  
+//Worker Profile Detail Styles
+workerProfileDetailContainer: {
+  backgroundColor: "white",
+  padding: 20,
+  borderRadius: 15,
+  margin: 15,
+  borderWidth: 1,
+  borderColor: "#e5e7eb",
+},
+workerProfileDetailRow: {
+  marginBottom: 15,
+},
+workerProfileDetailLabel: {
+  fontWeight: "bold",
+  fontSize: 14,
+  color: "#374151",
+  marginBottom: 2,
+},
+workerProfileDetailValue: {
+  fontSize: 14,
+  color: "#6b7280",
+},
+backButton: {
+  backgroundColor: "#2563eb",
+  padding: 15,
+  borderRadius: 10,
+  alignItems: "center",
+  margin: 20,
+},
+backButtonText: {
+  color: "white",
+  fontSize: 16,
+  fontWeight: "600",
+},
 
 })
+
