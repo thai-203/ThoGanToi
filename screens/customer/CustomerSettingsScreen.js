@@ -1,7 +1,15 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Switch, Alert } from "react-native"
-import { styles } from "../../styles/additional"
-import { CustomerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Switch,
+  Alert,
+} from "react-native";
+import { styles } from "../../styles/additional";
+import { CustomerBottomNav } from "../../components/BottomNavigation";
 
 const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
   const [settings, setSettings] = useState({
@@ -11,52 +19,52 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
     reminderNotifications: true,
     soundEnabled: true,
     vibrationEnabled: true,
-    
+
     // Privacy settings
     shareLocation: true,
     allowReviews: true,
     showProfile: true,
     dataCollection: false,
-    
+
     // Service preferences
     preferredTime: "morning", // morning, afternoon, evening, flexible
     maxDistance: "10", // km
     priceRange: "medium", // low, medium, high, any
-    autoBooking: false
-  })
+    autoBooking: false,
+  });
 
   const timePreferences = [
     { id: "morning", label: "Buổi sáng", time: "6:00 - 12:00" },
     { id: "afternoon", label: "Buổi chiều", time: "12:00 - 18:00" },
     { id: "evening", label: "Buổi tối", time: "18:00 - 22:00" },
-    { id: "flexible", label: "Linh hoạt", time: "Bất kỳ lúc nào" }
-  ]
+    { id: "flexible", label: "Linh hoạt", time: "Bất kỳ lúc nào" },
+  ];
 
-  const distanceOptions = ["3", "5", "10", "15", "20"]
+  const distanceOptions = ["3", "5", "10", "15", "20"];
 
   const priceRanges = [
     { id: "low", label: "Tiết kiệm", range: "< 100k" },
     { id: "medium", label: "Trung bình", range: "100k - 300k" },
     { id: "high", label: "Cao cấp", range: "> 300k" },
-    { id: "any", label: "Bất kỳ", range: "Không giới hạn" }
-  ]
+    { id: "any", label: "Bất kỳ", range: "Không giới hạn" },
+  ];
 
   const updateSetting = (key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }))
-  }
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Đăng xuất",
-      "Bạn có chắc chắn muốn đăng xuất?",
-      [
-        { text: "Hủy", style: "cancel" },
-        { text: "Đăng xuất", style: "destructive", onPress: () => {
+    Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Đăng xuất",
+        style: "destructive",
+        onPress: () => {
           // Handle logout
-        }}
-      ]
-    )
-  }
+        },
+      },
+    ]);
+  };
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -64,12 +72,16 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
       "Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.",
       [
         { text: "Hủy", style: "cancel" },
-        { text: "Xóa", style: "destructive", onPress: () => {
-          // Handle account deletion
-        }}
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: () => {
+            // Handle account deletion
+          },
+        },
       ]
-    )
-  }
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,11 +101,15 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Thông báo đơn hàng</Text>
-                <Text style={styles.settingSubtitle}>Cập nhật trạng thái đơn hàng</Text>
+                <Text style={styles.settingSubtitle}>
+                  Cập nhật trạng thái đơn hàng
+                </Text>
               </View>
               <Switch
                 value={settings.orderNotifications}
-                onValueChange={(value) => updateSetting('orderNotifications', value)}
+                onValueChange={(value) =>
+                  updateSetting("orderNotifications", value)
+                }
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.orderNotifications ? "#ffffff" : "#f3f4f6"}
               />
@@ -102,37 +118,51 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Thông báo khuyến mãi</Text>
-                <Text style={styles.settingSubtitle}>Ưu đãi và chương trình mới</Text>
+                <Text style={styles.settingSubtitle}>
+                  Ưu đãi và chương trình mới
+                </Text>
               </View>
               <Switch
                 value={settings.promotionNotifications}
-                onValueChange={(value) => updateSetting('promotionNotifications', value)}
+                onValueChange={(value) =>
+                  updateSetting("promotionNotifications", value)
+                }
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
-                thumbColor={settings.promotionNotifications ? "#ffffff" : "#f3f4f6"}
+                thumbColor={
+                  settings.promotionNotifications ? "#ffffff" : "#f3f4f6"
+                }
               />
             </View>
 
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Nhắc nhở</Text>
-                <Text style={styles.settingSubtitle}>Nhắc nhở lịch hẹn và thanh toán</Text>
+                <Text style={styles.settingSubtitle}>
+                  Nhắc nhở lịch hẹn và thanh toán
+                </Text>
               </View>
               <Switch
                 value={settings.reminderNotifications}
-                onValueChange={(value) => updateSetting('reminderNotifications', value)}
+                onValueChange={(value) =>
+                  updateSetting("reminderNotifications", value)
+                }
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
-                thumbColor={settings.reminderNotifications ? "#ffffff" : "#f3f4f6"}
+                thumbColor={
+                  settings.reminderNotifications ? "#ffffff" : "#f3f4f6"
+                }
               />
             </View>
 
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Âm thanh</Text>
-                <Text style={styles.settingSubtitle}>Phát âm thanh khi có thông báo</Text>
+                <Text style={styles.settingSubtitle}>
+                  Phát âm thanh khi có thông báo
+                </Text>
               </View>
               <Switch
                 value={settings.soundEnabled}
-                onValueChange={(value) => updateSetting('soundEnabled', value)}
+                onValueChange={(value) => updateSetting("soundEnabled", value)}
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.soundEnabled ? "#ffffff" : "#f3f4f6"}
               />
@@ -141,11 +171,15 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Rung</Text>
-                <Text style={styles.settingSubtitle}>Rung khi có thông báo</Text>
+                <Text style={styles.settingSubtitle}>
+                  Rung khi có thông báo
+                </Text>
               </View>
               <Switch
                 value={settings.vibrationEnabled}
-                onValueChange={(value) => updateSetting('vibrationEnabled', value)}
+                onValueChange={(value) =>
+                  updateSetting("vibrationEnabled", value)
+                }
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.vibrationEnabled ? "#ffffff" : "#f3f4f6"}
               />
@@ -164,7 +198,7 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
               </View>
               <Switch
                 value={settings.shareLocation}
-                onValueChange={(value) => updateSetting('shareLocation', value)}
+                onValueChange={(value) => updateSetting("shareLocation", value)}
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.shareLocation ? "#ffffff" : "#f3f4f6"}
               />
@@ -173,11 +207,13 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Cho phép đánh giá</Text>
-                <Text style={styles.settingSubtitle}>Thợ có thể xem đánh giá của bạn</Text>
+                <Text style={styles.settingSubtitle}>
+                  Thợ có thể xem đánh giá của bạn
+                </Text>
               </View>
               <Switch
                 value={settings.allowReviews}
-                onValueChange={(value) => updateSetting('allowReviews', value)}
+                onValueChange={(value) => updateSetting("allowReviews", value)}
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.allowReviews ? "#ffffff" : "#f3f4f6"}
               />
@@ -186,11 +222,14 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Hiển thị hồ sơ</Text>
-                <Text style={styles.settingSubtitle}>Thợ có thể xem thông tin cơ bản</Text>
+                <Text style={styles.settingSubtitle}>
+                  Thợ có thể xem thông tin cơ bản
+                </Text>
               </View>
               <Switch
                 value={settings.showProfile}
-                on ValueChange={(value) => updateSetting('showProfile', value)}
+                on
+                ValueChange={(value) => updateSetting("showProfile", value)}
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.showProfile ? "#ffffff" : "#f3f4f6"}
               />
@@ -199,11 +238,15 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Thu thập dữ liệu</Text>
-                <Text style={styles.settingSubtitle}>Cải thiện trải nghiệm dịch vụ</Text>
+                <Text style={styles.settingSubtitle}>
+                  Cải thiện trải nghiệm dịch vụ
+                </Text>
               </View>
               <Switch
                 value={settings.dataCollection}
-                onValueChange={(value) => updateSetting('dataCollection', value)}
+                onValueChange={(value) =>
+                  updateSetting("dataCollection", value)
+                }
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.dataCollection ? "#ffffff" : "#f3f4f6"}
               />
@@ -214,7 +257,7 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
         {/* Service Preferences */}
         <View style={styles.settingsSection}>
           <Text style={styles.settingsSectionTitle}>Tùy chọn dịch vụ</Text>
-          
+
           <View style={styles.settingsGroup}>
             <Text style={styles.settingTitle}>Thời gian ưa thích</Text>
             <View style={styles.timePreferenceSelector}>
@@ -223,15 +266,19 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
                   key={time.id}
                   style={[
                     styles.timePreferenceOption,
-                    settings.preferredTime === time.id && styles.selectedTimePreference
+                    settings.preferredTime === time.id &&
+                      styles.selectedTimePreference,
                   ]}
-                  onPress={() => updateSetting('preferredTime', time.id)}
+                  onPress={() => updateSetting("preferredTime", time.id)}
                 >
                   <View style={styles.timePreferenceInfo}>
-                    <Text style={[
-                      styles.timePreferenceLabel,
-                      settings.preferredTime === time.id && styles.selectedTimePreferenceLabel
-                    ]}>
+                    <Text
+                      style={[
+                        styles.timePreferenceLabel,
+                        settings.preferredTime === time.id &&
+                          styles.selectedTimePreferenceLabel,
+                      ]}
+                    >
                       {time.label}
                     </Text>
                     <Text style={styles.timePreferenceTime}>{time.time}</Text>
@@ -252,14 +299,18 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
                   key={distance}
                   style={[
                     styles.distanceButton,
-                    settings.maxDistance === distance && styles.selectedDistance
+                    settings.maxDistance === distance &&
+                      styles.selectedDistance,
                   ]}
-                  onPress={() => updateSetting('maxDistance', distance)}
+                  onPress={() => updateSetting("maxDistance", distance)}
                 >
-                  <Text style={[
-                    styles.distanceText,
-                    settings.maxDistance === distance && styles.selectedDistanceText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.distanceText,
+                      settings.maxDistance === distance &&
+                        styles.selectedDistanceText,
+                    ]}
+                  >
                     {distance}km
                   </Text>
                 </TouchableOpacity>
@@ -275,15 +326,19 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
                   key={price.id}
                   style={[
                     styles.priceRangeOption,
-                    settings.priceRange === price.id && styles.selectedPriceRange
+                    settings.priceRange === price.id &&
+                      styles.selectedPriceRange,
                   ]}
-                  onPress={() => updateSetting('priceRange', price.id)}
+                  onPress={() => updateSetting("priceRange", price.id)}
                 >
                   <View style={styles.priceRangeInfo}>
-                    <Text style={[
-                      styles.priceRangeLabel,
-                      settings.priceRange === price.id && styles.selectedPriceRangeLabel
-                    ]}>
+                    <Text
+                      style={[
+                        styles.priceRangeLabel,
+                        settings.priceRange === price.id &&
+                          styles.selectedPriceRangeLabel,
+                      ]}
+                    >
                       {price.label}
                     </Text>
                     <Text style={styles.priceRangeRange}>{price.range}</Text>
@@ -300,11 +355,13 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingTitle}>Tự động đặt lịch</Text>
-                <Text style={styles.settingSubtitle}>Tự động đặt thợ phù hợp nhất</Text>
+                <Text style={styles.settingSubtitle}>
+                  Tự động đặt thợ phù hợp nhất
+                </Text>
               </View>
               <Switch
                 value={settings.autoBooking}
-                onValueChange={(value) => updateSetting('autoBooking', value)}
+                onValueChange={(value) => updateSetting("autoBooking", value)}
                 trackColor={{ false: "#e5e7eb", true: "#10b981" }}
                 thumbColor={settings.autoBooking ? "#ffffff" : "#f3f4f6"}
               />
@@ -315,10 +372,10 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
         {/* App Settings */}
         <View style={styles.settingsSection}>
           <Text style={styles.settingsSectionTitle}>Ứng dụng</Text>
-          
+
           <TouchableOpacity style={styles.settingActionItem}>
             <Text style={styles.settingActionText}>Ngôn ngữ</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text style={styles.settingValue}>Tiếng Việt</Text>
               <Text style={styles.settingActionArrow}>›</Text>
             </View>
@@ -355,13 +412,21 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
 
         {/* Account Actions */}
         <View style={styles.settingsSection}>
-          <TouchableOpacity style={styles.settingActionItem} onPress={handleLogout}>
+          <TouchableOpacity
+            style={styles.settingActionItem}
+            onPress={handleLogout}
+          >
             <Text style={styles.settingActionText}>Đăng xuất</Text>
             <Text style={styles.settingActionArrow}>›</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingActionItem} onPress={handleDeleteAccount}>
-            <Text style={[styles.settingActionText, styles.dangerText]}>Xóa tài khoản</Text>
+          <TouchableOpacity
+            style={styles.settingActionItem}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={[styles.settingActionText, styles.dangerText]}>
+              Xóa tài khoản
+            </Text>
             <Text style={styles.settingActionArrow}>›</Text>
           </TouchableOpacity>
         </View>
@@ -369,7 +434,7 @@ const CustomerSettingsScreen = ({ onTabPress, onBack }) => {
 
       <CustomerBottomNav onTabPress={onTabPress} activeTab="profile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default CustomerSettingsScreen
+export default CustomerSettingsScreen;

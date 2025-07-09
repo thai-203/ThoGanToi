@@ -85,6 +85,8 @@ class FirebaseService {
   // Cập nhật dữ liệu
   async update(path, data) {
     try {
+      console.log(path)
+      console.log(data)
       const dataRef = ref(database, path);
       const updateData = {
         ...data,
@@ -114,18 +116,22 @@ class FirebaseService {
   listen(path, callback) {
     try {
       const dataRef = ref(database, path);
-      const unsubscribe = onValue(dataRef, (snapshot) => {
-        const raw = snapshot.val();
-        const result = raw
-          ? Object.values(raw).map((item) => ({
-              ...item,
-              id: item.id ?? null,
-            }))
-          : [];
-        callback(result);
-      }, (error) => {
-        console.error("❌ Firebase listener error:", error);
-      });
+      const unsubscribe = onValue(
+        dataRef,
+        (snapshot) => {
+          const raw = snapshot.val();
+          const result = raw
+            ? Object.values(raw).map((item) => ({
+                ...item,
+                id: item.id ?? null, // Lấy id từ bên trong nếu có
+              }))
+            : [];
+          callback(result);
+        },
+        (error) => {
+          console.error("❌ Firebase listener error:", error);
+        }
+      );
       return unsubscribe;
     } catch (error) {
       console.error("❌ Error setting up listener:", error);

@@ -1,10 +1,17 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, FlatList } from "react-native"
-import { styles } from "../../styles/styles"
-import { WorkerBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  FlatList,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { WorkerBottomNav } from "../../components/BottomNavigation";
 
 const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
-  const [selectedPeriod, setSelectedPeriod] = useState("month")
+  const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [incomeData] = useState({
     today: {
       total: 450000,
@@ -26,7 +33,7 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
       orders: 456,
       hours: 1200,
     },
-  })
+  });
 
   const [transactions] = useState([
     {
@@ -69,23 +76,23 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
       netAmount: 135000,
       status: "completed",
     },
-  ])
+  ]);
 
   const periods = [
     { id: "today", name: "Hôm nay" },
     { id: "week", name: "Tuần này" },
     { id: "month", name: "Tháng này" },
     { id: "year", name: "Năm này" },
-  ]
+  ];
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
-  const getCurrentData = () => incomeData[selectedPeriod]
+  const getCurrentData = () => incomeData[selectedPeriod];
 
   const renderTransaction = ({ item }) => (
     <View style={styles.transactionCard}>
@@ -96,9 +103,15 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
           <Text style={styles.transactionService}>{item.service}</Text>
         </View>
         <View style={styles.transactionAmounts}>
-          <Text style={styles.transactionGrossAmount}>{formatCurrency(item.amount)}</Text>
-          <Text style={styles.transactionCommission}>-{formatCurrency(item.commission)}</Text>
-          <Text style={styles.transactionNetAmount}>{formatCurrency(item.netAmount)}</Text>
+          <Text style={styles.transactionGrossAmount}>
+            {formatCurrency(item.amount)}
+          </Text>
+          <Text style={styles.transactionCommission}>
+            -{formatCurrency(item.commission)}
+          </Text>
+          <Text style={styles.transactionNetAmount}>
+            {formatCurrency(item.netAmount)}
+          </Text>
         </View>
       </View>
       <View style={styles.transactionFooter}>
@@ -106,7 +119,8 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
           style={[
             styles.transactionStatus,
             {
-              backgroundColor: item.status === "completed" ? "#d1fae5" : "#fef3c7",
+              backgroundColor:
+                item.status === "completed" ? "#d1fae5" : "#fef3c7",
             },
           ]}
         >
@@ -123,7 +137,7 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
         </View>
       </View>
     </View>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -137,16 +151,28 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.incomeContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.incomeContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Period Selector */}
         <View style={styles.periodSelector}>
           {periods.map((period) => (
             <TouchableOpacity
               key={period.id}
-              style={[styles.periodButton, selectedPeriod === period.id && styles.selectedPeriodButton]}
+              style={[
+                styles.periodButton,
+                selectedPeriod === period.id && styles.selectedPeriodButton,
+              ]}
               onPress={() => setSelectedPeriod(period.id)}
             >
-              <Text style={[styles.periodButtonText, selectedPeriod === period.id && styles.selectedPeriodButtonText]}>
+              <Text
+                style={[
+                  styles.periodButtonText,
+                  selectedPeriod === period.id &&
+                    styles.selectedPeriodButtonText,
+                ]}
+              >
                 {period.name}
               </Text>
             </TouchableOpacity>
@@ -157,20 +183,30 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
         <View style={styles.incomeSummary}>
           <View style={styles.incomeSummaryCard}>
             <Text style={styles.incomeSummaryTitle}>Tổng thu nhập</Text>
-            <Text style={styles.incomeSummaryAmount}>{formatCurrency(getCurrentData().total)}</Text>
+            <Text style={styles.incomeSummaryAmount}>
+              {formatCurrency(getCurrentData().total)}
+            </Text>
             <View style={styles.incomeSummaryDetails}>
               <View style={styles.incomeSummaryDetailItem}>
                 <Text style={styles.incomeSummaryDetailLabel}>Đơn hàng</Text>
-                <Text style={styles.incomeSummaryDetailValue}>{getCurrentData().orders}</Text>
+                <Text style={styles.incomeSummaryDetailValue}>
+                  {getCurrentData().orders}
+                </Text>
               </View>
               <View style={styles.incomeSummaryDetailItem}>
                 <Text style={styles.incomeSummaryDetailLabel}>Giờ làm</Text>
-                <Text style={styles.incomeSummaryDetailValue}>{getCurrentData().hours}h</Text>
+                <Text style={styles.incomeSummaryDetailValue}>
+                  {getCurrentData().hours}h
+                </Text>
               </View>
               <View style={styles.incomeSummaryDetailItem}>
-                <Text style={styles.incomeSummaryDetailLabel}>Trung bình/giờ</Text>
+                <Text style={styles.incomeSummaryDetailLabel}>
+                  Trung bình/giờ
+                </Text>
                 <Text style={styles.incomeSummaryDetailValue}>
-                  {formatCurrency(Math.round(getCurrentData().total / getCurrentData().hours))}
+                  {formatCurrency(
+                    Math.round(getCurrentData().total / getCurrentData().hours)
+                  )}
                 </Text>
               </View>
             </View>
@@ -185,18 +221,23 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
               <Text style={styles.incomeBreakdownIcon}>💰</Text>
               <Text style={styles.incomeBreakdownLabel}>Tổng doanh thu</Text>
               <Text style={styles.incomeBreakdownAmount}>
-                {formatCurrency(getCurrentData().total * 1.1)} {/* Assuming 10% commission */}
+                {formatCurrency(getCurrentData().total * 1.1)}{" "}
+                {/* Assuming 10% commission */}
               </Text>
             </View>
             <View style={styles.incomeBreakdownCard}>
               <Text style={styles.incomeBreakdownIcon}>📊</Text>
               <Text style={styles.incomeBreakdownLabel}>Hoa hồng (10%)</Text>
-              <Text style={styles.incomeBreakdownAmount}>-{formatCurrency(getCurrentData().total * 0.1)}</Text>
+              <Text style={styles.incomeBreakdownAmount}>
+                -{formatCurrency(getCurrentData().total * 0.1)}
+              </Text>
             </View>
             <View style={styles.incomeBreakdownCard}>
               <Text style={styles.incomeBreakdownIcon}>💵</Text>
               <Text style={styles.incomeBreakdownLabel}>Thực nhận</Text>
-              <Text style={styles.incomeBreakdownAmount}>{formatCurrency(getCurrentData().total)}</Text>
+              <Text style={styles.incomeBreakdownAmount}>
+                {formatCurrency(getCurrentData().total)}
+              </Text>
             </View>
           </View>
         </View>
@@ -204,7 +245,9 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
         {/* Recent Transactions */}
         <View style={styles.recentTransactions}>
           <View style={styles.recentTransactionsHeader}>
-            <Text style={styles.recentTransactionsTitle}>Giao dịch gần đây</Text>
+            <Text style={styles.recentTransactionsTitle}>
+              Giao dịch gần đây
+            </Text>
             <TouchableOpacity>
               <Text style={styles.viewAllTransactions}>Xem tất cả</Text>
             </TouchableOpacity>
@@ -222,7 +265,9 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
         <View style={styles.withdrawalSection}>
           <View style={styles.withdrawalCard}>
             <Text style={styles.withdrawalTitle}>Rút tiền</Text>
-            <Text style={styles.withdrawalBalance}>Số dư khả dụng: {formatCurrency(getCurrentData().total)}</Text>
+            <Text style={styles.withdrawalBalance}>
+              Số dư khả dụng: {formatCurrency(getCurrentData().total)}
+            </Text>
             <TouchableOpacity style={styles.withdrawalButton}>
               <Text style={styles.withdrawalButtonText}>💳 Rút tiền</Text>
             </TouchableOpacity>
@@ -232,7 +277,7 @@ const WorkerIncomeScreen = ({ onTabPress, onBack }) => {
 
       <WorkerBottomNav onTabPress={onTabPress} activeTab="workerProfile" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerIncomeScreen
+export default WorkerIncomeScreen;

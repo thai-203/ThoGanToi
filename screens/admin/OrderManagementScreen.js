@@ -1,35 +1,43 @@
-import React, { useEffect, useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, ScrollView } from "react-native"
-import { styles } from "../../styles/styles"
-import { AdminBottomNav } from "../../components/BottomNavigation"
-import { getDatabase, ref, onValue } from "firebase/database"
-import { statusConfig } from "../../constants/statusConfig"
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  ScrollView,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import { getDatabase, ref, onValue } from "firebase/database";
+import { statusConfig } from "../../constants/statusConfig";
 
 const OrderManagementScreen = ({ onTabPress, onBack }) => {
-  const [orders, setOrders] = useState([])
-  const [activeTab, setActiveTab] = useState("all")
+  const [orders, setOrders] = useState([]);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
-    const db = getDatabase()
-    const ordersRef = ref(db, "orders")
+    const db = getDatabase();
+    const ordersRef = ref(db, "orders");
     const unsubscribe = onValue(ordersRef, (snapshot) => {
-      const data = snapshot.val()
+      const data = snapshot.val();
       if (data) {
         const parsedOrders = Object.entries(data).map(([id, order]) => ({
           id,
           ...order,
-        }))
-        setOrders(parsedOrders)
+        }));
+        setOrders(parsedOrders);
       }
-    })
+    });
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   const filteredOrders = orders.filter((order) => {
-    if (activeTab === "all") return true
-    return order.status === activeTab
-  })
+    if (activeTab === "all") return true;
+    return order.status === activeTab;
+  });
 
   const handleOrderAction = (orderId, action) => {
     Alert.alert("Xác nhận", `Bạn có chắc muốn ${action} đơn hàng này?`, [
@@ -37,14 +45,18 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
       {
         text: "Xác nhận",
         onPress: () => {
-          Alert.alert("Thành công", `Đã ${action} đơn hàng!`)
+          Alert.alert("Thành công", `Đã ${action} đơn hàng!`);
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const renderOrder = ({ item }) => {
-    const status = statusConfig[item.status] || { label: "Không xác định", bg: "#e5e7eb", color: "#000" }
+    const status = statusConfig[item.status] || {
+      label: "Không xác định",
+      bg: "#e5e7eb",
+      color: "#000",
+    };
 
     return (
       <View style={styles.orderCard}>
@@ -52,21 +64,31 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
           <View style={styles.customerInfo}>
             <Text style={styles.customerAvatar}>{item.avatar || "👤"}</Text>
             <View>
-              <Text style={styles.customerName}>{item.customer || "Không rõ"}</Text>
+              <Text style={styles.customerName}>
+                {item.customer || "Không rõ"}
+              </Text>
               <Text style={styles.orderService}>{item.service}</Text>
-              <Text style={styles.orderTime}>📅 {item.date} - {item.time}</Text>
+              <Text style={styles.orderTime}>
+                📅 {item.date} - {item.time}
+              </Text>
             </View>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-            <Text style={[styles.statusText, { color: status.color }]}>{status.label}</Text>
+            <Text style={[styles.statusText, { color: status.color }]}>
+              {status.label}
+            </Text>
           </View>
         </View>
 
         <View style={styles.orderDetails}>
           <Text style={styles.orderAddress}>📍 {item.address}</Text>
-          {item.description && <Text style={styles.orderDescription}>{item.description}</Text>}
+          {item.description && (
+            <Text style={styles.orderDescription}>{item.description}</Text>
+          )}
           <View style={styles.orderMeta}>
-            <Text style={styles.orderDuration}>⏱️ {item.estimatedHours || "N/A"}h</Text>
+            <Text style={styles.orderDuration}>
+              ⏱️ {item.estimatedHours || "N/A"}h
+            </Text>
             <Text style={styles.orderPrice}>💰 {item.price}</Text>
           </View>
         </View>
@@ -74,25 +96,33 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
         <View style={styles.orderActions}>
           <TouchableOpacity
             style={styles.phoneButton}
-            onPress={() => Alert.alert("Liên hệ", `SĐT: ${item.phone || "N/A"}`)}
+            onPress={() =>
+              Alert.alert("Liên hệ", `SĐT: ${item.phone || "N/A"}`)
+            }
           >
             <Text style={styles.phoneButtonText}>📞 Liên hệ</Text>
           </TouchableOpacity>
 
           {item.status === "pending" && (
             <View style={styles.pendingActions}>
-              <TouchableOpacity style={styles.rejectButton} onPress={() => handleOrderAction(item.id, "hủy")}>
+              <TouchableOpacity
+                style={styles.rejectButton}
+                onPress={() => handleOrderAction(item.id, "hủy")}
+              >
                 <Text style={styles.rejectButtonText}>Hủy đơn</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.acceptButton} onPress={() => handleOrderAction(item.id, "xác nhận")}>
+              <TouchableOpacity
+                style={styles.acceptButton}
+                onPress={() => handleOrderAction(item.id, "xác nhận")}
+              >
                 <Text style={styles.acceptButtonText}>Xác nhận</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
       </View>
-    )
-  }
+    );
+  };
 
   const allTabs = [
     { key: "all", label: "Tất cả" },
@@ -102,7 +132,7 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
     { key: "completed", label: "Hoàn thành" },
     { key: "cancelled", label: "Đã hủy" },
     { key: "rejected", label: "Đã từ chối" },
-  ]
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -128,8 +158,17 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
               style={[styles.tab, activeTab === tab.key && styles.activeTab]}
               onPress={() => setActiveTab(tab.key)}
             >
-              <Text style={[styles.tabText, activeTab === tab.key && styles.activeTabText]}>
-                {tab.label} ({tab.key === "all" ? orders.length : orders.filter((o) => o.status === tab.key).length})
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab.key && styles.activeTabText,
+                ]}
+              >
+                {tab.label} (
+                {tab.key === "all"
+                  ? orders.length
+                  : orders.filter((o) => o.status === tab.key).length}
+                )
               </Text>
             </TouchableOpacity>
           ))}
@@ -146,7 +185,7 @@ const OrderManagementScreen = ({ onTabPress, onBack }) => {
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="orderManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default OrderManagementScreen
+export default OrderManagementScreen;

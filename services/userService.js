@@ -78,18 +78,9 @@ class UserService {
 
   // Real-time listener for users
   listenToUsers(callback) {
-    return FirebaseService.listen(this.basePath, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        const users = Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-        callback(users)
-      } else {
-        callback([])
-      }
-    })
+    return FirebaseService.listen(this.basePath, (usersArray) => {
+      callback(Array.isArray(usersArray) ? usersArray : []);
+    });
   }
 }
 
