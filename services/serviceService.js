@@ -58,21 +58,8 @@ class ServiceService {
   // ✅ Đã sửa: tìm theo service.id bên trong thay vì key bên ngoài
   async updateServiceStatus(serviceId, newStatus) {
     try {
-      const allServices = await FirebaseService.read(this.basePath);
-
-      if (!allServices) {
-        throw new Error("Không có dữ liệu dịch vụ.");
-      }
-
-      const keyToUpdate = Object.keys(allServices).find((key) => {
-        return String(allServices[key].id) === String(serviceId);
-      });
-
-      if (!keyToUpdate) {
-        throw new Error(`Không tìm thấy dịch vụ với id = ${serviceId}`);
-      }
-
-      const path = `${this.basePath}/${keyToUpdate}`;
+      const path = `${this.basePath}/${serviceId}`;
+      console.log(path)
       await FirebaseService.update(path, { status: newStatus });
       return true;
     } catch (error) {

@@ -42,11 +42,6 @@ const ServiceManagementScreen = ({ onTabPress, onBack }) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
     const action = newStatus === "inactive" ? "tắt" : "bật";
 
-    // console.log(serviceId)
-    // console.log(currentStatus)
-    // console.log(newStatus)
-    // console.log(action)
-
     Alert.alert("Xác nhận", `Bạn có chắc muốn ${action} dịch vụ này?`, [
       { text: "Hủy", style: "cancel" },
       {
