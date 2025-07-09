@@ -133,6 +133,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#1f2937",
+    marginTop: 15,
     marginBottom: 15,
   },
   servicesList: {

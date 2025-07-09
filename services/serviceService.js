@@ -27,6 +27,7 @@ class ServiceService {
 
   async getAllServices() {
     try {
+      console.log("da vao")
       const services = await FirebaseService.readAll(this.basePath)
       return services
     } catch (error) {
