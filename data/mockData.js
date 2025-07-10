@@ -312,11 +312,11 @@ export const menuItems = [
 export const workerMenuItems = [
   { id: "1", title: "Thông tin thợ", icon: "👤", action: "workerInfo" },
   { id: "2", title: "Khu vực làm việc", icon: "📍", action: "workerArea" },
-  { id: "3", title: "Lịch làm việc", icon: "📅", action: "schedule" },
+  { id: "3", title: "Lịch làm việc", icon: "📅", action: "workerSchedule" },
   { id: "4", title: "Báo cáo thu nhập", icon: "💰", action: "workerIncome" },
   { id: "5", title: "Đánh giá từ khách", icon: "⭐", action: "workerReviews" },
-  { id: "6", title: "Hỗ trợ thợ", icon: "💬", action: "support" },
-  { id: "7", title: "Cài đặt", icon: "⚙️", action: "settings" },
+  { id: "6", title: "Hỗ trợ thợ", icon: "💬", action: "workerSupport" },
+  { id: "7", title: "Cài đặt", icon: "⚙️", action: "workerSettings" },
 ]
 
 // Thêm dữ liệu thống kê cho admin
