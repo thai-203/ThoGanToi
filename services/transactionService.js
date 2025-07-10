@@ -20,7 +20,6 @@ class TransactionService {
     try {
       const raw = await FirebaseService.readAll(this.basePath)
       const allTransactions = Array.isArray(raw) ? raw : Object.values(raw || {})
-      console.log("🔥 All transactions from DB:", allTransactions)
   
       allTransactions.forEach(t => {
         console.log(`📝 Transaction id=${t.id}, workerId=${t.workerId}`)

@@ -69,7 +69,6 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
 
   // 🔍 Debug current user
   useEffect(() => {
-    console.log("👑 Current user:", currentUser)
   }, [currentUser])
 
   // 🔥 Load worker theo userId
@@ -77,9 +76,7 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
     const loadWorker = async () => {
       if (!currentUser) return
       const allWorkers = await WorkerService.getAllWorkers()
-      console.log("📦 All workers:", allWorkers)
       const matched = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-      console.log("🎯 Matched worker from userId:", matched)
       setWorker(matched)
     }
     loadWorker()
@@ -89,22 +86,15 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
   useEffect(() => {
     const loadIncomeData = async () => {
       if (!worker) {
-        console.log("⏳ Chưa có worker, skip loadIncomeData")
         return
       }
-
-      console.log("🚀 Bắt đầu load transactions cho worker:", worker.id)
       const allTransactions = await TransactionService.getTransactionsByWorkerId(worker.id)
-      console.log("💰 All transactions:", allTransactions)
 
       const filtered = filterTransactionsByPeriod(allTransactions, selectedPeriod)
-      console.log(`📊 Filtered transactions for ${selectedPeriod}:`, filtered)
 
       const total = filtered.reduce((sum, t) => sum + (t.workerReceived || 0), 0)
       const orders = filtered.length
       const hours = filtered.reduce((sum, t) => sum + (t.estimatedHours || 2), 0)
-
-      console.log("🔢 Calculated income:", { total, orders, hours })
 
       setIncomeData({ total, orders, hours })
       setTransactions(filtered)

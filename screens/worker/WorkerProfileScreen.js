@@ -18,7 +18,6 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
   useEffect(() => {
     const loadWorkerInfo = async () => {
       if (!currentUser?.id) {
-        console.log("🚨 Không tìm thấy currentUser")
         return
       }
       setLoading(true)
@@ -27,11 +26,7 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
           WorkerService.getAllWorkers(),
           ServiceService.getAllServices()
         ])
-        console.log("📦 Loaded workers:", allWorkers)
-        console.log("🛠 Loaded services:", allServices)
-
         const worker = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-        console.log("🎯 Matched worker:", worker)
 
         if (worker) {
           const serviceNames = (worker.serviceId || [])
@@ -60,9 +55,7 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
           const transactions = await TransactionService.getTransactionsByWorkerAndMonth(
             worker.id, now.getMonth() + 1, now.getFullYear()
           )
-          console.log("💸 Transactions this month:", transactions)
           const income = transactions.reduce((acc, tx) => acc + (tx.workerReceived || 0), 0)
-          console.log("💵 Monthly income:", income)
           setMonthlyIncome(income)
         } else {
           console.log("⚠️ Không tìm thấy worker tương ứng userId")

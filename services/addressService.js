@@ -54,8 +54,6 @@ class AddressService {
   async updateAddress(addressId, addressData) {
     try {
       const pathToUpdate = `${this.basePath}/${addressId}`;
-      console.log("✅ Updating path:", pathToUpdate);
-      console.log("📦 New data:", addressData);
 
       await FirebaseService.update(pathToUpdate, addressData);
       return true;

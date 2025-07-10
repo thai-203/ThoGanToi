@@ -4,14 +4,16 @@ import { styles } from "../../styles/styles"
 // import { workerOrders } from "../../data/mockData" // XÓA: Không dùng mock data nữa
 import { statusConfig } from "../../constants/statusConfig"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
+import { getCurrentUserId } from "../../utils/auth";
 
 // IMPORT: Thêm các service cần thiết
-import OrderService from "../../services/orderService" 
+import OrderService from "../../services/orderService"
+import WorkerService from "../../services/workerService" 
 
 const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
   // GIẢ ĐỊNH: ID của thợ đang đăng nhập. Trong ứng dụng thực tế, bạn sẽ lấy ID này từ
   // global state (Context/Redux) hoặc từ route params sau khi đăng nhập.
-  const loggedInWorkerId = "1" 
+  const loggedInWorkerId = "0" 
 
   const [activeTab, setActiveTab] = useState("all")
   const [orders, setOrders] = useState([]) // State để lưu danh sách đơn hàng từ Firebase
@@ -19,18 +21,49 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
 
   // Lấy dữ liệu từ Firebase khi component được mount
   useEffect(() => {
-    setLoading(true)
-    // Sử dụng listener để dữ liệu tự động cập nhật khi có thay đổi trên Firebase
-    const unsubscribe = OrderService.listenToWorkerOrders(loggedInWorkerId, (workerOrders) => {
-      // Sắp xếp đơn hàng mới nhất lên đầu
-      const sortedOrders = workerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-      setOrders(sortedOrders)
-      setLoading(false)
+    const fetchAndListenOrders = async () => {
+      setLoading(true)
+
+      try {
+        const userId = await getCurrentUserId()
+        const worker = await WorkerService.getWorkerByUserId(userId)
+
+        if (!worker || !worker.id) {
+          console.warn("Không tìm thấy thông tin worker tương ứng với userId:", userId)
+          setOrders([])
+          setLoading(false)
+          return
+        }
+
+        const unsubscribe = OrderService.listenToWorkerOrders(worker.id, (workerOrders) => {
+          const sortedOrders = workerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+          setOrders(sortedOrders)
+          setLoading(false)
+        })
+
+        return unsubscribe
+      } catch (error) {
+        console.error("Lỗi khi fetch và listen orders:", error)
+        setLoading(false)
+      }
+    }
+
+    let unsubscribeFn
+
+    fetchAndListenOrders().then((unsub) => {
+      if (typeof unsub === "function") {
+        unsubscribeFn = unsub
+      }
     })
 
-    // Cleanup listener khi component unmount
-    return () => unsubscribe()
-  }, [loggedInWorkerId]) // Chạy lại effect nếu workerId thay đổi
+    return () => {
+      if (unsubscribeFn) {
+        unsubscribeFn()
+      }
+    }
+  }, [])
+
+
 
   // Lọc dữ liệu từ state 'orders' thay vì mock data
   const filteredOrders = orders.filter((order) => {
