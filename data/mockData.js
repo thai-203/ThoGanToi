@@ -410,10 +410,10 @@ export const transactions = [
 
 // Thêm dữ liệu khu vực
 export const areas = [
-  { id: "1", name: "Quận 1", city: "TP.HCM", status: "active", workerCount: 15 },
-  { id: "2", name: "Quận 3", city: "TP.HCM", status: "active", workerCount: 12 },
-  { id: "3", name: "Quận 7", city: "TP.HCM", status: "active", workerCount: 18 },
-  { id: "4", name: "Quận Bình Thạnh", city: "TP.HCM", status: "active", workerCount: 8 },
+  { id: "1", name: "Quận 1", city: "TP.HCM", status: "active", distance: "2km", district: "Trung tâm", workerCount: 15, available: true},
+  { id: "2", name: "Quận 3", city: "TP.HCM", status: "active", distance: "3km", district: "Trung tâm", workerCount: 12, available: true},
+  { id: "3", name: "Quận 7", city: "TP.HCM", status: "active", distance: "4km", district: "Phía nam", workerCount: 18, available: true},
+  { id: "4", name: "Quận Bình Thạnh", city: "TP.HCM", status: "active", distance: "5km", district: "Phía đông", workerCount: 8, available: true },
 ]
 
 // Thêm dữ liệu nhật ký hệ thống
