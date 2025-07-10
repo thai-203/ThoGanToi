@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react"
 import { StatusBar } from "react-native"
 
@@ -28,6 +30,9 @@ import AdminAccountManagementScreen from "./screens/admin/AdminAccountManagement
 import SystemSettingsScreen from "./screens/admin/SystemSettingsScreen"
 import SystemLogsScreen from "./screens/admin/SystemLogsScreen"
 
+// Thêm vào phần imports
+import RegisterScreen from "./screens/RegisterScreen"
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState("login")
   const [userType, setUserType] = useState("customer") // 'customer' or 'worker'
@@ -49,6 +54,11 @@ export default function App() {
     } else if (role === "admin") {
       setCurrentScreen("adminDashboard")
     }
+  }
+
+  // Thêm function handleRegister sau handleLogin:
+  const handleRegister = () => {
+    setCurrentScreen("login")
   }
 
   const handleServicePress = (service) => {
@@ -141,7 +151,7 @@ export default function App() {
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case "login":
-        return <LoginScreen onLogin={handleLogin} />
+        return <LoginScreen onLogin={handleLogin} onRegister={() => setCurrentScreen("register")} />
 
       // Customer Screens
       case "home":
@@ -216,6 +226,10 @@ export default function App() {
         return <SystemSettingsScreen onTabPress={handleTabPress} onBack={handleBack} />
       case "systemLogs":
         return <SystemLogsScreen onTabPress={handleTabPress} onBack={handleBack} />
+
+      // Trong renderCurrentScreen, thêm case này:
+      case "register":
+        return <RegisterScreen onRegister={handleRegister} onBackToLogin={() => setCurrentScreen("login")} />
 
       default:
         return <LoginScreen onLogin={handleLogin} />

@@ -2213,4 +2213,74 @@ export const styles = StyleSheet.create({
     fontStyle: "italic",
     lineHeight: 20,
   },
+  // Register Screen Styles
+  roleContainer: {
+    marginBottom: 20,
+  },
+  roleLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1f2937",
+    marginBottom: 10,
+  },
+  roleButtons: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  roleButton: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#e5e7eb",
+    backgroundColor: "white",
+    alignItems: "center",
+  },
+  activeRoleButton: {
+    borderColor: "#2563eb",
+    backgroundColor: "#eff6ff",
+  },
+  roleButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6b7280",
+  },
+  activeRoleButtonText: {
+    color: "#2563eb",
+  },
+  workerFieldsContainer: {
+    backgroundColor: "#f8fafc",
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    marginBottom: 15,
+  },
+  workerFieldsTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1f2937",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  workerNote: {
+    backgroundColor: "#fef3c7",
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#fbbf24",
+    marginTop: 10,
+  },
+  workerNoteText: {
+    fontSize: 14,
+    color: "#92400e",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  // Register Screen Styles - Fixed
+  registerContent: {
+    flexGrow: 1,
+    padding: 20,
+    justifyContent: "flex-start",
+  },
 })
