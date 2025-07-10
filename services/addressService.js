@@ -88,7 +88,6 @@ class AddressService {
 
   async deleteAddress(addressId) {
     try {
-      console.log(addressId)
       await FirebaseService.delete(`${this.basePath}/${addressId}`)
       return true
     } catch (error) {

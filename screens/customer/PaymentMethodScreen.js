@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,32 +11,11 @@ import {
 } from "react-native";
 import { styles } from "../../styles/styles";
 import { CustomerBottomNav } from "../../components/BottomNavigation";
+import paymentService from "../../services/paymentService";
+import { getCurrentUserId } from "../../utils/auth";
 
 const PaymentMethodScreen = ({ onTabPress, onBack }) => {
-  const [paymentMethods, setPaymentMethods] = useState([
-    {
-      id: "1",
-      type: "card",
-      title: "Thẻ Visa",
-      number: "**** **** **** 1234",
-      expiry: "12/25",
-      isDefault: true,
-    },
-    {
-      id: "2",
-      type: "momo",
-      title: "Ví MoMo",
-      number: "0123456789",
-      isDefault: false,
-    },
-    {
-      id: "3",
-      type: "cash",
-      title: "Tiền mặt",
-      number: "Thanh toán khi hoàn thành",
-      isDefault: false,
-    },
-  ]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedType, setSelectedType] = useState("card");
   const [formData, setFormData] = useState({
@@ -45,13 +24,52 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
     expiry: "",
     cvv: "",
   });
+  const [userId, setUserId] = useState(null);
 
-  const paymentTypes = [
-    { id: "card", name: "Thẻ tín dụng", icon: "💳" },
-    { id: "momo", name: "Ví MoMo", icon: "📱" },
-    { id: "zalopay", name: "ZaloPay", icon: "💰" },
-    { id: "banking", name: "Internet Banking", icon: "🏦" },
-  ];
+  useEffect(() => {
+    let unsubscribe;
+    const fetchPayments = async () => {
+      const id = await getCurrentUserId();
+      setUserId(id); // Lưu userId để sử dụng ở nơi khác
+
+      unsubscribe = paymentService.listenToPaymentsByUserId(id, async (methods) => {
+        let newMethods = [...methods];
+
+        const hasCash = newMethods.some((m) => m.type === "cash");
+        if (!hasCash) {
+          const cashPayment = {
+            userId: id,
+            type: "cash",
+            title: "Tiền mặt",
+            number: "Thanh toán khi hoàn thành",
+            isDefault: newMethods.length === 0,
+          };
+          const newCashId = await paymentService.createPayment(cashPayment);
+          newMethods.push({ ...cashPayment, id: newCashId });
+        }
+
+        const hasDefault = newMethods.some((m) => m.isDefault);
+        if (!hasDefault) {
+          const cash = newMethods.find((m) => m.type === "cash");
+          if (cash) {
+            await paymentService.setDefaultPayment(id, cash.id);
+            newMethods = newMethods.map((m) => ({
+              ...m,
+              isDefault: m.id === cash.id,
+            }));
+          }
+        }
+
+        setPaymentMethods(newMethods);
+      });
+    };
+
+    fetchPayments();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   const handleAddPayment = () => {
     setFormData({ title: "", number: "", expiry: "", cvv: "" });
@@ -59,14 +77,14 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
     setShowAddModal(true);
   };
 
-  const handleSavePayment = () => {
+  const handleSavePayment = async () => {
     if (!formData.title || !formData.number) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
       return;
     }
 
     const newPayment = {
-      id: Date.now().toString(),
+      userId,
       type: selectedType,
       title: formData.title,
       number:
@@ -74,42 +92,34 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
           ? `**** **** **** ${formData.number.slice(-4)}`
           : formData.number,
       expiry: formData.expiry,
-      isDefault: paymentMethods.length === 0,
+      isDefault: false,
     };
 
-    setPaymentMethods([...paymentMethods, newPayment]);
+    await paymentService.createPayment(newPayment);
     setShowAddModal(false);
     Alert.alert("Thành công", "Đã thêm phương thức thanh toán");
   };
 
-  const handleDeletePayment = (paymentId) => {
-    Alert.alert(
-      "Xác nhận xóa",
-      "Bạn có chắc muốn xóa phương thức thanh toán này?",
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Xóa",
-          style: "destructive",
-          onPress: () => {
-            setPaymentMethods(
-              paymentMethods.filter((payment) => payment.id !== paymentId)
-            );
-            Alert.alert("Thành công", "Đã xóa phương thức thanh toán");
-          },
+  const handleDeletePayment = async (id, type) => {
+    if (type === "cash") {
+      Alert.alert("Không thể xóa", "Không thể xóa phương thức tiền mặt mặc định.");
+      return;
+    }
+
+    Alert.alert("Xác nhận", "Bạn có muốn xóa phương thức này?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          await paymentService.deletePayment(id);
         },
-      ]
-    );
+      },
+    ]);
   };
 
-  const handleSetDefault = (paymentId) => {
-    setPaymentMethods(
-      paymentMethods.map((payment) => ({
-        ...payment,
-        isDefault: payment.id === paymentId,
-      }))
-    );
-    Alert.alert("Thành công", "Đã đặt làm phương thức mặc định");
+  const handleSetDefault = async (id) => {
+    await paymentService.setDefaultPayment(userId, id);
   };
 
   const getPaymentIcon = (type) => {
@@ -137,18 +147,14 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
           <View style={styles.paymentDetails}>
             <View style={styles.paymentTitleContainer}>
               <Text style={styles.paymentTitle}>{item.title}</Text>
-              {item.isDefault && (
-                <Text style={styles.defaultBadge}>Mặc định</Text>
-              )}
+              {item.isDefault && <Text style={styles.defaultBadge}>Mặc định</Text>}
             </View>
             <Text style={styles.paymentNumber}>{item.number}</Text>
-            {item.expiry && (
-              <Text style={styles.paymentExpiry}>Hết hạn: {item.expiry}</Text>
-            )}
+            {item.expiry && <Text style={styles.paymentExpiry}>Hết hạn: {item.expiry}</Text>}
           </View>
         </View>
         {item.type !== "cash" && (
-          <TouchableOpacity onPress={() => handleDeletePayment(item.id)}>
+          <TouchableOpacity onPress={() => handleDeletePayment(item.id, item.type)}>
             <Text style={styles.deletePaymentButton}>🗑️</Text>
           </TouchableOpacity>
         )}
@@ -158,13 +164,18 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
           style={styles.setDefaultPaymentButton}
           onPress={() => handleSetDefault(item.id)}
         >
-          <Text style={styles.setDefaultPaymentButtonText}>
-            Đặt làm mặc định
-          </Text>
+          <Text style={styles.setDefaultPaymentButtonText}>Đặt làm mặc định</Text>
         </TouchableOpacity>
       )}
     </View>
   );
+
+  const paymentTypes = [
+    { id: "card", name: "Thẻ tín dụng", icon: "💳" },
+    { id: "momo", name: "Ví MoMo", icon: "📱" },
+    { id: "zalopay", name: "ZaloPay", icon: "💰" },
+    { id: "banking", name: "Internet Banking", icon: "🏦" },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -183,10 +194,9 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
         renderItem={renderPayment}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.paymentList}
-        showsVerticalScrollIndicator={false}
       />
 
-      {/* Add Payment Modal */}
+      {/* Modal thêm mới */}
       <Modal visible={showAddModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -214,8 +224,7 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
                       <Text
                         style={[
                           styles.paymentTypeName,
-                          selectedType === type.id &&
-                            styles.selectedPaymentTypeName,
+                          selectedType === type.id && styles.selectedPaymentTypeName,
                         ]}
                       >
                         {type.name}
@@ -231,9 +240,7 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
                   style={styles.formInput}
                   placeholder="VD: Thẻ Visa chính"
                   value={formData.title}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, title: text })
-                  }
+                  onChangeText={(text) => setFormData({ ...formData, title: text })}
                 />
               </View>
 
@@ -245,43 +252,30 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
                       style={styles.formInput}
                       placeholder="1234 5678 9012 3456"
                       value={formData.number}
-                      onChangeText={(text) =>
-                        setFormData({ ...formData, number: text })
-                      }
+                      onChangeText={(text) => setFormData({ ...formData, number: text })}
                       keyboardType="numeric"
-                      maxLength={19}
                     />
                   </View>
                   <View style={styles.formRow}>
-                    <View
-                      style={[styles.formGroup, { flex: 1, marginRight: 10 }]}
-                    >
-                      <Text style={styles.formLabel}>Ngày hết hạn</Text>
+                    <View style={[styles.formGroup, { flex: 1, marginRight: 10 }]}>
+                      <Text style={styles.formLabel}>Hết hạn</Text>
                       <TextInput
                         style={styles.formInput}
                         placeholder="MM/YY"
                         value={formData.expiry}
-                        onChangeText={(text) =>
-                          setFormData({ ...formData, expiry: text })
-                        }
+                        onChangeText={(text) => setFormData({ ...formData, expiry: text })}
                         keyboardType="numeric"
-                        maxLength={5}
                       />
                     </View>
-                    <View
-                      style={[styles.formGroup, { flex: 1, marginLeft: 10 }]}
-                    >
+                    <View style={[styles.formGroup, { flex: 1, marginLeft: 10 }]}>
                       <Text style={styles.formLabel}>CVV</Text>
                       <TextInput
                         style={styles.formInput}
                         placeholder="123"
-                        value={formData.cvv}
-                        onChangeText={(text) =>
-                          setFormData({ ...formData, cvv: text })
-                        }
-                        keyboardType="numeric"
-                        maxLength={4}
                         secureTextEntry
+                        keyboardType="numeric"
+                        value={formData.cvv}
+                        onChangeText={(text) => setFormData({ ...formData, cvv: text })}
                       />
                     </View>
                   </View>
@@ -295,15 +289,8 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
                   </Text>
                   <TextInput
                     style={styles.formInput}
-                    placeholder={
-                      selectedType === "momo" || selectedType === "zalopay"
-                        ? "0123456789"
-                        : "Nhập số tài khoản"
-                    }
                     value={formData.number}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, number: text })
-                    }
+                    onChangeText={(text) => setFormData({ ...formData, number: text })}
                     keyboardType="numeric"
                   />
                 </View>
@@ -316,10 +303,7 @@ const PaymentMethodScreen = ({ onTabPress, onBack }) => {
                 >
                   <Text style={styles.cancelButtonText}>Hủy</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  onPress={handleSavePayment}
-                >
+                <TouchableOpacity style={styles.saveButton} onPress={handleSavePayment}>
                   <Text style={styles.saveButtonText}>Lưu</Text>
                 </TouchableOpacity>
               </View>
