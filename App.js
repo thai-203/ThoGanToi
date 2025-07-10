@@ -243,7 +243,7 @@ export default function App() {
       case "workerDashboard":
         return <WorkerDashboardScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
       case "workerOrders":
-        return <WorkerOrdersScreen onServicePress={handleServicePress} onTabPress={handleTabPress} />
+        return <WorkerOrdersScreen onServicePress={handleServicePress} onTabPress={handleTabPress}  currentUser={currentUser} />
       case "workerOrderDetail":
         return <WorkerOrderDetailScreen order={selectedOrder} onTabPress={handleTabPress} onBack={handleBack} />
       case "workerProfile":

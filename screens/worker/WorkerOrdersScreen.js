@@ -1,57 +1,70 @@
 import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, ActivityIndicator } from "react-native"
 import { styles } from "../../styles/styles"
-// import { workerOrders } from "../../data/mockData" // XÓA: Không dùng mock data nữa
 import { statusConfig } from "../../constants/statusConfig"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
+import OrderService from "../../services/orderService"
 
-// IMPORT: Thêm các service cần thiết
-import OrderService from "../../services/orderService" 
-
-const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
-  // GIẢ ĐỊNH: ID của thợ đang đăng nhập. Trong ứng dụng thực tế, bạn sẽ lấy ID này từ
-  // global state (Context/Redux) hoặc từ route params sau khi đăng nhập.
-  const loggedInWorkerId = "1" 
-
+const WorkerOrdersScreen = ({ onTabPress, onOrderPress, currentUser }) => {
   const [activeTab, setActiveTab] = useState("all")
-  const [orders, setOrders] = useState([]) // State để lưu danh sách đơn hàng từ Firebase
-  const [loading, setLoading] = useState(true) // State để quản lý trạng thái loading
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [workerId, setWorkerId] = useState(null)
 
-  // Lấy dữ liệu từ Firebase khi component được mount
+  // Lấy workerId từ currentUser
   useEffect(() => {
+    if (!currentUser?.id) return
+    const fetchWorkerId = async () => {
+      const allWorkers = await import("../../services/workerService").then(m => m.default.getAllWorkers())
+      
+      const matchedWorker = allWorkers.find(w => String(w.userId) === String(currentUser.id))
+      if (matchedWorker) {
+        console.log("✅ Tìm thấy worker:", matchedWorker)
+        setWorkerId(matchedWorker.id)
+      } else {
+        console.log("❌ Không tìm thấy worker phù hợp userId")
+      }
+    }
+    fetchWorkerId()
+  }, [currentUser])
+
+  // Lắng nghe đơn hàng realtime
+  useEffect(() => {
+    if (!workerId) return
     setLoading(true)
-    // Sử dụng listener để dữ liệu tự động cập nhật khi có thay đổi trên Firebase
-    const unsubscribe = OrderService.listenToWorkerOrders(loggedInWorkerId, (workerOrders) => {
-      // Sắp xếp đơn hàng mới nhất lên đầu
+    const unsubscribe = OrderService.listenToWorkerOrders(workerId, (workerOrders) => {
+
       const sortedOrders = workerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
       setOrders(sortedOrders)
+      console.log("🚀 Đã cập nhật đơn hàng:", sortedOrders);
+      
       setLoading(false)
     })
-
-    // Cleanup listener khi component unmount
     return () => unsubscribe()
-  }, [loggedInWorkerId]) // Chạy lại effect nếu workerId thay đổi
+  }, [workerId])
 
-  // Lọc dữ liệu từ state 'orders' thay vì mock data
-  const filteredOrders = orders.filter((order) => {
-    if (activeTab === "all") return true
-    return order.status === activeTab
-  })
+  // Lọc theo tab
+  const filteredOrders = orders.filter(order => 
+    activeTab === "all" ? true : order.status === activeTab
+  )
 
-  // Hàm cập nhật trạng thái chung
+  // Hàm update trạng thái đơn
   const handleUpdateStatus = async (orderId, newStatus, confirmation) => {
+    console.log("🚀 Gọi handleUpdateStatus với:", { orderId, newStatus })
     Alert.alert(confirmation.title, confirmation.message, [
       { text: "Hủy", style: "cancel" },
       {
         text: confirmation.confirmText,
-        style: newStatus === "rejected" ? "destructive" : "default", // 'rejected' is a custom status, not in your data
+        style: newStatus === "rejected" ? "destructive" : "default",
         onPress: async () => {
           try {
+            console.log("OrderId,,", orderId);
+            
             await OrderService.updateOrderStatus(orderId, newStatus)
-            Alert.alert("Thành công", `Đã cập nhật trạng thái đơn hàng thành công!`)
-            // Không cần làm gì thêm, listener sẽ tự động cập nhật lại UI
+            console.log("✅ Đã gọi OrderService.updateOrderStatus")
+            Alert.alert("Thành công", "Đã cập nhật trạng thái đơn hàng thành công!")
           } catch (error) {
-            console.error("Failed to update order status:", error)
+            console.error("❌ Failed to update order status:", error)
             Alert.alert("Lỗi", "Không thể cập nhật trạng thái. Vui lòng thử lại.")
           }
         },
@@ -59,9 +72,9 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
     ])
   }
 
+  // Render từng đơn
   const renderOrder = ({ item }) => {
     const status = statusConfig[item.status] || statusConfig.default
-
     return (
       <TouchableOpacity style={styles.orderCard} onPress={() => onOrderPress(item)}>
         <View style={styles.orderHeader}>
@@ -70,9 +83,7 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
             <View>
               <Text style={styles.customerName}>{item.customer}</Text>
               <Text style={styles.orderService}>{item.service}</Text>
-              <Text style={styles.orderTime}>
-                📅 {item.date} - {item.time}
-              </Text>
+              <Text style={styles.orderTime}>📅 {item.date} - {item.time}</Text>
             </View>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
@@ -96,9 +107,9 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
               <TouchableOpacity
                 style={styles.rejectButton}
                 onPress={() => handleUpdateStatus(item.id, "rejected", {
-                    title: "Từ chối đơn",
-                    message: "Bạn có chắc muốn từ chối đơn hàng này?",
-                    confirmText: "Từ chối"
+                  title: "Từ chối đơn",
+                  message: "Bạn có chắc muốn từ chối đơn hàng này?",
+                  confirmText: "Từ chối"
                 })}
               >
                 <Text style={styles.rejectButtonText}>Từ chối</Text>
@@ -106,9 +117,9 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
               <TouchableOpacity
                 style={styles.acceptButton}
                 onPress={() => handleUpdateStatus(item.id, "accepted", {
-                    title: "Nhận đơn",
-                    message: "Bạn có chắc muốn nhận đơn hàng này?",
-                    confirmText: "Nhận đơn"
+                  title: "Nhận đơn",
+                  message: "Bạn có chắc muốn nhận đơn hàng này?",
+                  confirmText: "Nhận đơn"
                 })}
               >
                 <Text style={styles.acceptButtonText}>Nhận đơn</Text>
@@ -119,9 +130,9 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
             <TouchableOpacity
               style={styles.completeButton}
               onPress={() => handleUpdateStatus(item.id, "completed", {
-                  title: "Hoàn thành công việc",
-                  message: "Xác nhận đã hoàn thành công việc?",
-                  confirmText: "Hoàn thành"
+                title: "Hoàn thành công việc",
+                message: "Xác nhận đã hoàn thành công việc?",
+                confirmText: "Hoàn thành"
               })}
             >
               <Text style={styles.completeButtonText}>Hoàn thành</Text>
@@ -138,31 +149,17 @@ const WorkerOrdersScreen = ({ onTabPress, onOrderPress }) => {
         <Text style={styles.historyTitle}>Quản lý đơn hàng</Text>
       </View>
       <View style={styles.tabContainer}>
-        {/* Các tab không đổi */}
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "all" && styles.activeTab]}
-          onPress={() => setActiveTab("all")}
-        >
-          <Text style={[styles.tabText, activeTab === "all" && styles.activeTabText]}>Tất cả</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "pending" && styles.activeTab]}
-          onPress={() => setActiveTab("pending")}
-        >
-          <Text style={[styles.tabText, activeTab === "pending" && styles.activeTabText]}>Chờ xác nhận</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "accepted" && styles.activeTab]}
-          onPress={() => setActiveTab("accepted")}
-        >
-          <Text style={[styles.tabText, activeTab === "accepted" && styles.activeTabText]}>Đang làm</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "completed" && styles.activeTab]}
-          onPress={() => setActiveTab("completed")}
-        >
-          <Text style={[styles.tabText, activeTab === "completed" && styles.activeTabText]}>Hoàn thành</Text>
-        </TouchableOpacity>
+        {["all", "pending", "accepted", "completed"].map(tab => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tab, activeTab === tab && styles.activeTab]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+              {tab === "all" ? "Tất cả" : tab === "pending" ? "Chờ xác nhận" : tab === "accepted" ? "Đang làm" : "Hoàn thành"}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 20 }} />

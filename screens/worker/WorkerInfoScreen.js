@@ -1,90 +1,245 @@
 import { useState, useEffect } from "react"
-import { View, Text, ScrollView, ActivityIndicator, Switch, TouchableOpacity } from "react-native"
-import WorkerService from "../../services/workerService"
-import ServiceService from "../../services/serviceService"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  Switch,
+  ActivityIndicator
+} from "react-native"
 import { styles } from "../../styles/additional"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
+import WorkerService from "../../services/workerService"
+import UserService from "../../services/userService"
 
 const WorkerInfoScreen = ({ currentUser, onTabPress, onBack }) => {
+  const [isEditing, setIsEditing] = useState(false)
   const [workerInfo, setWorkerInfo] = useState(null)
-  const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchWorkerData = async () => {
       try {
         if (!currentUser?.id) return
+
         const allWorkers = await WorkerService.getAllWorkers()
         const worker = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-        setWorkerInfo(worker)
+        if (!worker) return
 
-        const allServices = await ServiceService.getAllServices()
-        setServices(allServices)
+        const user = await UserService.getUserById(worker.userId)
+
+        const totalIncome = 2400000 // fake data
+
+        setWorkerInfo({
+          ...worker,
+          email: user?.email,
+          specialty: user?.specialty,
+          completedOrders: user?.completedOrders,
+          certificate: user?.certificate,
+          area: user?.area,
+          income: totalIncome
+        })
       } catch (err) {
-        console.error("❌ Error loading data:", err)
+        console.error("❌ Error loading worker data:", err)
       } finally {
         setLoading(false)
       }
     }
-    fetchData()
+    fetchWorkerData()
   }, [currentUser])
 
+  const handleSave = async () => {
+    try {
+      await WorkerService.updateWorker(workerInfo.id, {
+        name: workerInfo.name,
+        phone: workerInfo.phone,
+        price: workerInfo.price,
+        experience: workerInfo.experience,
+        status: workerInfo.status
+      })
+      setIsEditing(false)
+    } catch (err) {
+      console.error("❌ Error saving worker:", err)
+    }
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+  }
+
+  const updateInfo = (field, value) => {
+    setWorkerInfo((prev) => ({ ...prev, [field]: value }))
+  }
+
   if (loading) {
-    return <ActivityIndicator size="large" color="#10b981" style={{ marginTop: 20 }} />
+    return (
+      <ActivityIndicator size="large" color="#10b981" style={{ marginTop: 20 }} />
+    )
   }
 
   if (!workerInfo) {
     return <Text style={{ textAlign: "center", marginTop: 20 }}>Không tìm thấy thông tin thợ.</Text>
   }
 
-  // 👉 map serviceId -> name
-  const serviceNames = (workerInfo.serviceId || [])
-    .map(id => services.find(s => String(s.id) === String(id))?.name)
-    .filter(Boolean)
-    .join(", ")
-
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.screenHeader}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Quay lại</Text>
         </TouchableOpacity>
         <Text style={styles.screenTitle}>Thông tin thợ</Text>
+        <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
+          <Text style={styles.editButton}>{isEditing ? "Hủy" : "Sửa"}</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Thông tin cơ bản</Text>
-        <Text style={styles.infoLabel}>Họ tên: <Text style={styles.infoValue}>{workerInfo.name}</Text></Text>
-        <Text style={styles.infoLabel}>Điện thoại: <Text style={styles.infoValue}>{workerInfo.phone}</Text></Text>
-        <Text style={styles.infoLabel}>Khu vực: <Text style={styles.infoValue}>{workerInfo.area}</Text></Text>
-      </View>
+      <ScrollView style={styles.workerInfoContent}>
+        <View style={styles.workerInfoAvatar}>
+          <Text style={styles.avatarIcon}>{workerInfo.avatar || "👨‍🔧"}</Text>
+          <Text style={styles.workerInfoName}>{workerInfo.name}</Text>
+          <Text style={styles.workerInfoSpecialty}>{workerInfo.specialty}</Text>
+          <View style={styles.workerInfoRating}>
+            <Text style={styles.ratingStars}>⭐⭐⭐⭐⭐</Text>
+            <Text style={styles.ratingText}>{workerInfo.rating} ({workerInfo.reviews} đánh giá)</Text>
+          </View>
+        </View>
 
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Nghề nghiệp</Text>
-        <Text style={styles.infoLabel}>Giá: <Text style={styles.infoValue}>{workerInfo.price}</Text></Text>
-        <Text style={styles.infoLabel}>Kinh nghiệm: <Text style={styles.infoValue}>{workerInfo.experience}</Text></Text>
-        <Text style={styles.infoLabel}>Dịch vụ: <Text style={styles.infoValue}>{serviceNames}</Text></Text>
-      </View>
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Thông tin cơ bản</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Họ tên</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.infoInput}
+                value={workerInfo.name}
+                onChangeText={(text) => updateInfo("name", text)}
+              />
+            ) : (
+              <Text style={styles.infoValue}>{workerInfo.name}</Text>
+            )}
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Số điện thoại</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.infoInput}
+                value={workerInfo.phone}
+                onChangeText={(text) => updateInfo("phone", text)}
+              />
+            ) : (
+              <Text style={styles.infoValue}>{workerInfo.phone}</Text>
+            )}
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Email</Text>
+            <Text style={styles.infoValue}>{workerInfo.email}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Khu vực</Text>
+            <Text style={styles.infoValue}>{workerInfo.area}</Text>
+          </View>
+        </View>
 
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Trạng thái làm việc</Text>
-        <Switch
-          value={workerInfo.status === "active" || workerInfo.status === true}
-          onValueChange={async (val) => {
-            try {
-              await WorkerService.updateWorker(workerInfo.id, { status: val ? true : false })
-              setWorkerInfo({ ...workerInfo, status: val ? true : false })
-            } catch (err) {
-              console.error("❌ Error updating status:", err)
-            }
-          }}
-          trackColor={{ false: "#e5e7eb", true: "#10b981" }}
-          thumbColor={workerInfo.status ? "#ffffff" : "#f3f4f6"}
-        />
-      </View>
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Thông tin nghề nghiệp</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Chuyên môn</Text>
+            <Text style={styles.infoValue}>{workerInfo.specialty}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Kinh nghiệm</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.infoInput}
+                value={workerInfo.experience}
+                onChangeText={(text) => updateInfo("experience", text)}
+              />
+            ) : (
+              <Text style={styles.infoValue}>{workerInfo.experience}</Text>
+            )}
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Giá theo giờ</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.infoInput}
+                value={workerInfo.price}
+                onChangeText={(text) => updateInfo("price", text)}
+              />
+            ) : (
+              <Text style={styles.infoValue}>{workerInfo.price}</Text>
+            )}
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Chứng chỉ</Text>
+            <Text style={styles.infoValue}>{workerInfo.certificate}</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Thống kê</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{workerInfo.completedOrders || 0}</Text>
+              <Text style={styles.statLabel}>Đơn hoàn thành</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{workerInfo.rating || 0}</Text>
+              <Text style={styles.statLabel}>Đánh giá TB</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>98%</Text>
+              <Text style={styles.statLabel}>Tỷ lệ hoàn thành</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{(workerInfo.income || 0).toLocaleString()}đ</Text>
+              <Text style={styles.statLabel}>Thu nhập tháng</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Trạng thái</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Sẵn sàng nhận việc</Text>
+            <Switch
+              value={workerInfo.status === true}
+              onValueChange={async (val) => {
+                try {
+                  await WorkerService.updateWorker(workerInfo.id, { status: val })
+                  setWorkerInfo({ ...workerInfo, status: val })
+                } catch (err) {
+                  console.error("❌ Error updating status:", err)
+                }
+              }}
+              trackColor={{ false: "#e5e7eb", true: "#10b981" }}
+              thumbColor={workerInfo.status ? "#ffffff" : "#f3f4f6"}
+            />
+          </View>
+        </View>
+
+        {isEditing && (
+          <View style={styles.editActions}>
+            <TouchableOpacity
+              style={styles.cancelEditButton}
+              onPress={handleCancel}
+            >
+              <Text style={styles.cancelEditButtonText}>Hủy</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.saveEditButton}
+              onPress={handleSave}
+            >
+              <Text style={styles.saveEditButtonText}>Lưu thay đổi</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
 
       <WorkerBottomNav onTabPress={onTabPress} activeTab="workerProfile" />
-    </ScrollView>
+    </SafeAreaView>
   )
 }
 

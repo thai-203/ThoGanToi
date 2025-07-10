@@ -94,8 +94,6 @@ class FirebaseService {
   // Cập nhật dữ liệu
   async update(path, data) {
     try {
-      console.log(path)
-      console.log(data)
       const dataRef = ref(database, path);
       const updateData = {
         ...data,

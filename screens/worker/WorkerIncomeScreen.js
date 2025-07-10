@@ -9,16 +9,18 @@ import {
 } from "react-native"
 import { styles } from "../../styles/styles"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
-import TransactionService from "../../services/transactionService"
+import OrderService from "../../services/orderService"
 import WorkerService from "../../services/workerService"
 
 const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
   const [selectedPeriod, setSelectedPeriod] = useState("month")
-  const [transactions, setTransactions] = useState([])
+  const [orders, setOrders] = useState([])
   const [incomeData, setIncomeData] = useState({
     total: 0,
     orders: 0,
     hours: 0,
+    gross: 0,
+    commission: 0
   })
   const [worker, setWorker] = useState(null)
 
@@ -36,19 +38,31 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
     }).format(amount)
   }
 
-  const filterTransactionsByPeriod = (transactions, period) => {
+  const parsePrice = (priceStr) => {
+    if (!priceStr) return 0
+    const numeric = priceStr.replace(/[^\d]/g, "")
+    return parseInt(numeric || "0")
+  }
+
+  const filterOrdersByPeriod = (orders, period) => {
     const now = new Date()
     const nowDateStr = now.toISOString().slice(0,10)
 
-    return transactions.filter(tx => {
-      if (!tx.date) return false
-      const [day, month, year] = tx.date.split("/").map(x => parseInt(x))
-      const txDate = new Date(year, month - 1, day)
-      const txDateStr = `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`
+    return orders.filter(order => {
+      if (!order.date) return false
+      let orderDate = new Date()
+      if (order.date.includes("/")) {
+        const [day, month, year] = order.date.split("/").map(x => parseInt(x))
+        orderDate = new Date(year, month - 1, day)
+      } else if (order.date.includes("-")) {
+        orderDate = new Date(order.date)
+      }
+
+      const orderDateStr = `${orderDate.getFullYear()}-${String(orderDate.getMonth()+1).padStart(2,"0")}-${String(orderDate.getDate()).padStart(2,"0")}`
 
       switch (period) {
         case "today":
-          return txDateStr === nowDateStr
+          return orderDateStr === nowDateStr
         case "week":
           const startOfWeek = new Date(now)
           startOfWeek.setDate(now.getDate() - now.getDay())
@@ -56,80 +70,73 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
           const endOfWeek = new Date(startOfWeek)
           endOfWeek.setDate(startOfWeek.getDate() + 6)
           endOfWeek.setHours(23,59,59,999)
-          return txDate >= startOfWeek && txDate <= endOfWeek
+          return orderDate >= startOfWeek && orderDate <= endOfWeek
         case "month":
-          return year === now.getFullYear() && month === (now.getMonth() + 1)
+          return orderDate.getFullYear() === now.getFullYear() && orderDate.getMonth() === now.getMonth()
         case "year":
-          return year === now.getFullYear()
+          return orderDate.getFullYear() === now.getFullYear()
         default:
           return false
       }
     })
   }
 
-  // 🔍 Debug current user
-  useEffect(() => {
-    console.log("👑 Current user:", currentUser)
-  }, [currentUser])
-
-  // 🔥 Load worker theo userId
   useEffect(() => {
     const loadWorker = async () => {
       if (!currentUser) return
       const allWorkers = await WorkerService.getAllWorkers()
-      console.log("📦 All workers:", allWorkers)
       const matched = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-      console.log("🎯 Matched worker from userId:", matched)
       setWorker(matched)
     }
     loadWorker()
   }, [currentUser])
 
-  // 🔥 Load transactions cho worker
   useEffect(() => {
     const loadIncomeData = async () => {
-      if (!worker) {
-        console.log("⏳ Chưa có worker, skip loadIncomeData")
-        return
-      }
+      if (!worker) return
 
-      console.log("🚀 Bắt đầu load transactions cho worker:", worker.id)
-      const allTransactions = await TransactionService.getTransactionsByWorkerId(worker.id)
-      console.log("💰 All transactions:", allTransactions)
+      const allOrders = await OrderService.getOrdersByWorker(worker.id)
+      const filtered = filterOrdersByPeriod(allOrders, selectedPeriod)
+      const completedOrders = filtered.filter(o =>
+        (o.status || "").toLowerCase() === "completed"
+      )
 
-      const filtered = filterTransactionsByPeriod(allTransactions, selectedPeriod)
-      console.log(`📊 Filtered transactions for ${selectedPeriod}:`, filtered)
+      const gross = completedOrders.reduce((sum, o) => sum + parsePrice(o.price), 0)
+      const commission = gross * 0.1
+      const workerReceived = gross - commission
+      const ordersCount = completedOrders.length
+      const hours = completedOrders.reduce((sum, o) => sum + (o.estimatedHours || 2), 0)
 
-      const total = filtered.reduce((sum, t) => sum + (t.workerReceived || 0), 0)
-      const orders = filtered.length
-      const hours = filtered.reduce((sum, t) => sum + (t.estimatedHours || 2), 0)
-
-      console.log("🔢 Calculated income:", { total, orders, hours })
-
-      setIncomeData({ total, orders, hours })
-      setTransactions(filtered)
+      setIncomeData({
+        total: workerReceived,
+        gross,
+        commission,
+        orders: ordersCount,
+        hours
+      })
+      setOrders(completedOrders)
     }
 
     loadIncomeData()
   }, [worker, selectedPeriod])
 
-  const renderTransaction = ({ item }) => (
+  const renderOrder = ({ item }) => (
     <View style={styles.transactionCard}>
       <View style={styles.transactionHeader}>
         <View style={styles.transactionInfo}>
           <Text style={styles.transactionDate}>{item.date}</Text>
-          <Text style={styles.transactionCustomer}>{item.customer}</Text>
-          <Text style={styles.transactionService}>{item.service}</Text>
+          <Text style={styles.transactionCustomer}>{item.customerName || item.customer || "Khách hàng"}</Text>
+          <Text style={styles.transactionService}>{item.serviceName || item.service}</Text>
         </View>
         <View style={styles.transactionAmounts}>
           <Text style={styles.transactionGrossAmount}>
-            {formatCurrency(item.amount)}
+            {formatCurrency(parsePrice(item.price))}
           </Text>
           <Text style={styles.transactionCommission}>
-            -{formatCurrency(item.commission)}
+            -{formatCurrency(parsePrice(item.price) * 0.1)}
           </Text>
           <Text style={styles.transactionNetAmount}>
-            {formatCurrency(item.workerReceived)}
+            {formatCurrency(parsePrice(item.price) * 0.9)}
           </Text>
         </View>
       </View>
@@ -165,9 +172,6 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
           <Text style={styles.backButton}>← Quay lại</Text>
         </TouchableOpacity>
         <Text style={styles.screenTitle}>Báo cáo thu nhập</Text>
-        <TouchableOpacity>
-          <Text style={styles.filterButton}>📊</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -236,14 +240,14 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
               <Text style={styles.incomeBreakdownIcon}>💰</Text>
               <Text style={styles.incomeBreakdownLabel}>Tổng doanh thu</Text>
               <Text style={styles.incomeBreakdownAmount}>
-                {formatCurrency(incomeData.total * 1.1)}
+                {formatCurrency(incomeData.gross)}
               </Text>
             </View>
             <View style={styles.incomeBreakdownCard}>
               <Text style={styles.incomeBreakdownIcon}>📊</Text>
               <Text style={styles.incomeBreakdownLabel}>Hoa hồng (10%)</Text>
               <Text style={styles.incomeBreakdownAmount}>
-                -{formatCurrency(incomeData.total * 0.1)}
+                -{formatCurrency(incomeData.commission)}
               </Text>
             </View>
             <View style={styles.incomeBreakdownCard}>
@@ -259,15 +263,12 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
         <View style={styles.recentTransactions}>
           <View style={styles.recentTransactionsHeader}>
             <Text style={styles.recentTransactionsTitle}>
-              Giao dịch gần đây
+              Đơn hàng gần đây
             </Text>
-            <TouchableOpacity>
-              <Text style={styles.viewAllTransactions}>Xem tất cả</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
-            data={transactions.slice(0, 5)}
-            renderItem={renderTransaction}
+            data={orders.slice(0, 5)}
+            renderItem={renderOrder}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             contentContainerStyle={styles.transactionsList}

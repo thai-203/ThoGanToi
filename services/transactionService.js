@@ -20,16 +20,16 @@ class TransactionService {
     try {
       const raw = await FirebaseService.readAll(this.basePath)
       const allTransactions = Array.isArray(raw) ? raw : Object.values(raw || {})
-      console.log("🔥 All transactions from DB:", allTransactions)
+
   
       allTransactions.forEach(t => {
-        console.log(`📝 Transaction id=${t.id}, workerId=${t.workerId}`)
+
       })
   
       const filtered = allTransactions.filter(
         t => String(t.workerId) === String(workerId)
       )
-      console.log("🚀 Filtered transactions by workerId:", filtered)
+
       return filtered
     } catch (error) {
       console.error("❌ Error getting transactions by workerId:", error)

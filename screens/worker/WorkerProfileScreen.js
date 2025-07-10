@@ -6,7 +6,7 @@ import { WorkerBottomNav } from "../../components/BottomNavigation"
 import WorkerEditProfileScreen from "./WorkerEditProfileScreen"
 import WorkerService from "../../services/workerService"
 import ServiceService from "../../services/serviceService"
-import TransactionService from "../../services/transactionService"
+import OrderService from "../../services/orderService"
 
 const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress }) => {
   const [isAvailable, setIsAvailable] = useState(true)
@@ -18,20 +18,32 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
   useEffect(() => {
     const loadWorkerInfo = async () => {
       if (!currentUser?.id) {
-        console.log("🚨 Không tìm thấy currentUser")
+        console.log("🚨 currentUser không có id:", currentUser)
+        setLoading(false)
         return
       }
+
       setLoading(true)
       try {
+        console.log("🚀 currentUser:", currentUser)
+        
         const [allWorkers, allServices] = await Promise.all([
           WorkerService.getAllWorkers(),
           ServiceService.getAllServices()
         ])
-        console.log("📦 Loaded workers:", allWorkers)
-        console.log("🛠 Loaded services:", allServices)
 
+        console.log("🛠 All workers:", allWorkers)
+        console.log("🔧 All services:", allServices)
+
+        // Log từng worker để thấy userId
+        allWorkers.forEach(w => {
+          console.log(`👉 Worker ID: ${w.id}, userId: ${w.userId}, name: ${w.name}`)
+        })
+
+        // Tìm worker có userId khớp currentUser.id
         const worker = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-        console.log("🎯 Matched worker:", worker)
+        
+        console.log("🎯 Worker tìm được:", worker)
 
         if (worker) {
           const serviceNames = (worker.serviceId || [])
@@ -56,19 +68,41 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
           setIsAvailable(worker.status === "active" || worker.status === true)
 
           // 🎯 Tính thu nhập tháng này
+          const allOrders = await OrderService.getOrdersByWorker(worker.id)
+          console.log("📦 Orders của worker:", allOrders)
+
           const now = new Date()
-          const transactions = await TransactionService.getTransactionsByWorkerAndMonth(
-            worker.id, now.getMonth() + 1, now.getFullYear()
-          )
-          console.log("💸 Transactions this month:", transactions)
-          const income = transactions.reduce((acc, tx) => acc + (tx.workerReceived || 0), 0)
-          console.log("💵 Monthly income:", income)
+          const monthlyOrders = allOrders.filter(o => {
+            if (!o.date) return false
+            let orderDate = new Date()
+            if (o.date.includes("/")) {
+              const [day, month, year] = o.date.split("/").map(x => parseInt(x))
+              orderDate = new Date(year, month - 1, day)
+            } else if (o.date.includes("-")) {
+              orderDate = new Date(o.date)
+            }
+            return (
+              orderDate.getFullYear() === now.getFullYear() &&
+              orderDate.getMonth() === now.getMonth() &&
+              (o.status || "").toLowerCase() === "completed"
+            )
+          })
+          console.log("✅ monthlyOrders:", monthlyOrders)
+
+          const parsePrice = (priceStr) => {
+            if (!priceStr) return 0
+            const numeric = priceStr.replace(/[^\d]/g, "")
+            return parseInt(numeric || "0")
+          }
+
+          const gross = monthlyOrders.reduce((sum, o) => sum + parsePrice(o.price), 0)
+          const income = gross - gross * 0.1
+
           setMonthlyIncome(income)
-        } else {
-          console.log("⚠️ Không tìm thấy worker tương ứng userId")
         }
       } catch (err) {
-        console.error("❌ Lỗi load worker:", err)
+        console.error("❌ Lỗi khi load thông tin thợ:", err)
+        Alert.alert("Lỗi", "Không thể tải dữ liệu thợ.")
       } finally {
         setLoading(false)
       }
@@ -82,8 +116,9 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
     if (!userInfo) return
     try {
       await WorkerService.updateWorker(userInfo.id, { status: value ? true : false })
+      console.log("🔄 Đã cập nhật trạng thái thợ:", value)
     } catch (err) {
-      console.error("❌ Error updating availability:", err)
+      console.error("❌ Lỗi cập nhật trạng thái thợ:", err)
       Alert.alert("Lỗi", "Không thể cập nhật trạng thái làm việc.")
     }
   }
@@ -109,6 +144,7 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
   }
 
   if (!userInfo) {
+    console.log("❗ Không tìm thấy userInfo.")
     return (
       <SafeAreaView style={styles.container}>
         <Text style={{ textAlign: "center", marginTop: 20 }}>Không tìm thấy thông tin thợ.</Text>
@@ -185,7 +221,6 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
               <Text style={styles.earningsAmount}>
                 {monthlyIncome.toLocaleString("vi-VN")}đ
               </Text>
-              
             </View>
             <TouchableOpacity style={styles.earningsButton} onPress={() => handleMenuPress("workerIncome")}>
               <Text style={styles.earningsButtonText}>Chi tiết</Text>
