@@ -91,6 +91,46 @@ export const styles = StyleSheet.create({
     marginBottom: 2,
   },
 
+  // Forgot Password Styles
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginBottom: 15,
+    padding: 8, // Thêm padding để dễ nhấn hơn
+    borderRadius: 4,
+  },
+  forgotPasswordText: {
+    color: "#2563eb",
+    fontSize: 14,
+    fontWeight: "600",
+    textDecorationLine: "underline", // Thêm gạch chân để rõ ràng hơn
+  },
+
+  // OTP Input Styles
+  otpInput: {
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+    letterSpacing: 8,
+  },
+
+  // Resend OTP Styles
+  resendContainer: {
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  countdownText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  resendButton: {
+    padding: 10,
+  },
+  resendButtonText: {
+    color: "#2563eb",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
   // Home Screen Styles
   homeHeader: {
     padding: 20,
@@ -1276,7 +1316,7 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Thêm styles cho admin screens
+  // Admin Styles
   adminHeader: {
     backgroundColor: "#7c3aed",
     padding: 20,
@@ -1290,6 +1330,11 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "white",
+  },
+  adminSubtitle: {
+    color: "white",
+    fontSize: 14,
+    opacity: 0.9,
   },
   adminStatsGrid: {
     flexDirection: "row",
@@ -1326,11 +1371,17 @@ export const styles = StyleSheet.create({
     color: "#6b7280",
     textAlign: "center",
   },
+  adminMenuGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
   adminMenuCard: {
     backgroundColor: "white",
     borderRadius: 15,
     padding: 20,
-    margin: 10,
+    width: "48%",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "#e5e7eb",
     shadowColor: "#000",
@@ -1342,20 +1393,45 @@ export const styles = StyleSheet.create({
   adminMenuIcon: {
     fontSize: 32,
     marginBottom: 10,
-    textAlign: "center",
   },
   adminMenuTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#1f2937",
     textAlign: "center",
-    marginBottom: 5,
   },
   adminMenuDescription: {
     fontSize: 12,
     color: "#6b7280",
     textAlign: "center",
+    marginTop: 5,
   },
+
+  // Quick Stats
+  quickStatsContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 15,
+    gap: 20,
+  },
+  quickStatItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  quickStatNumber: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#7c3aed",
+    marginBottom: 4,
+  },
+  quickStatLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center",
+  },
+
+  // User Management Styles
   userCard: {
     backgroundColor: "white",
     borderRadius: 15,
@@ -1381,17 +1457,6 @@ export const styles = StyleSheet.create({
   },
   userInfo: {
     flex: 1,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1f2937",
-    marginBottom: 2,
-  },
-  userPhone: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginBottom: 2,
   },
   userRole: {
     fontSize: 12,
@@ -1441,71 +1506,6 @@ export const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     fontWeight: "600",
-  },
-  // Thêm styles cho quick stats
-  quickStatsContainer: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 15,
-    gap: 20,
-  },
-  quickStatItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  quickStatNumber: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#7c3aed",
-    marginBottom: 4,
-  },
-  quickStatLabel: {
-    fontSize: 12,
-    color: "#6b7280",
-    textAlign: "center",
-  },
-
-  // Admin styles bổ sung
-  adminSubtitle: {
-    color: "white",
-    fontSize: 14,
-    opacity: 0.9,
-  },
-  adminMenuGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  adminMenuCard: {
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 20,
-    width: "48%",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  adminMenuIcon: {
-    fontSize: 32,
-    marginBottom: 10,
-  },
-  adminMenuTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#1f2937",
-    textAlign: "center",
-  },
-  adminMenuDescription: {
-    fontSize: 12,
-    color: "#6b7280",
-    textAlign: "center",
-    marginTop: 5,
   },
 
   // Service Management Styles

@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { StatusBar } from "react-native"
+import { StatusBar, Platform } from "react-native"
 
 // Screen imports
 import LoginScreen from "./screens/LoginScreen"
+import ForgotPasswordScreen from "./screens/ForgotPasswordScreen"
 import HomeScreen from "./screens/customer/HomeScreen"
 import WorkerListScreen from "./screens/customer/WorkerListScreen"
 import WorkerDetailScreen from "./screens/customer/WorkerDetailScreen"
@@ -15,7 +16,7 @@ import WorkerOrdersScreen from "./screens/worker/WorkerOrdersScreen"
 import WorkerOrderDetailScreen from "./screens/worker/WorkerOrderDetailScreen"
 import WorkerProfileScreen from "./screens/worker/WorkerProfileScreen"
 
-// Cập nhật imports để thêm admin screens
+// Admin screens
 import AdminDashboardScreen from "./screens/admin/AdminDashboardScreen"
 import UserManagementScreen from "./screens/admin/UserManagementScreen"
 import OrderManagementScreen from "./screens/admin/OrderManagementScreen"
@@ -29,21 +30,16 @@ import AreaManagementScreen from "./screens/admin/AreaManagementScreen"
 import AdminAccountManagementScreen from "./screens/admin/AdminAccountManagementScreen"
 import SystemSettingsScreen from "./screens/admin/SystemSettingsScreen"
 import SystemLogsScreen from "./screens/admin/SystemLogsScreen"
-
-// Thêm vào phần imports
 import RegisterScreen from "./screens/RegisterScreen"
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState("login")
-  const [userType, setUserType] = useState("customer") // 'customer' or 'worker'
+  const [userType, setUserType] = useState("customer")
   const [selectedService, setSelectedService] = useState(null)
   const [selectedWorker, setSelectedWorker] = useState(null)
   const [selectedOrder, setSelectedOrder] = useState(null)
-
-  // Cập nhật state để thêm currentUser
   const [currentUser, setCurrentUser] = useState(null)
 
-  // Cập nhật handleLogin để nhận user data
   const handleLogin = (role, user) => {
     setUserType(role)
     setCurrentUser(user)
@@ -56,9 +52,14 @@ export default function App() {
     }
   }
 
-  // Thêm function handleRegister sau handleLogin:
   const handleRegister = () => {
     setCurrentScreen("login")
+  }
+
+  // Sửa lại hàm handleForgotPassword
+  const handleForgotPassword = () => {
+    console.log("Navigating to forgot password screen")
+    setCurrentScreen("forgotPassword")
   }
 
   const handleServicePress = (service) => {
@@ -77,14 +78,12 @@ export default function App() {
     setCurrentScreen("workerOrderDetail")
   }
 
-  // Thêm handleMenuPress cho admin
   const handleMenuPress = (screen) => {
     if (screen) {
       setCurrentScreen(screen)
     }
   }
 
-  // Cập nhật handleTabPress để thêm admin navigation
   const handleTabPress = (tab) => {
     if (userType === "customer") {
       if (tab === "home") {
@@ -115,7 +114,6 @@ export default function App() {
     }
   }
 
-  // Cập nhật handleBack để thêm admin navigation
   const handleBack = () => {
     if (currentScreen === "workerDetail") {
       setCurrentScreen("workerList")
@@ -123,6 +121,8 @@ export default function App() {
       setCurrentScreen("home")
     } else if (currentScreen === "workerOrderDetail") {
       setCurrentScreen("workerOrders")
+    } else if (currentScreen === "forgotPassword") {
+      setCurrentScreen("login")
     } else if (
       currentScreen === "userManagement" ||
       currentScreen === "orderManagement" ||
@@ -140,18 +140,28 @@ export default function App() {
     }
   }
 
-  // Cập nhật handleLogout để reset currentUser
   const handleLogout = () => {
     setCurrentScreen("login")
     setUserType("customer")
     setCurrentUser(null)
   }
 
-  // Render current screen
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case "login":
-        return <LoginScreen onLogin={handleLogin} onRegister={() => setCurrentScreen("register")} />
+        return (
+          <LoginScreen
+            onLogin={handleLogin}
+            onRegister={() => setCurrentScreen("register")}
+            onForgotPassword={handleForgotPassword}
+          />
+        )
+
+      case "forgotPassword":
+        return <ForgotPasswordScreen onBackToLogin={() => setCurrentScreen("login")} />
+
+      case "register":
+        return <RegisterScreen onRegister={handleRegister} onBackToLogin={() => setCurrentScreen("login")} />
 
       // Customer Screens
       case "home":
@@ -189,7 +199,6 @@ export default function App() {
       case "workerProfile":
         return <WorkerProfileScreen onTabPress={handleTabPress} onLogout={handleLogout} />
 
-      // Thêm admin screens vào renderCurrentScreen
       // Admin Screens
       case "adminDashboard":
         return (
@@ -227,18 +236,14 @@ export default function App() {
       case "systemLogs":
         return <SystemLogsScreen onTabPress={handleTabPress} onBack={handleBack} />
 
-      // Trong renderCurrentScreen, thêm case này:
-      case "register":
-        return <RegisterScreen onRegister={handleRegister} onBackToLogin={() => setCurrentScreen("login")} />
-
       default:
-        return <LoginScreen onLogin={handleLogin} />
+        return <LoginScreen onLogin={handleLogin} onForgotPassword={handleForgotPassword} />
     }
   }
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
+      {Platform.OS !== "web" && <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />}
       {renderCurrentScreen()}
     </>
   )

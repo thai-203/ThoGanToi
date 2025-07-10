@@ -7,7 +7,7 @@ import UserService from "../services/userService"
 import DataInitializer from "../utils/dataInitializer"
 import { users } from "../data/mockData" // Fallback data
 
-const LoginScreen = ({ onLogin, onRegister }) => {
+const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -117,6 +117,16 @@ const LoginScreen = ({ onLogin, onRegister }) => {
             secureTextEntry
             editable={!loading}
           />
+
+          {/* Forgot Password Link */}
+          <TouchableOpacity
+            style={styles.forgotPasswordButton}
+            onPress={() => onForgotPassword && onForgotPassword()}
+            disabled={loading}
+          >
+            <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
+          </TouchableOpacity>
+
           <View style={styles.loginInfo}>
             <Text style={styles.loginInfoText}>Tài khoản demo:</Text>
             <Text style={styles.loginInfoText}>• Admin: 0123456789</Text>
@@ -124,6 +134,7 @@ const LoginScreen = ({ onLogin, onRegister }) => {
             <Text style={styles.loginInfoText}>• Worker: 0444444444</Text>
             <Text style={styles.loginInfoText}>Mật khẩu: 123456</Text>
           </View>
+
           <TouchableOpacity
             style={[styles.loginButton, loading && { opacity: 0.7 }]}
             onPress={handleLogin}
@@ -131,6 +142,7 @@ const LoginScreen = ({ onLogin, onRegister }) => {
           >
             {loading ? <ActivityIndicator color="white" /> : <Text style={styles.loginButtonText}>Đăng nhập</Text>}
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.registerButton} disabled={loading} onPress={() => onRegister && onRegister()}>
             <Text style={styles.registerButtonText}>Chưa có tài khoản? Đăng ký</Text>
           </TouchableOpacity>
