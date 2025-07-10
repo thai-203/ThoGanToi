@@ -27,6 +27,17 @@ class WorkerService {
     }
   }
 
+  async getWorkerByUserId(userId) {
+  try {
+    const allWorkers = await FirebaseService.readAllWithKeys(this.basePath)
+    const worker = allWorkers.find((w) => String(w.userId) === String(userId))
+    return worker || null
+  } catch (error) {
+    console.error("Error getting worker by userId:", error)
+    throw error
+  }
+}
+
   async getAllWorkers() {
     try {
       const allUsers = await FirebaseService.readAll(this.basePath)

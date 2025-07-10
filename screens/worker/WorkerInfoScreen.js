@@ -42,7 +42,7 @@ const WorkerInfoScreen = ({ currentUser, onTabPress, onBack }) => {
           income: totalIncome
         })
       } catch (err) {
-        console.error("❌ Error loading worker data:", err)
+        // Do nothing for now
       } finally {
         setLoading(false)
       }
@@ -61,7 +61,7 @@ const WorkerInfoScreen = ({ currentUser, onTabPress, onBack }) => {
       })
       setIsEditing(false)
     } catch (err) {
-      console.error("❌ Error saving worker:", err)
+      // Handle error
     }
   }
 
@@ -211,7 +211,7 @@ const WorkerInfoScreen = ({ currentUser, onTabPress, onBack }) => {
                   await WorkerService.updateWorker(workerInfo.id, { status: val })
                   setWorkerInfo({ ...workerInfo, status: val })
                 } catch (err) {
-                  console.error("❌ Error updating status:", err)
+                  // Handle error
                 }
               }}
               trackColor={{ false: "#e5e7eb", true: "#10b981" }}

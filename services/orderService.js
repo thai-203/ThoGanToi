@@ -101,7 +101,7 @@ class OrderService {
     });
   }
 
-  // 👇 Real-time listener for a specific worker's orders
+  // 👇 Real-time listener for a specific worker's order
   listenToWorkerOrders(workerId, callback) {
     return FirebaseService.listen(this.basePath, (data) => {
       
