@@ -42,7 +42,6 @@ const WorkerManagementScreen = ({ onTabPress, onBack }) => {
   });
 
   const handleApproveWorker = (workerId) => {
-    console.log(workerId)
     Alert.alert("Duyệt hồ sơ", "Bạn có chắc muốn duyệt hồ sơ này?", [
       { text: "Hủy", style: "cancel" },
       {

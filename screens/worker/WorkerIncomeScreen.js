@@ -82,18 +82,15 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
   }
 
   useEffect(() => {
-    console.log("🚀 currentUser:", currentUser)
     const loadWorker = async () => {
       if (!currentUser) return
       const allWorkers = await WorkerService.getAllWorkers()
-      console.log("🛠 All workers:", allWorkers)
 
       allWorkers.forEach(w => {
         console.log(`🔍 So sánh userId: ${w.userId} === ${currentUser.id}`, String(w.userId) === String(currentUser.id))
       })
 
       const matched = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-      console.log("🎯 Worker tìm thấy:", matched)
       setWorker(matched)
     }
     loadWorker()
@@ -102,18 +99,11 @@ const WorkerIncomeScreen = ({ onTabPress, onBack, currentUser }) => {
   useEffect(() => {
     const loadIncomeData = async () => {
       if (!worker) return
-      console.log("📌 Worker đang load income:", worker)
-
       const allOrders = await OrderService.getOrdersByWorker(worker.id)
-      console.log("📦 Orders lấy về:", allOrders)
-
       const filtered = filterOrdersByPeriod(allOrders, selectedPeriod)
-      console.log(`📊 Orders lọc theo period "${selectedPeriod}":`, filtered)
-
       const completedOrders = filtered.filter(o =>
         (o.status || "").toLowerCase() === "completed"
       )
-      console.log("✅ Completed orders:", completedOrders)
 
       const gross = completedOrders.reduce((sum, o) => sum + parsePrice(o.price), 0)
       const commission = gross * 0.1

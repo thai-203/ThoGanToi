@@ -70,7 +70,6 @@ const AddressManagementScreen = ({ onTabPress, onBack }) => {
 
     try {
       if (editingAddress) {
-        console.log(editingAddress.id)
         await addressService.updateAddress(editingAddress.id, { title, address, phone });
         Alert.alert("Thành công", "Đã cập nhật địa chỉ");
       } else {

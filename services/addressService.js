@@ -71,7 +71,6 @@ class AddressService {
 
       Object.entries(allAddresses).forEach(([key, address]) => {
         if (address.userId === userId) {
-          console.log(address)
           updates[`${address.id}/isDefault`] = address.id === addressId;
         }
       });

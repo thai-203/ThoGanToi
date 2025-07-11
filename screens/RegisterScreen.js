@@ -104,7 +104,7 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
           experience: formData.experience,
           certificate: formData.certificate,
           area: formData.area || "TP.HCM",
-          status: "pending",
+          status: "false",
           rating: 0,
           completedOrders: 0,
           price: "Thỏa thuận",

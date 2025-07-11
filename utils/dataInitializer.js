@@ -200,7 +200,6 @@ class DataInitializer {
     try {
       console.log("Checking Firebase connection...")
 
-      // Check if Firebase is available
       const isConnected = await this.checkFirebaseConnection()
       if (!isConnected) {
         console.log("Firebase not available, skipping data initialization")
