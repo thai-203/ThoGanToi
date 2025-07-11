@@ -1,16 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { StatusBar, Platform } from "react-native"
+import { StatusBar } from "react-native"
 
 // Screen imports
 import LoginScreen from "./screens/LoginScreen"
 import ForgotPasswordScreen from "./screens/ForgotPasswordScreen"
+import RegisterScreen from "./screens/RegisterScreen"
+
+// Customer screens
 import HomeScreen from "./screens/customer/HomeScreen"
 import WorkerListScreen from "./screens/customer/WorkerListScreen"
 import WorkerDetailScreen from "./screens/customer/WorkerDetailScreen"
 import BookingHistoryScreen from "./screens/customer/BookingHistoryScreen"
 import ProfileScreen from "./screens/customer/ProfileScreen"
+
+// Worker screens
 import WorkerDashboardScreen from "./screens/worker/WorkerDashboardScreen"
 import WorkerOrdersScreen from "./screens/worker/WorkerOrdersScreen"
 import WorkerOrderDetailScreen from "./screens/worker/WorkerOrderDetailScreen"
@@ -30,7 +35,6 @@ import AreaManagementScreen from "./screens/admin/AreaManagementScreen"
 import AdminAccountManagementScreen from "./screens/admin/AdminAccountManagementScreen"
 import SystemSettingsScreen from "./screens/admin/SystemSettingsScreen"
 import SystemLogsScreen from "./screens/admin/SystemLogsScreen"
-import RegisterScreen from "./screens/RegisterScreen"
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState("login")
@@ -56,9 +60,7 @@ export default function App() {
     setCurrentScreen("login")
   }
 
-  // Sửa lại hàm handleForgotPassword
   const handleForgotPassword = () => {
-    console.log("Navigating to forgot password screen")
     setCurrentScreen("forgotPassword")
   }
 
@@ -70,6 +72,14 @@ export default function App() {
   const handleWorkerPress = (worker, service) => {
     setSelectedWorker(worker)
     setSelectedService(service)
+    setSelectedOrder(null)
+    setCurrentScreen("workerDetail")
+  }
+
+  const handleRebook = (worker, service, order) => {
+    setSelectedWorker(worker)
+    setSelectedService(service)
+    setSelectedOrder(order)
     setCurrentScreen("workerDetail")
   }
 
@@ -115,28 +125,36 @@ export default function App() {
   }
 
   const handleBack = () => {
-    if (currentScreen === "workerDetail") {
-      setCurrentScreen("workerList")
-    } else if (currentScreen === "workerList") {
-      setCurrentScreen("home")
-    } else if (currentScreen === "workerOrderDetail") {
-      setCurrentScreen("workerOrders")
-    } else if (currentScreen === "forgotPassword") {
-      setCurrentScreen("login")
-    } else if (
-      currentScreen === "userManagement" ||
-      currentScreen === "orderManagement" ||
-      currentScreen === "customerManagement" ||
-      currentScreen === "workerManagement" ||
-      currentScreen === "serviceManagement" ||
-      currentScreen === "reviewManagement" ||
-      currentScreen === "paymentManagement" ||
-      currentScreen === "areaManagement" ||
-      currentScreen === "adminAccountManagement" ||
-      currentScreen === "systemSettings" ||
-      currentScreen === "systemLogs"
-    ) {
-      setCurrentScreen("adminDashboard")
+    const backNavigation = {
+      workerDetail: "workerList",
+      workerList: "home",
+      workerOrderDetail: "workerOrders",
+      forgotPassword: "login",
+      register: "login",
+      userManagement: "adminDashboard",
+      orderManagement: "adminDashboard",
+      customerManagement: "adminDashboard",
+      workerManagement: "adminDashboard",
+      serviceManagement: "adminDashboard",
+      reviewManagement: "adminDashboard",
+      paymentManagement: "adminDashboard",
+      areaManagement: "adminDashboard",
+      adminAccountManagement: "adminDashboard",
+      systemSettings: "adminDashboard",
+      systemLogs: "adminDashboard",
+    }
+
+    const backScreen = backNavigation[currentScreen]
+    if (backScreen) {
+      setCurrentScreen(backScreen)
+    } else {
+      if (userType === "customer") {
+        setCurrentScreen("home")
+      } else if (userType === "worker") {
+        setCurrentScreen("workerDashboard")
+      } else if (userType === "admin") {
+        setCurrentScreen("adminDashboard")
+      }
     }
   }
 
@@ -182,12 +200,20 @@ export default function App() {
             service={selectedService}
             onBack={handleBack}
             onTabPress={handleTabPress}
+            previousOrder={selectedOrder}
           />
         )
       case "history":
-        return <BookingHistoryScreen onTabPress={handleTabPress} />
+        return <BookingHistoryScreen onTabPress={handleTabPress} onRebook={handleRebook} />
       case "profile":
-        return <ProfileScreen onTabPress={handleTabPress} onLogout={handleLogout} />
+        return (
+          <ProfileScreen
+            onTabPress={handleTabPress}
+            onLogout={handleLogout}
+            currentUser={currentUser}
+            onMenuPress={handleMenuPress}
+          />
+        )
 
       // Worker Screens
       case "workerDashboard":
@@ -243,7 +269,7 @@ export default function App() {
 
   return (
     <>
-      {Platform.OS !== "web" && <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />}
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       {renderCurrentScreen()}
     </>
   )

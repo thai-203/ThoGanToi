@@ -5,7 +5,8 @@ import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityI
 import { styles } from "../styles/styles"
 import UserService from "../services/userService"
 import DataInitializer from "../utils/dataInitializer"
-import { users } from "../data/mockData" // Fallback data
+import { users } from "../data/mockData"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
   const [phone, setPhone] = useState("")
@@ -53,6 +54,7 @@ const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
         // Try Firebase first
         try {
           user = await UserService.authenticateUser(phone, password)
+          await AsyncStorage.setItem("currentUserId", user.id)
         } catch (error) {
           console.error("Firebase authentication error:", error)
           // Fall back to mock data
@@ -118,12 +120,7 @@ const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
             editable={!loading}
           />
 
-          {/* Forgot Password Link */}
-          <TouchableOpacity
-            style={styles.forgotPasswordButton}
-            onPress={() => onForgotPassword && onForgotPassword()}
-            disabled={loading}
-          >
+          <TouchableOpacity style={styles.forgotPasswordButton} onPress={onForgotPassword} disabled={loading}>
             <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
           </TouchableOpacity>
 
@@ -143,7 +140,7 @@ const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
             {loading ? <ActivityIndicator color="white" /> : <Text style={styles.loginButtonText}>Đăng nhập</Text>}
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.registerButton} disabled={loading} onPress={() => onRegister && onRegister()}>
+          <TouchableOpacity style={styles.registerButton} onPress={onRegister} disabled={loading}>
             <Text style={styles.registerButtonText}>Chưa có tài khoản? Đăng ký</Text>
           </TouchableOpacity>
         </View>

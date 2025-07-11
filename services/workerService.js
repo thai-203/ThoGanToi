@@ -2,158 +2,106 @@ import FirebaseService from "./firebaseService"
 
 class WorkerService {
   constructor() {
-    this.basePath = "workers"
+    this.workers = [
+      {
+        id: "1",
+        userId: "3",
+        name: "Trần Văn B",
+        phone: "0444444444",
+        email: "worker@test.com",
+        specialty: "Thợ điện",
+        experience: "5 năm kinh nghiệm",
+        certificate: "Chứng chỉ điện công nghiệp",
+        area: "Quận 3, TP.HCM",
+        status: "active",
+        rating: 4.8,
+        completedOrders: 156,
+        price: "200,000đ/giờ",
+        avatar: "👨‍🔧",
+        reviews: 89,
+      },
+    ]
   }
 
   async createWorker(workerData) {
     try {
-      const workerId = await FirebaseService.create(this.basePath, workerData)
-      return workerId
-    } catch (error) {
-      console.error("Error creating worker:", error)
-      throw error
-    }
-  }
+      const newWorker = {
+        ...workerData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+      }
 
-  async getWorkerById(workerId) {
-    try {
-      const worker = await FirebaseService.read(`${this.basePath}/${workerId}`)
-      return worker
-    } catch (error) {
-      console.error("Error getting worker:", error)
-      throw error
-    }
-  }
+      // Try Firebase first
+      if (FirebaseService.isFirebaseConnected()) {
+        const firebaseId = await FirebaseService.create("workers", newWorker)
+        newWorker.firebaseId = firebaseId
+      }
 
-  async getWorkerByUserId(userId) {
-    try {
-      const workers = await FirebaseService.queryByField(this.basePath, "userId", userId)
-      return workers.length > 0 ? workers[0] : null
+      // Always add to local storage as backup
+      this.workers.push(newWorker)
+      return newWorker.id
     } catch (error) {
-      console.error("Error getting worker by userId:", error)
-      throw error
+      console.error("Create worker error:", error)
+      // Fallback to local only
+      const newWorker = {
+        ...workerData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+      }
+      this.workers.push(newWorker)
+      return newWorker.id
     }
   }
 
   async getAllWorkers() {
     try {
-      const workers = await FirebaseService.readAll(this.basePath)
-      return workers
-    } catch (error) {
-      console.error("Error getting all workers:", error)
-      throw error
-    }
-  }
+      // Try Firebase first
+      if (FirebaseService.isFirebaseConnected()) {
+        const firebaseWorkers = await FirebaseService.readAll("workers")
+        return [...firebaseWorkers, ...this.workers]
+      }
 
-  async getWorkersByStatus(status) {
-    try {
-      const workers = await FirebaseService.queryByField(this.basePath, "status", status)
-      return workers
+      return this.workers
     } catch (error) {
-      console.error("Error getting workers by status:", error)
-      throw error
+      console.error("Get all workers error:", error)
+      return this.workers
     }
   }
 
   async getActiveWorkers() {
     try {
-      const workers = await FirebaseService.queryByField(this.basePath, "status", "active")
-      return workers
+      const allWorkers = await this.getAllWorkers()
+      return allWorkers.filter((worker) => worker.status === "active")
     } catch (error) {
-      console.error("Error getting active workers:", error)
-      throw error
-    }
-  }
-
-  async getPendingWorkers() {
-    try {
-      const workers = await FirebaseService.queryByField(this.basePath, "status", "pending")
-      return workers
-    } catch (error) {
-      console.error("Error getting pending workers:", error)
-      throw error
-    }
-  }
-
-  async updateWorker(workerId, workerData) {
-    try {
-      await FirebaseService.update(`${this.basePath}/${workerId}`, workerData)
-      return true
-    } catch (error) {
-      console.error("Error updating worker:", error)
-      throw error
+      console.error("Get active workers error:", error)
+      return this.workers.filter((worker) => worker.status === "active")
     }
   }
 
   async updateWorkerStatus(workerId, status) {
     try {
-      await FirebaseService.update(`${this.basePath}/${workerId}`, { status })
-      return true
-    } catch (error) {
-      console.error("Error updating worker status:", error)
-      throw error
-    }
-  }
-
-  async approveWorker(workerId) {
-    try {
-      await this.updateWorkerStatus(workerId, "active")
-      return true
-    } catch (error) {
-      console.error("Error approving worker:", error)
-      throw error
-    }
-  }
-
-  async rejectWorker(workerId) {
-    try {
-      await this.updateWorkerStatus(workerId, "rejected")
-      return true
-    } catch (error) {
-      console.error("Error rejecting worker:", error)
-      throw error
-    }
-  }
-
-  async deleteWorker(workerId) {
-    try {
-      await FirebaseService.delete(`${this.basePath}/${workerId}`)
-      return true
-    } catch (error) {
-      console.error("Error deleting worker:", error)
-      throw error
-    }
-  }
-
-  // Real-time listener for workers
-  listenToWorkers(callback) {
-    return FirebaseService.listen(this.basePath, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        const workers = Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-        callback(workers)
-      } else {
-        callback([])
+      // Try Firebase first
+      if (FirebaseService.isFirebaseConnected()) {
+        await FirebaseService.update(`workers/${workerId}`, { status })
       }
-    })
-  }
 
-  // Listen to pending workers for admin approval
-  listenToPendingWorkers(callback) {
-    return FirebaseService.listen(this.basePath, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        const pendingWorkers = Object.keys(data)
-          .map((key) => ({ ...data[key], id: key }))
-          .filter((worker) => worker.status === "pending")
-        callback(pendingWorkers)
-      } else {
-        callback([])
+      // Update local data
+      const workerIndex = this.workers.findIndex((w) => w.id === workerId)
+      if (workerIndex !== -1) {
+        this.workers[workerIndex].status = status
+        return true
       }
-    })
+      return false
+    } catch (error) {
+      console.error("Update worker status error:", error)
+      // Fallback to local data only
+      const workerIndex = this.workers.findIndex((w) => w.id === workerId)
+      if (workerIndex !== -1) {
+        this.workers[workerIndex].status = status
+        return true
+      }
+      return false
+    }
   }
 }
 

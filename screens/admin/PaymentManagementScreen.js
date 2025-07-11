@@ -1,207 +1,254 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
-import { styles } from "../../styles/styles"
-import { reviews } from "../../data/mockData"
-import { AdminBottomNav } from "../../components/BottomNavigation"
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import orderService from "../../services/orderService";
 
-const ReviewManagementScreen = ({ onTabPress, onBack }) => {
-  const [reviewList, setReviewList] = useState(reviews)
-  const [searchText, setSearchText] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+const PaymentManagementScreen = ({ onTabPress, onBack }) => {
+  const [orders, setOrders] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [commissionRate, setCommissionRate] = useState(10);
 
-  const filteredReviews = reviewList.filter((review) => {
+  useEffect(() => {
+    fetchData();
+  }, [commissionRate]);
+
+  const fetchData = async () => {
+    const data = await orderService.getAllOrders();
+    const transactions = data.map((order) => {
+      const amount = parseInt(order.price.replace(/[^\d]/g, ""));
+      const commission = Math.round((amount * commissionRate) / 100);
+      const workerReceived = amount - commission;
+      return {
+        ...order,
+        amount,
+        commission,
+        workerReceived,
+        orderId: order.id,
+      };
+    });
+    setOrders(transactions);
+  };
+
+  const filteredOrders = orders.filter((order) => {
     const matchesSearch =
-      review.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      review.worker.toLowerCase().includes(searchText.toLowerCase()) ||
-      review.service.toLowerCase().includes(searchText.toLowerCase())
-    const matchesStatus = filterStatus === "all" || review.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.orderId.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus =
+      filterStatus === "all" || order.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
-  const handleApproveReview = (reviewId) => {
-    Alert.alert("Duyệt đánh giá", "Bạn có chắc muốn duyệt đánh giá này?", [
-      { text: "Hủy", style: "cancel" },
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  };
+
+  const getTotalRevenue = () => orders.reduce((sum, o) => sum + o.amount, 0);
+
+  const getTotalCommission = () =>
+    orders.reduce((sum, o) => sum + o.commission, 0);
+
+  const handleUpdateCommission = () => {
+    Alert.prompt(
+      "Cập nhật hoa hồng",
+      `Tỷ lệ hiện tại: ${commissionRate}%`,
+      [
+        { text: "Huỷ", style: "cancel" },
+        {
+          text: "Cập nhật",
+          onPress: (input) => {
+            const rate = parseFloat(input);
+            if (!isNaN(rate) && rate >= 0 && rate <= 50) {
+              setCommissionRate(rate);
+              Alert.alert("Thành công", `Đã cập nhật: ${rate}%`);
+            } else {
+              Alert.alert("Lỗi", "Vui lòng nhập số từ 0 đến 50");
+            }
+          },
+        },
+      ],
+      "numeric",
+      commissionRate.toString()
+    );
+  };
+
+  const handleProcessWithdrawal = (order) => {
+    Alert.alert("Xử lý rút tiền", `Xác nhận xử lý đơn ${order.orderId}?`, [
+      { text: "Huỷ", style: "cancel" },
       {
-        text: "Duyệt",
-        onPress: () => {
-          setReviewList(
-            reviewList.map((review) => (review.id === reviewId ? { ...review, status: "approved" } : review)),
-          )
-          Alert.alert("Thành công", "Đã duyệt đánh giá")
+        text: "Xác nhận",
+        onPress: async () => {
+          await orderService.updateOrder(order.id, { status: "completed" });
+          fetchData();
+          Alert.alert("Thành công", "Đơn đã được cập nhật");
         },
       },
-    ])
-  }
+    ]);
+  };
 
-  const handleRejectReview = (reviewId) => {
-    Alert.alert("Từ chối đánh giá", "Bạn có chắc muốn từ chối đánh giá này?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Từ chối",
-        style: "destructive",
-        onPress: () => {
-          setReviewList(
-            reviewList.map((review) => (review.id === reviewId ? { ...review, status: "rejected" } : review)),
-          )
-          Alert.alert("Đã từ chối", "Đánh giá đã bị từ chối")
-        },
-      },
-    ])
-  }
-
-  const handleWarningWorker = (review) => {
-    Alert.alert("Cảnh báo thợ", `Gửi cảnh báo đến ${review.worker} về vi phạm?`, [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Gửi cảnh báo",
-        onPress: () => {
-          Alert.alert("Thành công", `Đã gửi cảnh báo đến ${review.worker}`)
-        },
-      },
-    ])
-  }
-
-  const getRatingStars = (rating) => {
-    return "⭐".repeat(rating) + "☆".repeat(5 - rating)
-  }
-
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "approved":
-        return { backgroundColor: "#d1fae5", color: "#065f46" }
-      case "reported":
-        return { backgroundColor: "#fee2e2", color: "#dc2626" }
-      case "rejected":
-        return { backgroundColor: "#f3f4f6", color: "#6b7280" }
-      default:
-        return { backgroundColor: "#fef3c7", color: "#92400e" }
-    }
-  }
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case "approved":
-        return "Đã duyệt"
-      case "reported":
-        return "Báo cáo vi phạm"
-      case "rejected":
-        return "Đã từ chối"
-      default:
-        return "Chờ duyệt"
-    }
-  }
-
-  const renderReview = ({ item }) => {
-    const statusStyle = getStatusStyle(item.status)
-
-    return (
-      <View style={styles.reviewCard}>
-        <View style={styles.reviewHeader}>
-          <View style={styles.reviewInfo}>
-            <Text style={styles.reviewCustomer}>👤 {item.customer}</Text>
-            <Text style={styles.reviewWorker}>👨‍🔧 {item.worker}</Text>
-            <Text style={styles.reviewService}>🔧 {item.service}</Text>
-            <Text style={styles.reviewDate}>📅 {item.date}</Text>
-          </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusStyle.backgroundColor }]}>
-            <Text style={[styles.statusText, { color: statusStyle.color }]}>{getStatusText(item.status)}</Text>
-          </View>
+  const renderItem = ({ item }) => (
+    <View style={styles.transactionCard}>
+      <View style={styles.transactionHeader}>
+        <View>
+          <Text style={styles.transactionId}>#{item.orderId}</Text>
+          <Text style={styles.transactionCustomer}>👤 {item.customer}</Text>
+          <Text style={styles.transactionWorker}>
+            👨‍🔧 Thợ ID: {item.workerId}
+          </Text>
+          <Text style={styles.transactionDate}>
+            📅 {item.date} {item.time}
+          </Text>
         </View>
-
-        <View style={styles.reviewRating}>
-          <Text style={styles.ratingStars}>{getRatingStars(item.rating)}</Text>
-          <Text style={styles.ratingNumber}>({item.rating}/5)</Text>
-        </View>
-
-        <Text style={styles.reviewComment}>"{item.comment}"</Text>
-
-        <View style={styles.reviewActions}>
-          {item.status === "reported" && (
-            <>
-              <TouchableOpacity style={styles.warningButton} onPress={() => handleWarningWorker(item)}>
-                <Text style={styles.warningButtonText}>Cảnh báo thợ</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.approveButton} onPress={() => handleApproveReview(item.id)}>
-                <Text style={styles.approveButtonText}>Duyệt</Text>
-              </TouchableOpacity>
-            </>
-          )}
-          {item.status === "pending" && (
-            <>
-              <TouchableOpacity style={styles.rejectButton} onPress={() => handleRejectReview(item.id)}>
-                <Text style={styles.rejectButtonText}>Từ chối</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.approveButton} onPress={() => handleApproveReview(item.id)}>
-                <Text style={styles.approveButtonText}>Duyệt</Text>
-              </TouchableOpacity>
-            </>
-          )}
+        <View
+          style={[
+            styles.statusBadge,
+            {
+              backgroundColor:
+                item.status === "completed" ? "#d1fae5" : "#fef3c7",
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              {
+                color: item.status === "completed" ? "#065f46" : "#92400e",
+              },
+            ]}
+          >
+            {item.status === "completed" ? "Hoàn thành" : "Chờ xử lý"}
+          </Text>
         </View>
       </View>
-    )
-  }
+
+      <View style={styles.transactionDetails}>
+        <View style={styles.transactionRow}>
+          <Text style={styles.transactionLabel}>Tổng tiền:</Text>
+          <Text style={styles.transactionAmount}>
+            {formatCurrency(item.amount)}
+          </Text>
+        </View>
+        <View style={styles.transactionRow}>
+          <Text style={styles.transactionLabel}>
+            Hoa hồng ({commissionRate}%):
+          </Text>
+          <Text style={styles.transactionCommission}>
+            {formatCurrency(item.commission)}
+          </Text>
+        </View>
+        <View style={styles.transactionRow}>
+          <Text style={styles.transactionLabel}>Thợ nhận:</Text>
+          <Text style={styles.transactionWorkerReceived}>
+            {formatCurrency(item.workerReceived)}
+          </Text>
+        </View>
+      </View>
+
+      {item.status === "pending" && (
+        <View style={styles.transactionActions}>
+          <TouchableOpacity
+            style={styles.processButton}
+            onPress={() => handleProcessWithdrawal(item)}
+          >
+            <Text style={styles.processButtonText}>Xử lý rút tiền</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.screenHeader}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Quay lại</Text>
         </TouchableOpacity>
-        <Text style={styles.screenTitle}>Đánh giá & phản hồi</Text>
-        <TouchableOpacity>
-          <Text style={styles.filterButton}>📊</Text>
+        <Text style={styles.screenTitle}>Thanh toán & Hoa hồng</Text>
+        <TouchableOpacity onPress={handleUpdateCommission}>
+          <Text style={styles.filterButton}>⚙️</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Stats */}
+      <View style={styles.paymentStatsContainer}>
+        <View style={styles.paymentStatCard}>
+          <Text style={styles.paymentStatIcon}>💰</Text>
+          <Text style={styles.paymentStatNumber}>
+            {formatCurrency(getTotalRevenue())}
+          </Text>
+          <Text style={styles.paymentStatLabel}>Tổng doanh thu</Text>
+        </View>
+        <View style={styles.paymentStatCard}>
+          <Text style={styles.paymentStatIcon}>📊</Text>
+          <Text style={styles.paymentStatNumber}>
+            {formatCurrency(getTotalCommission())}
+          </Text>
+          <Text style={styles.paymentStatLabel}>Tổng hoa hồng</Text>
+        </View>
       </View>
 
       {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Tìm kiếm theo khách hàng, thợ, dịch vụ..."
+          placeholder="Tìm kiếm theo mã đơn, khách hàng..."
           value={searchText}
           onChangeText={setSearchText}
         />
       </View>
 
-      {/* Filter */}
+      {/* Filter Chips */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("all")}
-        >
-          <Text style={[styles.filterText, filterStatus === "all" && styles.activeFilterText]}>
-            Tất cả ({reviewList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "reported" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("reported")}
-        >
-          <Text style={[styles.filterText, filterStatus === "reported" && styles.activeFilterText]}>
-            Vi phạm ({reviewList.filter((r) => r.status === "reported").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "approved" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("approved")}
-        >
-          <Text style={[styles.filterText, filterStatus === "approved" && styles.activeFilterText]}>
-            Đã duyệt ({reviewList.filter((r) => r.status === "approved").length})
-          </Text>
-        </TouchableOpacity>
+        {["all", "completed", "pending"].map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={[
+              styles.filterChip,
+              filterStatus === status && styles.activeFilterChip,
+            ]}
+            onPress={() => setFilterStatus(status)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                filterStatus === status && styles.activeFilterText,
+              ]}
+            >
+              {status === "all"
+                ? `Tất cả (${orders.length})`
+                : `${status === "completed" ? "Hoàn thành" : "Chờ xử lý"} (${
+                    orders.filter((o) => o.status === status).length
+                  })`}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
+      {/* List */}
       <FlatList
-        data={filteredReviews}
-        renderItem={renderReview}
+        data={filteredOrders}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       />
 
-      <AdminBottomNav onTabPress={onTabPress} activeTab="reviewManagement" />
+      <AdminBottomNav onTabPress={onTabPress} activeTab="paymentManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default ReviewManagementScreen
+export default PaymentManagementScreen;

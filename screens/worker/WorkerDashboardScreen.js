@@ -4,7 +4,7 @@ import { workerOrders } from "../../data/mockData"
 import { statusConfig } from "../../constants/statusConfig"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
 
-const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
+const WorkerDashboardScreen = ({ onTabPress, onOrderPress, currentUser }) => {
   const pendingOrders = workerOrders.filter((order) => order.status === "pending").length
   const acceptedOrders = workerOrders.filter((order) => order.status === "accepted").length
   const completedOrders = workerOrders.filter((order) => order.status === "completed").length
@@ -40,11 +40,11 @@ const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
           <View style={styles.workerInfo}>
             <Text style={styles.workerAvatar}>👨‍🔧</Text>
             <View>
-              <Text style={styles.workerName}>Thợ Minh Tuấn</Text>
-              <Text style={styles.workerSpecialty}>Thợ điện chuyên nghiệp</Text>
+              <Text style={styles.workerName}>{currentUser?.name || "Thợ chưa đặt tên"}</Text>
+              <Text style={styles.workerSpecialty}>{currentUser?.specialty || "Chuyên ngành chưa xác định"}</Text>
               <View style={styles.workerRating}>
-                <Text style={styles.rating}>⭐ 4.8</Text>
-                <Text style={styles.reviews}>(127 đánh giá)</Text>
+                <Text style={styles.rating}>⭐ {currentUser?.rating || "4.8"}</Text>
+                <Text style={styles.reviews}>({currentUser?.totalReviews || 127} đánh giá)</Text>
               </View>
             </View>
           </View>

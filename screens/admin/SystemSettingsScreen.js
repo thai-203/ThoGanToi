@@ -1,74 +1,90 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, TextInput } from "react-native"
-import { styles } from "../../styles/styles"
-import { systemLogs } from "../../data/mockData"
-import { AdminBottomNav } from "../../components/BottomNavigation"
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+  TextInput,
+  Switch,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
 
-const SystemLogsScreen = ({ onTabPress, onBack }) => {
-  const [logList] = useState(systemLogs)
-  const [searchText, setSearchText] = useState("")
-  const [filterAction, setFilterAction] = useState("all")
+const SystemSettingsScreen = ({ onTabPress, onBack }) => {
+  const [appName, setAppName] = useState("Thợ Gần Tôi");
+  const [contactEmail, setContactEmail] = useState("support@thogantoi.com");
+  const [contactPhone, setContactPhone] = useState("1900-1234");
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
-  const filteredLogs = logList.filter((log) => {
-    const matchesSearch =
-      log.action.toLowerCase().includes(searchText.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchText.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchText.toLowerCase())
-    const matchesAction = filterAction === "all" || log.action.toLowerCase().includes(filterAction.toLowerCase())
-    return matchesSearch && matchesAction
-  })
+  const handleUpdateAppInfo = () => {
+    Alert.alert("Cập nhật thông tin app", "Đã cập nhật thông tin ứng dụng");
+  };
 
-  const getActionIcon = (action) => {
-    switch (action.toLowerCase()) {
-      case "đăng nhập":
-        return "🔑"
-      case "xóa người dùng":
-        return "🗑️"
-      case "cập nhật dịch vụ":
-        return "✏️"
-      case "tạo đơn hàng":
-        return "📋"
-      case "thanh toán":
-        return "💰"
-      default:
-        return "📝"
-    }
-  }
+  const handleUpdatePolicies = () => {
+    Alert.alert(
+      "Cập nhật chính sách",
+      "Chức năng chỉnh sửa chính sách đang được phát triển"
+    );
+  };
 
-  const getActionColor = (action) => {
-    switch (action.toLowerCase()) {
-      case "đăng nhập":
-        return "#10b981"
-      case "xóa người dùng":
-        return "#ef4444"
-      case "cập nhật dịch vụ":
-        return "#3b82f6"
-      case "tạo đơn hàng":
-        return "#f59e0b"
-      case "thanh toán":
-        return "#8b5cf6"
-      default:
-        return "#6b7280"
-    }
-  }
+  const handleSendNotification = () => {
+    Alert.prompt(
+      "Gửi thông báo",
+      "Nhập nội dung thông báo:",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Gửi",
+          onPress: (message) => {
+            if (message) {
+              Alert.alert(
+                "Thành công",
+                "Đã gửi thông báo đến tất cả người dùng"
+              );
+            }
+          },
+        },
+      ],
+      "plain-text",
+      "Thông báo từ hệ thống..."
+    );
+  };
 
-  const renderLog = ({ item }) => (
-    <View style={styles.logCard}>
-      <View style={styles.logHeader}>
-        <View style={styles.logInfo}>
-          <View style={styles.logActionContainer}>
-            <Text style={styles.logActionIcon}>{getActionIcon(item.action)}</Text>
-            <Text style={[styles.logAction, { color: getActionColor(item.action) }]}>{item.action}</Text>
-          </View>
-          <Text style={styles.logUser}>👤 {item.user}</Text>
-          <Text style={styles.logTimestamp}>🕐 {item.timestamp}</Text>
-          <Text style={styles.logIP}>🌐 {item.ip}</Text>
-        </View>
-      </View>
+  const handleBackupData = () => {
+    Alert.alert(
+      "Sao lưu dữ liệu",
+      "Bạn có chắc muốn sao lưu toàn bộ dữ liệu hệ thống?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Sao lưu",
+          onPress: () => {
+            Alert.alert("Thành công", "Đã tạo bản sao lưu dữ liệu");
+          },
+        },
+      ]
+    );
+  };
 
-      <Text style={styles.logDetails}>{item.details}</Text>
-    </View>
-  )
+  const handleRestoreData = () => {
+    Alert.alert(
+      "Khôi phục dữ liệu",
+      "Bạn có chắc muốn khôi phục dữ liệu từ bản sao lưu?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Khôi phục",
+          style: "destructive",
+          onPress: () => {
+            Alert.alert("Thành công", "Đã khôi phục dữ liệu từ bản sao lưu");
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -76,80 +92,169 @@ const SystemLogsScreen = ({ onTabPress, onBack }) => {
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Quay lại</Text>
         </TouchableOpacity>
-        <Text style={styles.screenTitle}>Nhật ký hệ thống</Text>
+        <Text style={styles.screenTitle}>Cài đặt hệ thống</Text>
         <TouchableOpacity>
-          <Text style={styles.filterButton}>📊</Text>
+          <Text style={styles.filterButton}>⚙️</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Stats */}
-      <View style={styles.logStatsContainer}>
-        <View style={styles.logStatCard}>
-          <Text style={styles.logStatIcon}>📝</Text>
-          <Text style={styles.logStatNumber}>{logList.length}</Text>
-          <Text style={styles.logStatLabel}>Tổng log</Text>
-        </View>
-        <View style={styles.logStatCard}>
-          <Text style={styles.logStatIcon}>🔑</Text>
-          <Text style={styles.logStatNumber}>{logList.filter((l) => l.action === "Đăng nhập").length}</Text>
-          <Text style={styles.logStatLabel}>Đăng nhập</Text>
-        </View>
-        <View style={styles.logStatCard}>
-          <Text style={styles.logStatIcon}>⚠️</Text>
-          <Text style={styles.logStatNumber}>{logList.filter((l) => l.action.includes("Xóa")).length}</Text>
-          <Text style={styles.logStatLabel}>Thao tác nguy hiểm</Text>
-        </View>
-      </View>
-
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Tìm kiếm trong nhật ký..."
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-      </View>
-
-      {/* Filter */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterAction === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterAction("all")}
-        >
-          <Text style={[styles.filterText, filterAction === "all" && styles.activeFilterText]}>
-            Tất cả ({logList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterAction === "đăng nhập" && styles.activeFilterChip]}
-          onPress={() => setFilterAction("đăng nhập")}
-        >
-          <Text style={[styles.filterText, filterAction === "đăng nhập" && styles.activeFilterText]}>
-            Đăng nhập ({logList.filter((l) => l.action === "Đăng nhập").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterAction === "xóa" && styles.activeFilterChip]}
-          onPress={() => setFilterAction("xóa")}
-        >
-          <Text style={[styles.filterText, filterAction === "xóa" && styles.activeFilterText]}>
-            Xóa ({logList.filter((l) => l.action.includes("Xóa")).length})
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={filteredLogs}
-        renderItem={renderLog}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
+      <ScrollView
+        style={styles.settingsContent}
         showsVerticalScrollIndicator={false}
-      />
+      >
+        {/* App Information */}
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Thông tin ứng dụng</Text>
 
-      <AdminBottomNav onTabPress={onTabPress} activeTab="systemLogs" />
+          <View style={styles.settingsItem}>
+            <Text style={styles.settingsLabel}>Tên ứng dụng</Text>
+            <TextInput
+              style={styles.settingsInput}
+              value={appName}
+              onChangeText={setAppName}
+              placeholder="Tên ứng dụng"
+            />
+          </View>
+
+          <View style={styles.settingsItem}>
+            <Text style={styles.settingsLabel}>Email hỗ trợ</Text>
+            <TextInput
+              style={styles.settingsInput}
+              value={contactEmail}
+              onChangeText={setContactEmail}
+              placeholder="Email hỗ trợ"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.settingsItem}>
+            <Text style={styles.settingsLabel}>Hotline</Text>
+            <TextInput
+              style={styles.settingsInput}
+              value={contactPhone}
+              onChangeText={setContactPhone}
+              placeholder="Số điện thoại hỗ trợ"
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={handleUpdateAppInfo}
+          >
+            <Text style={styles.settingsButtonText}>Cập nhật thông tin</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* System Settings */}
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Cài đặt hệ thống</Text>
+
+          <View style={styles.settingsToggleItem}>
+            <View style={styles.settingsToggleInfo}>
+              <Text style={styles.settingsToggleTitle}>Thông báo đẩy</Text>
+              <Text style={styles.settingsToggleSubtitle}>
+                Cho phép gửi thông báo đến người dùng
+              </Text>
+            </View>
+            <Switch
+              value={pushNotifications}
+              onValueChange={setPushNotifications}
+              trackColor={{ false: "#e5e7eb", true: "#10b981" }}
+              thumbColor={pushNotifications ? "#ffffff" : "#f3f4f6"}
+            />
+          </View>
+
+          <View style={styles.settingsToggleItem}>
+            <View style={styles.settingsToggleInfo}>
+              <Text style={styles.settingsToggleTitle}>Chế độ bảo trì</Text>
+              <Text style={styles.settingsToggleSubtitle}>
+                Tạm dừng hoạt động của ứng dụng
+              </Text>
+            </View>
+            <Switch
+              value={maintenanceMode}
+              onValueChange={setMaintenanceMode}
+              trackColor={{ false: "#e5e7eb", true: "#ef4444" }}
+              thumbColor={maintenanceMode ? "#ffffff" : "#f3f4f6"}
+            />
+          </View>
+        </View>
+
+        {/* Policies */}
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>
+            Chính sách & điều khoản
+          </Text>
+
+          <TouchableOpacity
+            style={styles.settingsMenuItem}
+            onPress={handleUpdatePolicies}
+          >
+            <Text style={styles.settingsMenuIcon}>📄</Text>
+            <View style={styles.settingsMenuInfo}>
+              <Text style={styles.settingsMenuTitle}>Điều khoản sử dụng</Text>
+              <Text style={styles.settingsMenuSubtitle}>
+                Chỉnh sửa điều khoản sử dụng
+              </Text>
+            </View>
+            <Text style={styles.settingsMenuArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingsMenuItem}
+            onPress={handleUpdatePolicies}
+          >
+            <Text style={styles.settingsMenuIcon}>🔒</Text>
+            <View style={styles.settingsMenuInfo}>
+              <Text style={styles.settingsMenuTitle}>Chính sách bảo mật</Text>
+              <Text style={styles.settingsMenuSubtitle}>
+                Chỉnh sửa chính sách bảo mật
+              </Text>
+            </View>
+            <Text style={styles.settingsMenuArrow}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Notifications */}
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Thông báo</Text>
+
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={handleSendNotification}
+          >
+            <Text style={styles.settingsButtonText}>
+              📢 Gửi thông báo tới tất cả
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Data Management */}
+        <View style={styles.settingsSection}>
+          <Text style={styles.settingsSectionTitle}>Quản lý dữ liệu</Text>
+
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={handleBackupData}
+          >
+            <Text style={styles.settingsButtonText}>💾 Sao lưu dữ liệu</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingsButton, styles.dangerButton]}
+            onPress={handleRestoreData}
+          >
+            <Text style={[styles.settingsButtonText, styles.dangerButtonText]}>
+              🔄 Khôi phục dữ liệu
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <AdminBottomNav onTabPress={onTabPress} activeTab="systemSettings" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default SystemLogsScreen
+export default SystemSettingsScreen;

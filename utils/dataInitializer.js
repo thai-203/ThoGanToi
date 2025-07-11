@@ -1,5 +1,4 @@
 import UserService from "../services/userService"
-import WorkerService from "../services/workerService"
 import ServiceService from "../services/serviceService"
 import FirebaseService from "../services/firebaseService"
 
@@ -50,96 +49,68 @@ const initialUsers = [
     role: "customer",
     name: "Lê Văn C",
     email: "customer3@example.com",
-    status: "active", // Changed from blocked to active
+    status: "blocked",
     joinDate: "2024-01-10",
     area: "Quận 7, TP.HCM",
   },
 
-  // Worker users (basic info only)
+  // Worker users
   {
     phone: "0444444444",
     password: "123456",
     role: "worker",
     name: "Thợ Minh Tuấn",
-    email: "worker1@example.com",
-    status: "active",
-    joinDate: "2024-01-02",
-    area: "Quận 1, TP.HCM",
-  },
-  {
-    phone: "0555555555",
-    password: "123456",
-    role: "worker",
-    name: "Thợ Văn Nam",
-    email: "worker2@example.com",
-    status: "active",
-    joinDate: "2024-01-15",
-    area: "Quận 3, TP.HCM",
-  },
-  {
-    phone: "0666666666",
-    password: "123456",
-    role: "worker",
-    name: "Thợ Hoàng Long",
-    email: "worker3@example.com",
-    status: "active",
-    joinDate: "2024-01-08",
-    area: "Quận 7, TP.HCM",
-  },
-]
-
-// Worker profiles (separate table)
-const initialWorkers = [
-  {
-    userId: "user_worker_1", // Will be replaced with actual user ID
-    name: "Thợ Minh Tuấn",
-    phone: "0444444444",
     email: "worker1@example.com",
     specialty: "Thợ điện",
     status: "active",
+    joinDate: "2024-01-02",
     area: "Quận 1, TP.HCM",
     rating: 4.8,
     completedOrders: 127,
     certificate: "Chứng chỉ điện công nghiệp",
     experience: "5 năm kinh nghiệm",
     price: "150,000đ/giờ",
+    distance: "0.5km",
     avatar: "👨‍🔧",
     reviews: 127,
-    joinDate: "2024-01-02",
   },
   {
-    userId: "user_worker_2",
-    name: "Thợ Văn Nam",
     phone: "0555555555",
+    password: "123456",
+    role: "worker",
+    name: "Thợ Văn Nam",
     email: "worker2@example.com",
     specialty: "Thợ nước",
-    status: "pending", // This one is pending approval
+    status: "pending",
+    joinDate: "2024-01-15",
     area: "Quận 3, TP.HCM",
     rating: 4.6,
     completedOrders: 89,
     certificate: "Chứng chỉ kỹ thuật nước",
     experience: "3 năm kinh nghiệm",
     price: "120,000đ/giờ",
+    distance: "1.2km",
     avatar: "👨‍🔧",
     reviews: 89,
-    joinDate: "2024-01-15",
   },
   {
-    userId: "user_worker_3",
-    name: "Thợ Hoàng Long",
     phone: "0666666666",
+    password: "123456",
+    role: "worker",
+    name: "Thợ Hoàng Long",
     email: "worker3@example.com",
     specialty: "Thợ máy lạnh",
     status: "active",
+    joinDate: "2024-01-08",
     area: "Quận 7, TP.HCM",
     rating: 4.9,
     completedOrders: 203,
     certificate: "Chứng chỉ điện lạnh",
     experience: "7 năm kinh nghiệm",
     price: "180,000đ/giờ",
+    distance: "2.1km",
     avatar: "👨‍🔧",
     reviews: 203,
-    joinDate: "2024-01-08",
   },
 ]
 
@@ -245,37 +216,13 @@ class DataInitializer {
         return true
       }
 
-      // Initialize users first
+      // Initialize users
       console.log("Creating users...")
-      const userIdMap = new Map() // To track user IDs for workers
-
       for (const user of initialUsers) {
         try {
-          const userId = await UserService.createUser(user)
-          if (user.role === "worker") {
-            userIdMap.set(user.phone, userId)
-          }
-          console.log(`✅ Created user: ${user.name} (${user.role})`)
+          await UserService.createUser(user)
         } catch (error) {
           console.error("Error creating user:", user.name, error)
-        }
-      }
-
-      // Initialize worker profiles
-      console.log("Creating worker profiles...")
-      for (const worker of initialWorkers) {
-        try {
-          // Find the corresponding user ID
-          const userId = userIdMap.get(worker.phone)
-          if (userId) {
-            const workerData = { ...worker, userId }
-            await WorkerService.createWorker(workerData)
-            console.log(`✅ Created worker profile: ${worker.name}`)
-          } else {
-            console.warn(`⚠️ No user found for worker: ${worker.name}`)
-          }
-        } catch (error) {
-          console.error("Error creating worker:", worker.name, error)
         }
       }
 
@@ -284,13 +231,12 @@ class DataInitializer {
       for (const service of initialServices) {
         try {
           await ServiceService.createService(service)
-          console.log(`✅ Created service: ${service.name}`)
         } catch (error) {
           console.error("Error creating service:", service.name, error)
         }
       }
 
-      console.log("🎉 Firebase data initialization completed!")
+      console.log("Firebase data initialization completed!")
       return true
     } catch (error) {
       console.error("Error initializing Firebase data:", error)

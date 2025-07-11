@@ -1,178 +1,220 @@
-import { database } from "../config/firebase"
-import { ref, push, set, get, update, remove, onValue, query, orderByChild, equalTo, off } from "firebase/database"
+import { initializeApp } from "firebase/app"
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from "firebase/firestore"
+import { firebaseConfig } from "../config/firebase"
 
 class FirebaseService {
-  // Generic CRUD operations
-  async create(path, data) {
-    try {
-      const dataRef = ref(database, path)
-      const newRef = push(dataRef)
-      const newData = {
-        ...data,
-        id: newRef.key,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      }
-      await set(newRef, newData)
-      return newRef.key
-    } catch (error) {
-      console.error("Error creating data:", error)
-      throw error
-    }
+  constructor() {
+    this.app = null
+    this.db = null
+    this.initialized = false
   }
 
-  async createWithId(path, id, data) {
+  async initialize() {
     try {
-      const dataRef = ref(database, `${path}/${id}`)
-      const newData = {
-        ...data,
-        id,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+      if (!this.initialized) {
+        this.app = initializeApp(firebaseConfig)
+        this.db = getFirestore(this.app)
+        this.initialized = true
       }
-      await set(dataRef, newData)
-      return id
-    } catch (error) {
-      console.error("Error creating data with ID:", error)
-      throw error
-    }
-  }
-
-  async read(path) {
-    try {
-      const dataRef = ref(database, path)
-      const snapshot = await get(dataRef)
-      if (snapshot.exists()) {
-        return snapshot.val()
-      }
-      return null
-    } catch (error) {
-      console.error("Error reading data:", error)
-      throw error
-    }
-  }
-
-  async readAll(path) {
-    try {
-      const dataRef = ref(database, path)
-      const snapshot = await get(dataRef)
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        return Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-      }
-      return []
-    } catch (error) {
-      console.error("Error reading all data:", error)
-      return [] // Return empty array instead of throwing
-    }
-  }
-
-  async update(path, data) {
-    try {
-      const dataRef = ref(database, path)
-      const updateData = {
-        ...data,
-        updatedAt: Date.now(),
-      }
-      await update(dataRef, updateData)
       return true
     } catch (error) {
-      console.error("Error updating data:", error)
-      throw error
+      console.error("Firebase initialization error:", error)
+      return false
     }
   }
 
-  async delete(path) {
+  async checkConnection() {
     try {
-      const dataRef = ref(database, path)
-      await remove(dataRef)
+      if (!this.initialized) {
+        await this.initialize()
+      }
+      // Try to read from a collection to test connection
+      const testCollection = collection(this.db, "test")
+      await getDocs(testCollection)
       return true
     } catch (error) {
-      console.error("Error deleting data:", error)
-      throw error
+      console.error("Firebase connection error:", error)
+      return false
     }
   }
 
-  // Real-time listeners
-  listen(path, callback) {
+  // Users
+  async createUser(userData) {
     try {
-      const dataRef = ref(database, path)
-      const unsubscribe = onValue(dataRef, callback, (error) => {
-        console.error("Firebase listener error:", error)
+      const docRef = await addDoc(collection(this.db, "users"), {
+        ...userData,
+        createdAt: new Date().toISOString(),
       })
-      return unsubscribe
+      return docRef.id
     } catch (error) {
-      console.error("Error setting up listener:", error)
-      return () => {} // Return empty function
+      console.error("Error creating user:", error)
+      throw error
     }
   }
 
-  // Query operations
-  async queryByField(path, field, value) {
+  async getUsers() {
     try {
-      const dataRef = ref(database, path)
-      const queryRef = query(dataRef, orderByChild(field), equalTo(value))
-      const snapshot = await get(queryRef)
-
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        return Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-      }
-      return []
+      const querySnapshot = await getDocs(collection(this.db, "users"))
+      const users = []
+      querySnapshot.forEach((doc) => {
+        users.push({ id: doc.id, ...doc.data() })
+      })
+      return users
     } catch (error) {
-      console.error("Error querying data:", error)
-      return [] // Return empty array instead of throwing
+      console.error("Error getting users:", error)
+      throw error
     }
   }
 
-  // Check if Firebase is connected
-  async checkConnection(timeoutMs = 3000) {
-    return new Promise((resolve) => {
-      const connectedRef = ref(database, ".info/connected");
-      const timeout = setTimeout(() => {
-        resolve(false); // Hết thời gian chờ, vẫn chưa có kết nối
-        off(connectedRef); // Bỏ lắng nghe
-      }, timeoutMs);
-
-      onValue(connectedRef, (snapshot) => {
-        const isConnected = snapshot.val() === true;
-        if (isConnected) {
-          clearTimeout(timeout);
-          resolve(true);
-          off(connectedRef); // Bỏ lắng nghe sau khi có kết quả
-        }
-      });
-    });
-  }
-
-
-  async queryByField(path, field, value) {
-    if (!value || typeof value !== "string") {
-      console.warn(`⚠️ Invalid query value for field ${field}:`, value)
-      return []
-    }
+  async updateUser(userId, userData) {
     try {
-      const dataRef = ref(database, path)
-      const queryRef = query(dataRef, orderByChild(field), equalTo(value))
-      const snapshot = await get(queryRef)
-
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        return Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-      }
-      return []
+      const userRef = doc(this.db, "users", userId)
+      await updateDoc(userRef, {
+        ...userData,
+        updatedAt: new Date().toISOString(),
+      })
+      return true
     } catch (error) {
-      console.error("Error querying data:", error)
-      return []
+      console.error("Error updating user:", error)
+      throw error
+    }
+  }
+
+  async deleteUser(userId) {
+    try {
+      await deleteDoc(doc(this.db, "users", userId))
+      return true
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      throw error
+    }
+  }
+
+  // Workers
+  async createWorker(workerData) {
+    try {
+      const docRef = await addDoc(collection(this.db, "workers"), {
+        ...workerData,
+        createdAt: new Date().toISOString(),
+      })
+      return docRef.id
+    } catch (error) {
+      console.error("Error creating worker:", error)
+      throw error
+    }
+  }
+
+  async getWorkers() {
+    try {
+      const querySnapshot = await getDocs(collection(this.db, "workers"))
+      const workers = []
+      querySnapshot.forEach((doc) => {
+        workers.push({ id: doc.id, ...doc.data() })
+      })
+      return workers
+    } catch (error) {
+      console.error("Error getting workers:", error)
+      throw error
+    }
+  }
+
+  async updateWorker(workerId, workerData) {
+    try {
+      const workerRef = doc(this.db, "workers", workerId)
+      await updateDoc(workerRef, {
+        ...workerData,
+        updatedAt: new Date().toISOString(),
+      })
+      return true
+    } catch (error) {
+      console.error("Error updating worker:", error)
+      throw error
+    }
+  }
+
+  // Orders
+  async createOrder(orderData) {
+    try {
+      const docRef = await addDoc(collection(this.db, "orders"), {
+        ...orderData,
+        createdAt: new Date().toISOString(),
+      })
+      return docRef.id
+    } catch (error) {
+      console.error("Error creating order:", error)
+      throw error
+    }
+  }
+
+  async getOrders() {
+    try {
+      const querySnapshot = await getDocs(collection(this.db, "orders"))
+      const orders = []
+      querySnapshot.forEach((doc) => {
+        orders.push({ id: doc.id, ...doc.data() })
+      })
+      return orders
+    } catch (error) {
+      console.error("Error getting orders:", error)
+      throw error
+    }
+  }
+
+  async updateOrder(orderId, orderData) {
+    try {
+      const orderRef = doc(this.db, "orders", orderId)
+      await updateDoc(orderRef, {
+        ...orderData,
+        updatedAt: new Date().toISOString(),
+      })
+      return true
+    } catch (error) {
+      console.error("Error updating order:", error)
+      throw error
+    }
+  }
+
+  // Services
+  async createService(serviceData) {
+    try {
+      const docRef = await addDoc(collection(this.db, "services"), {
+        ...serviceData,
+        createdAt: new Date().toISOString(),
+      })
+      return docRef.id
+    } catch (error) {
+      console.error("Error creating service:", error)
+      throw error
+    }
+  }
+
+  async getServices() {
+    try {
+      const querySnapshot = await getDocs(collection(this.db, "services"))
+      const services = []
+      querySnapshot.forEach((doc) => {
+        services.push({ id: doc.id, ...doc.data() })
+      })
+      return services
+    } catch (error) {
+      console.error("Error getting services:", error)
+      throw error
+    }
+  }
+
+  // Generic query method
+  async queryCollection(collectionName, field, operator, value) {
+    try {
+      const q = query(collection(this.db, collectionName), where(field, operator, value))
+      const querySnapshot = await getDocs(q)
+      const results = []
+      querySnapshot.forEach((doc) => {
+        results.push({ id: doc.id, ...doc.data() })
+      })
+      return results
+    } catch (error) {
+      console.error(`Error querying ${collectionName}:`, error)
+      throw error
     }
   }
 }
