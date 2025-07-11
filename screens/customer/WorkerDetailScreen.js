@@ -113,7 +113,7 @@ const WorkerDetailScreen = ({
       Alert.alert('Lỗi', 'Không xác định được người dùng.');
       return;
     }
-    
+
     const orderData = {
       address,
       date: selectedDate,
@@ -170,6 +170,12 @@ const WorkerDetailScreen = ({
         },
       ]
     );
+  };
+
+  const formatCurrency = (value) => {
+    const number = Number(value);
+    if (isNaN(number)) return '0 đ/giờ';
+    return `${new Intl.NumberFormat('vi-VN').format(number)} đ/giờ`;
   };
 
   // Tạo danh sách ngày: Hôm nay, Ngày mai, +3 ngày
@@ -235,7 +241,14 @@ const WorkerDetailScreen = ({
                 ({worker.reviews} đánh giá)
               </Text>
             </View>
-            <Text style={styles.detailPrice}>{worker.price}</Text>
+
+            {/* <Text style={styles.detailPrice}>
+              {`${new Intl.NumberFormat('vi-VN').format(worker.price)} đ/giờ`}
+            </Text> */}
+
+            <Text style={styles.detailPrice}>
+              {formatCurrency(worker.price)}
+            </Text>
           </View>
 
           <View style={styles.section}>
