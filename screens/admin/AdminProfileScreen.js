@@ -106,7 +106,6 @@ const AdminProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
   }
 
   const handleSaveProfile = async (newUserInfo) => {
-    console.log(newUserInfo)
     await userService.updateUser(newUserInfo.id, newUserInfo)
     setUserInfo(newUserInfo)
     setShowEditProfile(false)

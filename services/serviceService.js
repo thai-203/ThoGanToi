@@ -71,7 +71,6 @@ class ServiceService {
   async updateServiceStatus(serviceId, newStatus) {
     try {
       const path = `${this.basePath}/${serviceId}`;
-      console.log(path)
       await FirebaseService.update(path, { status: newStatus });
       return true;
     } catch (error) {

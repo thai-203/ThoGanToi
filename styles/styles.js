@@ -3718,6 +3718,88 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#111827',
   },
-
-  
+// OTP styles
+  resendContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  countdownText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  resendButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  resendButtonText: {
+    color: "#2563eb",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  // Role selection styles
+  roleContainer: {
+    marginBottom: 24,
+  },
+  roleLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1f2937",
+    marginBottom: 12,
+  },
+  roleButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  roleButton: {
+    flex: 1,
+    backgroundColor: "white",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#e5e7eb",
+  },
+  activeRoleButton: {
+    borderColor: "#2563eb",
+    backgroundColor: "#eff6ff",
+  },
+  roleButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6b7280",
+    textAlign: "center",
+  },
+  activeRoleButtonText: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+  // Worker fields styles
+  workerFieldsContainer: {
+    backgroundColor: "#f9fafb",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  workerFieldsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1f2937",
+    marginBottom: 16,
+  },
+  workerNote: {
+    backgroundColor: "#fef3c7",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: "#f59e0b",
+  },
+  workerNoteText: {
+    fontSize: 13,
+    color: "#92400e",
+    lineHeight: 18,
+  },
 });

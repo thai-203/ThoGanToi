@@ -76,6 +76,17 @@ class UserService {
     }
   }
 
+  async phoneExists(phone) {
+    try {
+      const users = await FirebaseService.queryByField(this.basePath, "phone", phone);
+      return users.length > 0;
+    } catch (error) {
+      console.error("Error checking if phone exists:", error);
+      throw error;
+    }
+  }
+
+
   // Real-time listener for users
   listenToUsers(callback) {
     return FirebaseService.listen(this.basePath, (usersArray) => {

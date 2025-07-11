@@ -109,19 +109,11 @@ const WorkerDetailScreen = ({
       return;
     }
 
-    // console.log(address)
-
-    // const customerId = await getCurrentUserId();
-
     if (!customer) {
       Alert.alert('Lỗi', 'Không xác định được người dùng.');
       return;
     }
-    // const customer = await userService.getUserById(customerId);
-
-    // console.log(customerId)
-    // console.log(customer)
-
+    
     const orderData = {
       address,
       date: selectedDate,

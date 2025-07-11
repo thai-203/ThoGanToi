@@ -3,6 +3,8 @@ import { StatusBar } from 'react-native';
 
 // Screen imports
 import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 
 // Customer screens
 import HomeScreen from './screens/customer/HomeScreen';
@@ -72,6 +74,11 @@ export default function App() {
       setCurrentScreen('adminDashboard');
     }
   };
+ // Sửa lại hàm handleForgotPassword
+  const handleForgotPassword = () => {
+    console.log("Navigating to forgot password screen")
+    setCurrentScreen("forgotPassword")
+  }
 
   const handleServicePress = (service) => {
     setSelectedService(service);
@@ -209,8 +216,14 @@ export default function App() {
   // Render current screen
   const renderCurrentScreen = () => {
     switch (currentScreen) {
-      case 'login':
-        return <LoginScreen onLogin={handleLogin} />;
+      case "login":
+        return (
+          <LoginScreen
+            onLogin={handleLogin}
+            onRegister={() => setCurrentScreen("register")}
+            onForgotPassword={handleForgotPassword}
+          />
+        )
       case 'history':
         return (
           <BookingHistoryScreen
@@ -218,6 +231,10 @@ export default function App() {
             onRebook={handleRebook}
           />
         );
+      case 'register':
+        return <RegisterScreen onRegister={() => setCurrentScreen('login')} onBackToLogin={() => setCurrentScreen('login')} />;
+      case 'forgotPassword':
+        return <ForgotPasswordScreen onBackToLogin={() => setCurrentScreen('login')} />;
       case 'profile':
         return (
           <ProfileScreen
