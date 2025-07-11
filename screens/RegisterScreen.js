@@ -40,6 +40,12 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
       return false
     }
 
+    const phoneRegex = /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-9]|9[0-9])[0-9]{7}$/
+    if (!phoneRegex.test(phone)) {
+      Alert.alert("Lỗi", "Số điện thoại không hợp lệ")
+      return false
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       Alert.alert("Lỗi", "Email không hợp lệ")
@@ -74,6 +80,12 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
       const phoneExists = await UserService.phoneExists(formData.phone)
       if (phoneExists) {
         Alert.alert("Lỗi", "Số điện thoại đã được sử dụng")
+        return
+      }
+
+      const emailExists = await UserService.emailExists(formData.email)
+      if (emailExists) {
+        Alert.alert("Lỗi", "Email đã được sử dụng")
         return
       }
 
