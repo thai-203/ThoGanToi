@@ -423,6 +423,7 @@ export default function App() {
             onTabPress={handleTabPress}
             onMenuPress={handleMenuPress}
             currentUser={currentUser}
+            onBack={handleBack}
           />
         );
       case 'orderManagement':

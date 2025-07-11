@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { styles } from "../styles/styles"
 import UserService from "../services/userService"
 import WorkerService from "../services/workerService"
+import ServiceService from "../services/serviceService"
 
 const RegisterScreen = ({ onRegister, onBackToLogin }) => {
   const [formData, setFormData] = useState({
@@ -21,19 +22,33 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
     password: "",
     confirmPassword: "",
     role: "customer",
-    specialty: "",
+    serviceId: [],
     experience: "",
     certificate: "",
-    area: "",
+    address: "",
   })
+
+  const [services, setServices] = useState([])
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const allServices = await ServiceService.getActiveServices()
+        setServices(allServices)
+      } catch (error) {
+        console.error("Error fetching services:", error)
+      }
+    }
+    fetchServices()
+  }, [])
 
   const updateFormData = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const validateForm = () => {
-    const { name, phone, email, password, confirmPassword, role, specialty, experience } = formData
+    const { name, phone, email, password, confirmPassword, role, serviceId, experience } = formData
 
     if (!name.trim() || !phone.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin")
@@ -56,8 +71,8 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
       return false
     }
 
-    if (role === "worker" && (!specialty.trim() || !experience.trim())) {
-      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin thợ")
+    if (role === "worker" && (!serviceId.length || !experience.trim())) {
+      Alert.alert("Lỗi", "Vui lòng chọn ít nhất một chuyên môn và nhập kinh nghiệm")
       return false
     }
 
@@ -70,14 +85,12 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
     try {
       setLoading(true)
 
-      // Check if phone already exists
       const phoneExists = await UserService.phoneExists(formData.phone)
       if (phoneExists) {
         Alert.alert("Lỗi", "Số điện thoại đã được sử dụng")
         return
       }
 
-      // Create user data
       const userData = {
         name: formData.name,
         phone: formData.phone,
@@ -86,24 +99,28 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
         role: formData.role,
         status: formData.role === "worker" ? "pending" : "active",
         joinDate: new Date().toISOString().split("T")[0],
-        area: formData.area || "TP.HCM",
+        address: formData.address || "TP.HCM",
         avatar: formData.role === "worker" ? "👨‍🔧" : "👤",
       }
 
-      // Create user
       const userId = await UserService.createUser(userData)
 
-      // If worker, create worker profile
       if (formData.role === "worker") {
+        const selectedServiceNames = services
+          .filter((s) => formData.serviceId.includes(s.id))
+          .map((s) => s.name)
+          .join(", ")
+
         const workerData = {
-          userId: userId,
+          userId,
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
-          specialty: formData.specialty,
+          specialty: selectedServiceNames || "Không rõ",
+          serviceId: formData.serviceId,
           experience: formData.experience,
           certificate: formData.certificate,
-          area: formData.area || "TP.HCM",
+          address: formData.address || "Hà Nội",
           status: "false",
           rating: 0,
           completedOrders: 0,
@@ -111,6 +128,7 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
           avatar: "👨‍🔧",
           reviews: 0,
         }
+
         await WorkerService.createWorker(workerData)
       }
 
@@ -119,7 +137,7 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
         formData.role === "worker"
           ? "Tài khoản thợ đã được tạo và đang chờ phê duyệt từ admin."
           : "Tài khoản đã được tạo thành công. Bạn có thể đăng nhập ngay.",
-        [{ text: "OK", onPress: onRegister }],
+        [{ text: "OK", onPress: onRegister }]
       )
     } catch (error) {
       console.error("Registration error:", error)
@@ -127,6 +145,14 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const toggleService = (serviceId) => {
+    const isSelected = formData.serviceId.includes(serviceId)
+    const updatedServiceIds = isSelected
+      ? formData.serviceId.filter((id) => id !== serviceId)
+      : [...formData.serviceId, serviceId]
+    updateFormData("serviceId", updatedServiceIds)
   }
 
   return (
@@ -140,7 +166,6 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
           </View>
 
           <View style={styles.form}>
-            {/* Role Selection - Horizontal Layout */}
             <View style={styles.roleContainer}>
               <Text style={styles.roleLabel}>Loại tài khoản</Text>
               <View style={styles.roleButtons}>
@@ -163,7 +188,6 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
               </View>
             </View>
 
-            {/* Basic Information */}
             <TextInput
               style={styles.input}
               placeholder="Họ và tên"
@@ -212,23 +236,36 @@ const RegisterScreen = ({ onRegister, onBackToLogin }) => {
             <TextInput
               style={styles.input}
               placeholder="Khu vực (VD: Quận 1, TP.HCM)"
-              value={formData.area}
-              onChangeText={(value) => updateFormData("area", value)}
+              value={formData.address}
+              onChangeText={(value) => updateFormData("address", value)}
               editable={!loading}
             />
 
-            {/* Worker Specific Fields */}
             {formData.role === "worker" && (
               <View style={styles.workerFieldsContainer}>
                 <Text style={styles.workerFieldsTitle}>Thông tin thợ</Text>
 
-                <TextInput
-                  style={styles.input}
-                  placeholder="Chuyên môn (VD: Thợ điện, Thợ nước)"
-                  value={formData.specialty}
-                  onChangeText={(value) => updateFormData("specialty", value)}
-                  editable={!loading}
-                />
+                <View style={styles.multiSelectContainer}>
+                  <Text style={styles.multiSelectLabel}>Chọn chuyên môn</Text>
+                  {services.map((service) => {
+                    const isSelected = formData.serviceId.includes(service.id)
+                    return (
+                      <TouchableOpacity
+                        key={service.id}
+                        style={[
+                          styles.serviceItem,
+                          isSelected && styles.serviceItemSelected,
+                        ]}
+                        onPress={() => toggleService(service.id)}
+                        disabled={loading}
+                      >
+                        <Text style={isSelected ? styles.serviceTextSelected : styles.serviceText}>
+                          {isSelected ? "✅ " : "☑️ "} {service.name}
+                        </Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+                </View>
 
                 <TextInput
                   style={styles.input}

@@ -124,13 +124,13 @@ const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
             <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
           </TouchableOpacity>
 
-          <View style={styles.loginInfo}>
+          {/* <View style={styles.loginInfo}>
             <Text style={styles.loginInfoText}>Tài khoản demo:</Text>
             <Text style={styles.loginInfoText}>• Admin: 0123456789</Text>
             <Text style={styles.loginInfoText}>• Customer: 0111111111</Text>
             <Text style={styles.loginInfoText}>• Worker: 0444444444</Text>
             <Text style={styles.loginInfoText}>Mật khẩu: 123456</Text>
-          </View>
+          </View> */}
 
           <TouchableOpacity
             style={[styles.loginButton, loading && { opacity: 0.7 }]}
