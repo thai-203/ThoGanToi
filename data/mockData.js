@@ -310,13 +310,13 @@ export const menuItems = [
 ]
 
 export const workerMenuItems = [
-  { id: "1", title: "Thông tin thợ", icon: "👤", action: "profile" },
-  { id: "2", title: "Khu vực làm việc", icon: "📍", action: "area" },
-  { id: "3", title: "Lịch làm việc", icon: "📅", action: "schedule" },
-  { id: "4", title: "Báo cáo thu nhập", icon: "💰", action: "income" },
-  { id: "5", title: "Đánh giá từ khách", icon: "⭐", action: "reviews" },
-  { id: "6", title: "Hỗ trợ thợ", icon: "💬", action: "support" },
-  { id: "7", title: "Cài đặt", icon: "⚙️", action: "settings" },
+  { id: "1", title: "Thông tin thợ", icon: "👤", action: "workerInfo" },
+  { id: "2", title: "Khu vực làm việc", icon: "📍", action: "workerArea" },
+  { id: "3", title: "Lịch làm việc", icon: "📅", action: "workerSchedule" },
+  { id: "4", title: "Báo cáo thu nhập", icon: "💰", action: "workerIncome" },
+  { id: "5", title: "Đánh giá từ khách", icon: "⭐", action: "workerReviews" },
+  { id: "6", title: "Hỗ trợ thợ", icon: "💬", action: "workerSupport" },
+  { id: "7", title: "Cài đặt", icon: "⚙️", action: "workerSettings" },
 ]
 
 // Thêm dữ liệu thống kê cho admin
@@ -410,10 +410,10 @@ export const transactions = [
 
 // Thêm dữ liệu khu vực
 export const areas = [
-  { id: "1", name: "Quận 1", city: "TP.HCM", status: "active", workerCount: 15 },
-  { id: "2", name: "Quận 3", city: "TP.HCM", status: "active", workerCount: 12 },
-  { id: "3", name: "Quận 7", city: "TP.HCM", status: "active", workerCount: 18 },
-  { id: "4", name: "Quận Bình Thạnh", city: "TP.HCM", status: "active", workerCount: 8 },
+  { id: "1", name: "Quận 1", city: "TP.HCM", status: "active", distance: "2km", district: "Trung tâm", workerCount: 15, available: true},
+  { id: "2", name: "Quận 3", city: "TP.HCM", status: "active", distance: "3km", district: "Trung tâm", workerCount: 12, available: true},
+  { id: "3", name: "Quận 7", city: "TP.HCM", status: "active", distance: "4km", district: "Phía nam", workerCount: 18, available: true},
+  { id: "4", name: "Quận Bình Thạnh", city: "TP.HCM", status: "active", distance: "5km", district: "Phía đông", workerCount: 8, available: true },
 ]
 
 // Thêm dữ liệu nhật ký hệ thống
