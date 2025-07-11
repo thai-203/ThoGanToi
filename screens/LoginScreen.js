@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from "react-native"
 import { styles } from "../styles/styles"
