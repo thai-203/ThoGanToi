@@ -11,8 +11,8 @@ import {
 import { styles } from "../../styles/styles"
 import { menuItems } from "../../data/mockData"
 import { CustomerBottomNav } from "../../components/BottomNavigation"
-import EditProfileScreen from "./EditProfileScreen"
 import userService from "../../services/userService"
+import EditProfileScreen from "./EditProfileScreen"
 import { getCurrentUserId } from "../../utils/auth"
 
 const ProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
@@ -61,7 +61,7 @@ const ProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
   }
 
   const handleSaveProfile = async (newUserInfo) => {
-    await userService.updateUser(newUserInfo.id, newUserInfo)
+    await userService.updateUser(userInfo.id, newUserInfo)
     setUserInfo(newUserInfo)
     setShowEditProfile(false)
     Alert.alert("Thành công", "Đã lưu thông tin cá nhân.")
