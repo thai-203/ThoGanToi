@@ -69,8 +69,15 @@ const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
   const acceptedOrders = orders.filter((o) => o.status === "accepted").length
   const completedOrders = orders.filter((o) => o.status === "completed").length
   const totalEarnings = orders
-    .filter((o) => o.status === "completed")
-    .reduce((sum, o) => sum + Number.parseInt(o.price.replace(/[^\d]/g, "")), 0)
+  .filter((o) => o.status === "completed")
+  .reduce((sum, o) => {
+    const rawPrice = o.price?.toLowerCase?.().trim()
+    const price =
+      rawPrice === "thỏa thuận"
+        ? 0
+        : Number.parseInt(rawPrice.replace(/[^\d]/g, ""), 10) || 0
+    return sum + price
+  }, 0)
 
   const recentOrders = orders.slice(0, 3)
 
