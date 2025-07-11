@@ -334,7 +334,7 @@ export default function App() {
       case 'workerOrders':
         return (
           <WorkerOrdersScreen
-            onServicePress={handleServicePress}
+            onOrderPress={handleOrderPress}
             onTabPress={handleTabPress}
           />
         );

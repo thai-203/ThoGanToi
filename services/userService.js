@@ -86,6 +86,15 @@ class UserService {
     }
   }
 
+  async emailExists(email) {
+    try {
+      const users = await FirebaseService.queryByField(this.basePath, "email", email);
+      return users.length > 0;
+    } catch (error) {
+      console.error("Error checking if email exists:", error);
+      throw error;
+    }
+  }
 
   // Real-time listener for users
   listenToUsers(callback) {

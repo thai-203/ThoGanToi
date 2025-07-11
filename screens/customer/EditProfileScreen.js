@@ -1,48 +1,100 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Modal } from "react-native"
+import { useState, useEffect } from "react"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+  Modal,
+} from "react-native"
 import { styles } from "../../styles/styles"
+import userService from "../../services/userService"
+
 
 const EditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
   const [formData, setFormData] = useState({
-    name: userInfo?.name || "Nguyễn Văn A",
-    phone: userInfo?.phone || "0123 456 789",
-    email: userInfo?.email || "nguyenvana@email.com",
-    address: userInfo?.address || "123 Nguyễn Văn Cừ, Quận 5, TP.HCM",
-    dateOfBirth: userInfo?.dateOfBirth || "01/01/1990",
-    gender: userInfo?.gender || "Nam",
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    dateOfBirth: "",
+    gender: "",
   })
-
   const [errors, setErrors] = useState({})
+  const [checking, setChecking] = useState(false)
 
-  const validateForm = () => {
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        name: userInfo.name || "",
+        phone: userInfo.phone || "",
+        email: userInfo.email || "",
+        address: userInfo.address || "",
+        dateOfBirth: userInfo.dateOfBirth || "",
+        gender: userInfo.gender || "Nam",
+      })
+    }
+  }, [userInfo])
+
+  const formatDateIfNeeded = (text) => {
+    if (/^\d{8}$/.test(text)) {
+      const day = text.slice(0, 2)
+      const month = text.slice(2, 4)
+      const year = text.slice(4)
+      return `${day}/${month}/${year}`
+    }
+    return text
+  }
+
+  const validateForm = async () => {
     const newErrors = {}
+    const trimmedPhone = formData.phone.replace(/\s/g, "")
+    const trimmedEmail = formData.email.trim()
+    const trimmedName = formData.name.trim()
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Vui lòng nhập họ tên"
-    }
+    if (!trimmedName) newErrors.name = "Vui lòng nhập họ tên"
 
-    if (!formData.phone.trim()) {
+    if (!trimmedPhone) {
       newErrors.phone = "Vui lòng nhập số điện thoại"
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
+    } else if (!/^\d{10,11}$/.test(trimmedPhone)) {
       newErrors.phone = "Số điện thoại không hợp lệ"
+    } else if (trimmedPhone !== userInfo?.phone) {
+      const exists = await userService.phoneExists(trimmedPhone)
+      if (exists) newErrors.phone = "Số điện thoại đã được sử dụng"
     }
 
-    if (!formData.email.trim()) {
+    if (!trimmedEmail) {
       newErrors.email = "Vui lòng nhập email"
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       newErrors.email = "Email không hợp lệ"
+    } else if (trimmedEmail !== userInfo?.email) {
+      const exists = await userService.emailExists(trimmedEmail)
+      if (exists) newErrors.email = "Email đã được sử dụng"
+    }
+
+    if (formData.dateOfBirth.trim()) {
+      const dobRegex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[012])\/\d{4}$/
+      if (!dobRegex.test(formData.dateOfBirth)) {
+        newErrors.dateOfBirth = "Định dạng ngày sinh không hợp lệ (dd/mm/yyyy)"
+      }
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSave = () => {
-    if (validateForm()) {
+  const handleSave = async () => {
+    if (checking) return
+    setChecking(true)
+
+    const isValid = await validateForm()
+    if (isValid) {
       onSave(formData)
-      Alert.alert("Thành công", "Đã cập nhật thông tin cá nhân")
       onClose()
     }
+
+    setChecking(false)
   }
 
   const handleGenderSelect = (gender) => {
@@ -61,7 +113,6 @@ const EditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
           </View>
 
           <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
-            {/* Avatar Section */}
             <View style={styles.avatarSection}>
               <Text style={styles.editProfileAvatar}>👤</Text>
               <TouchableOpacity style={styles.changeAvatarButton}>
@@ -120,9 +171,18 @@ const EditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
             {/* Date of Birth */}
             <View style={styles.formGroup}>
               <Text style={styles.formLabel}>Ngày sinh</Text>
-              <TouchableOpacity style={styles.formInput}>
-                <Text style={styles.datePickerText}>{formData.dateOfBirth}</Text>
-              </TouchableOpacity>
+              <TextInput
+                style={[styles.formInput, errors.dateOfBirth && styles.formInputError]}
+                placeholder="Nhập ngày sinh (vd: 20072003)"
+                value={formData.dateOfBirth}
+                onChangeText={(text) => {
+                  const formatted = formatDateIfNeeded(text)
+                  setFormData({ ...formData, dateOfBirth: formatted })
+                  if (errors.dateOfBirth) setErrors({ ...errors, dateOfBirth: null })
+                }}
+                keyboardType="numeric"
+              />
+              {errors.dateOfBirth && <Text style={styles.errorText}>{errors.dateOfBirth}</Text>}
             </View>
 
             {/* Gender */}
@@ -132,11 +192,17 @@ const EditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
                 {["Nam", "Nữ", "Khác"].map((gender) => (
                   <TouchableOpacity
                     key={gender}
-                    style={[styles.genderButton, formData.gender === gender && styles.selectedGenderButton]}
+                    style={[
+                      styles.genderButton,
+                      formData.gender === gender && styles.selectedGenderButton,
+                    ]}
                     onPress={() => handleGenderSelect(gender)}
                   >
                     <Text
-                      style={[styles.genderButtonText, formData.gender === gender && styles.selectedGenderButtonText]}
+                      style={[
+                        styles.genderButtonText,
+                        formData.gender === gender && styles.selectedGenderButtonText,
+                      ]}
                     >
                       {gender}
                     </Text>
@@ -163,7 +229,9 @@ const EditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
                 <Text style={styles.cancelButtonText}>Hủy</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+                <Text style={styles.saveButtonText}>
+                  {checking ? "Đang lưu..." : "Lưu thay đổi"}
+                </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
