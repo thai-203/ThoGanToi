@@ -21,7 +21,7 @@ import { PhoneAuthProvider, signInWithCredential } from "firebase/auth"
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha"
 import UserService from "../services/userService"
 
-const ForgotPasswordScreen = ({ onPasswordResetSuccess, onBackToLogin }) => {
+const ForgotPasswordScreen = ({ onPasswordResetSuccess, onBackToLogin, onNavigateToLogin }) => {
   const [step, setStep] = useState(1) // 1: Phone, 2: OTP, 3: New Password
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState("")
@@ -178,11 +178,12 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onBackToLogin }) => {
           {
             text: "OK",
             onPress: () => {
-              if (onPasswordResetSuccess) {
-                onPasswordResetSuccess()
-              } else if (onNavigateToLogin) {
-                onNavigateToLogin()
-              }
+              // if (onPasswordResetSuccess) {
+              //   onPasswordResetSuccess()
+              // } else if (onNavigateToLogin) {
+              //   onNavigateToLogin()
+              // }
+              onBackToLogin()
             },
           },
         ])

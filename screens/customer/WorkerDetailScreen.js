@@ -103,6 +103,22 @@ const WorkerDetailScreen = ({
     '18:00',
   ];
 
+  // Hàm gửi SMS
+  const sendSMS = (phone, message) => {
+    if (!phone || !message) return;
+
+    const formattedPhone = phone.startsWith('+')
+      ? phone
+      : `+84${phone.slice(1)}`;
+    const url = `sms:${formattedPhone}${
+      Platform.OS === 'ios' ? '&' : '?'
+    }body=${encodeURIComponent(message)}`;
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Lỗi', 'Không thể mở ứng dụng nhắn tin.');
+    });
+  };
+
   const handleBooking = async () => {
     if (!selectedDate || !selectedTime || !address) {
       Alert.alert('Thông báo', 'Vui lòng chọn ngày, giờ và địa chỉ');
@@ -124,8 +140,8 @@ const WorkerDetailScreen = ({
       avatar: worker?.avatar,
       worker: worker?.name,
       price: worker?.price,
-      estimatedHours: "1",
-      description: "mô tả",
+      estimatedHours: '1',
+      description: 'mô tả',
       status: 'pending',
       customerId: customer?.id,
       workerId: worker?.id,
@@ -142,6 +158,13 @@ const WorkerDetailScreen = ({
             try {
               await orderService.createOrder(orderData);
               Alert.alert('Thành công', 'Đặt lịch thành công!');
+
+              // Nội dung tin nhắn gửi cho worker
+              const smsContent = `Chào ${worker?.name}, khách hàng ${customer?.name} đã đặt lịch dịch vụ "${service?.name}" vào ${selectedDate} lúc ${selectedTime}. Địa chỉ: ${address}.`;
+
+              // Gửi SMS
+              sendSMS(worker?.phone, smsContent);
+
               onBack && onBack();
             } catch (error) {
               console.error('Lỗi tạo booking:', error);
