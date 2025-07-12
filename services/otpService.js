@@ -1,3 +1,5 @@
+import sendMailOTP from './sendMailOTP'
+
 class OTPService {
   constructor() {
     this.otpStorage = new Map() // phone -> {otp, expiry, attempts}
@@ -9,19 +11,16 @@ class OTPService {
     return Math.floor(100000 + Math.random() * 900000).toString()
   }
 
-  async sendOTP(phone) {
+  /**
+   * Gửi OTP về email (gmail)
+   * @param {string} email - Địa chỉ email nhận OTP
+   * @returns {Promise<boolean>}
+   */
+  async sendOTP(email) {
     try {
-      // Validate phone number
-      if (!phone || typeof phone !== "string") {
-        console.error("Invalid phone number")
-        return false
-      }
-
-      // Clean phone number (remove spaces, dashes, etc.)
-      const cleanPhone = phone.replace(/\D/g, "")
-
-      if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-        console.error("Phone number must be 10-11 digits")
+      // Validate email
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        console.error('Invalid email')
         return false
       }
 
@@ -29,29 +28,23 @@ class OTPService {
       const expiry = Date.now() + this.otpExpiry
 
       // Store OTP data
-      this.otpStorage.set(cleanPhone, {
+      this.otpStorage.set(email, {
         otp,
         expiry,
         attempts: 0,
         createdAt: Date.now(),
       })
 
-      // Simulate SMS sending delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Log OTP for development (remove in production)
-      console.log(`📱 OTP sent to ${cleanPhone}: ${otp}`)
-      console.log(`⏰ OTP expires at: ${new Date(expiry).toLocaleTimeString()}`)
-
-      // In real app, integrate with SMS service like:
-      // - Firebase Auth Phone Authentication
-      // - Twilio SMS API
-      // - AWS SNS
-      // - Other SMS providers
-
+      // Gửi OTP qua email
+      const sent = await sendMailOTP(email, otp)
+      if (!sent) {
+        this.otpStorage.delete(email)
+        return false
+      }
+      console.log(`📧 OTP sent to ${email}: ${otp}`)
       return true
     } catch (error) {
-      console.error("Send OTP error:", error)
+      console.error('Send OTP error:', error)
       return false
     }
   }

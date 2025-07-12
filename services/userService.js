@@ -87,6 +87,23 @@ class UserService {
   }
 
 
+  // Đặt lại mật khẩu bằng số điện thoại
+  async resetPasswordByPhone(phone, newPassword) {
+    try {
+      const users = await FirebaseService.queryByField(this.basePath, "phone", phone)
+      if (!users || users.length === 0) return false
+      const user = users[0]
+      await FirebaseService.update(`${this.basePath}/${user.id}`, {
+        password: newPassword,
+        updatedAt: Date.now(),
+      })
+      return true
+    } catch (error) {
+      console.error("Error resetting password by phone:", error)
+      return false
+    }
+  }
+
   // Real-time listener for users
   listenToUsers(callback) {
     return FirebaseService.listen(this.basePath, (usersArray) => {

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { useNavigation } from "@react-navigation/native"
 import {
   View,
   Text,
@@ -15,10 +16,12 @@ import {
   ActivityIndicator,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import OTPService from "../services/otpService"
+import { auth } from "../config/firebase"
+import { PhoneAuthProvider, signInWithCredential } from "firebase/auth"
+import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha"
 import UserService from "../services/userService"
 
-const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => {
+const ForgotPasswordScreen = ({ onPasswordResetSuccess, onBackToLogin }) => {
   const [step, setStep] = useState(1) // 1: Phone, 2: OTP, 3: New Password
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState("")
@@ -27,6 +30,14 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
   const [loading, setLoading] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [error, setError] = useState("")
+  const [verificationId, setVerificationId] = useState(null)
+  const recaptchaVerifier = useRef(null)
+  let navigation = null;
+  try {
+    navigation = useNavigation();
+  } catch (e) {
+    navigation = null;
+  }
 
   // Countdown timer for resend OTP
   useEffect(() => {
@@ -41,9 +52,17 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
     return () => clearInterval(interval)
   }, [countdown])
 
+  // Chấp nhận cả 0xxxxxxxxx và +84xxxxxxxxx
   const validatePhone = (phoneNumber) => {
-    const phoneRegex = /^[0-9]{10,11}$/
-    return phoneRegex.test(phoneNumber)
+    const phoneRegex = /^(0[0-9]{9,10}|\+84[0-9]{9,10})$/;
+    return phoneRegex.test(phoneNumber);
+  }
+
+  // Chuyển số về định dạng quốc tế nếu cần
+  const getInternationalPhone = (phone) => {
+    if (phone.startsWith("+84")) return phone;
+    if (phone.startsWith("0")) return "+84" + phone.slice(1);
+    return phone;
   }
 
   const validatePassword = (password) => {
@@ -53,19 +72,15 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
   const handleSendOTP = async () => {
     try {
       setError("")
-
       if (!phone.trim()) {
         setError("Vui lòng nhập số điện thoại")
         return
       }
-
       if (!validatePhone(phone)) {
         setError("Số điện thoại không hợp lệ (10-11 số)")
         return
       }
-
       setLoading(true)
-
       // Check if phone exists in database
       const phoneExists = await UserService.phoneExists(phone)
       if (!phoneExists) {
@@ -73,19 +88,19 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
         setLoading(false)
         return
       }
-
-      // Send OTP
-      const otpSent = await OTPService.sendOTP(phone)
-      if (otpSent) {
-        setStep(2)
-        setCountdown(60) // 60 seconds countdown
-        Alert.alert("Thành công", `Mã OTP đã được gửi đến ${phone}`)
-      } else {
-        setError("Không thể gửi mã OTP. Vui lòng thử lại.")
-      }
+      // Send OTP qua Firebase
+      const provider = new PhoneAuthProvider(auth)
+      const phoneToSend = getInternationalPhone(phone)
+      const id = await provider.verifyPhoneNumber(
+        phoneToSend,
+        recaptchaVerifier.current
+      )
+      setVerificationId(id)
+      setStep(2)
+      setCountdown(60)
+      Alert.alert("Thành công", `Mã OTP đã được gửi đến ${phone}`)
     } catch (error) {
-      console.error("Send OTP error:", error)
-      setError("Có lỗi xảy ra. Vui lòng thử lại.")
+      setError("Không thể gửi mã OTP. Vui lòng thử lại.")
     } finally {
       setLoading(false)
     }
@@ -94,29 +109,21 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
   const handleVerifyOTP = async () => {
     try {
       setError("")
-
       if (!otp.trim()) {
         setError("Vui lòng nhập mã OTP")
         return
       }
-
       if (otp.length !== 6) {
         setError("Mã OTP phải có 6 số")
         return
       }
-
       setLoading(true)
-
-      const isValidOTP = await OTPService.verifyOTP(phone, otp)
-      if (isValidOTP) {
-        setStep(3)
-        Alert.alert("Thành công", "Mã OTP hợp lệ")
-      } else {
-        setError("Mã OTP không đúng hoặc đã hết hạn")
-      }
+      const credential = PhoneAuthProvider.credential(verificationId, otp)
+      await signInWithCredential(auth, credential)
+      setStep(3)
+      Alert.alert("Thành công", "Mã OTP hợp lệ")
     } catch (error) {
-      console.error("Verify OTP error:", error)
-      setError("Có lỗi xảy ra khi xác thực OTP")
+      setError("Mã OTP không đúng hoặc đã hết hạn")
     } finally {
       setLoading(false)
     }
@@ -124,21 +131,20 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
 
   const handleResendOTP = async () => {
     if (countdown > 0) return
-
     try {
       setError("")
       setLoading(true)
-
-      const otpSent = await OTPService.sendOTP(phone)
-      if (otpSent) {
-        setCountdown(60)
-        Alert.alert("Thành công", "Mã OTP mới đã được gửi")
-      } else {
-        setError("Không thể gửi lại mã OTP")
-      }
+      const provider = new PhoneAuthProvider(auth)
+      const phoneToSend = getInternationalPhone(phone)
+      const id = await provider.verifyPhoneNumber(
+        phoneToSend,
+        recaptchaVerifier.current
+      )
+      setVerificationId(id)
+      setCountdown(60)
+      Alert.alert("Thành công", "Mã OTP mới đã được gửi")
     } catch (error) {
-      console.error("Resend OTP error:", error)
-      setError("Có lỗi xảy ra khi gửi lại OTP")
+      setError("Không thể gửi lại mã OTP")
     } finally {
       setLoading(false)
     }
@@ -165,7 +171,8 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
 
       setLoading(true)
 
-      const resetSuccess = await UserService.resetPassword(phone, newPassword)
+      // Đặt lại mật khẩu qua số điện thoại
+      const resetSuccess = await UserService.resetPasswordByPhone(phone, newPassword)
       if (resetSuccess) {
         Alert.alert("Thành công", "Mật khẩu đã được đặt lại thành công", [
           {
@@ -191,8 +198,25 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
   }
 
   const handleBackToLogin = () => {
-    if (onNavigateToLogin) {
-      onNavigateToLogin()
+    // Reset lại các state khi quay lại đăng nhập
+    setStep(1);
+    setPhone("");
+    setOtp("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError("");
+    setCountdown(0);
+    setVerificationId(null);
+    if (onBackToLogin) {
+      onBackToLogin();
+    } else if (navigation && navigation.navigate) {
+      try {
+        navigation.navigate("Login");
+      } catch (e) {
+        // ignore
+      }
+    } else if (onPasswordResetSuccess) {
+      onPasswordResetSuccess();
     }
   }
 
@@ -210,9 +234,8 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
                 style={styles.input}
                 placeholder="Số điện thoại"
                 value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                maxLength={11}
+                onChangeText={text => setPhone(text.replace(/[^0-9+]/g, ""))}
+                keyboardType="number-pad"
                 autoFocus
               />
             </View>
@@ -326,6 +349,10 @@ const ForgotPasswordScreen = ({ onPasswordResetSuccess, onNavigateToLogin }) => 
 
   return (
     <SafeAreaView style={styles.container}>
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={auth.app.options}
+      />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardAvoidingView}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
