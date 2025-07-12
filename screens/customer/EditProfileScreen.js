@@ -57,7 +57,7 @@ const EditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
 
     if (!trimmedPhone) {
       newErrors.phone = "Vui lòng nhập số điện thoại"
-    } else if (!/^\d{10,11}$/.test(trimmedPhone)) {
+    } else if (!/^\d{10}$/.test(trimmedPhone)) {
       newErrors.phone = "Số điện thoại không hợp lệ"
     } else if (trimmedPhone !== userInfo?.phone) {
       const exists = await userService.phoneExists(trimmedPhone)
