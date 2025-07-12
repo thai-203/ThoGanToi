@@ -4,6 +4,7 @@ import { styles } from "../../styles/styles"
 
 const WorkerEditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
   const [formData, setFormData] = useState({
+    avatar: userInfo?.avatar || "👨‍🔧",
     name: userInfo?.name || "Thợ Minh Tuấn",
     phone: userInfo?.phone || "0901234567",
     email: userInfo?.email || "minhtuan@email.com",
@@ -11,7 +12,7 @@ const WorkerEditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
     experience: userInfo?.experience || "5",
     description:
       userInfo?.description || "Có 5 năm kinh nghiệm sửa chữa điện dân dụng và công nghiệp. Tận tâm, chuyên nghiệp.",
-    hourlyRate: userInfo?.hourlyRate || "50000",
+    price: userInfo?.price || "50000",
     address: userInfo?.address || "Quận 7, TP.HCM",
     skills: userInfo?.skills || ["Sửa chữa điện", "Lắp đặt thiết bị", "Bảo trì hệ thống"],
   })
@@ -38,10 +39,10 @@ const WorkerEditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
       newErrors.email = "Email không hợp lệ"
     }
 
-    if (!formData.hourlyRate.trim()) {
-      newErrors.hourlyRate = "Vui lòng nhập giá dịch vụ"
-    } else if (isNaN(formData.hourlyRate) || Number(formData.hourlyRate) <= 0) {
-      newErrors.hourlyRate = "Giá dịch vụ không hợp lệ"
+    if (!formData.price.trim()) {
+      newErrors.price = "Vui lòng nhập giá dịch vụ"
+    } else if (isNaN(formData.price) || Number(formData.price) <= 0) {
+      newErrors.price = "Giá dịch vụ không hợp lệ"
     }
 
     setErrors(newErrors)
@@ -87,7 +88,16 @@ const WorkerEditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
           <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
             {/* Avatar Section */}
             <View style={styles.avatarSection}>
-              <Text style={styles.editProfileAvatar}>👨‍🔧</Text>
+              {formData.avatar && formData.avatar.startsWith("http") ? (
+                <Image
+                  source={{ uri: formData.avatar }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <Text style={styles.editProfileAvatar}>
+                  {formData.avatar || "👨‍🔧"}
+                </Text>
+              )}
               <TouchableOpacity style={styles.changeAvatarButton}>
                 <Text style={styles.changeAvatarButtonText}>Đổi ảnh đại diện</Text>
               </TouchableOpacity>
@@ -171,16 +181,16 @@ const WorkerEditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Giá dịch vụ (VNĐ/giờ) *</Text>
                 <TextInput
-                  style={[styles.formInput, errors.hourlyRate && styles.formInputError]}
+                  style={[styles.formInput, errors.price && styles.formInputError]}
                   placeholder="VD: 50000"
-                  value={formData.hourlyRate}
+                  value={formData.price}
                   onChangeText={(text) => {
-                    setFormData({ ...formData, hourlyRate: text })
-                    if (errors.hourlyRate) setErrors({ ...errors, hourlyRate: null })
+                    setFormData({ ...formData, price: text })
+                    if (errors.price) setErrors({ ...errors, price: null })
                   }}
                   keyboardType="numeric"
                 />
-                {errors.hourlyRate && <Text style={styles.errorText}>{errors.hourlyRate}</Text>}
+                {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
               </View>
 
               <View style={styles.formGroup}>
