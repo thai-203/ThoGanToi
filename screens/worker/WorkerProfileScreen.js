@@ -50,7 +50,8 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
             price: worker.price,
             address: worker.address,
             rating: worker.rating,
-            completedOrders: worker.orderCompleted,
+            reviews: worker.reviews,
+            completedOrders: worker.completedOrders,
             isAvailable: worker.status === "active" || worker.status === true,
           })
           setIsAvailable(worker.status === "active" || worker.status === true)
@@ -179,7 +180,7 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
 
         <View style={styles.workerStatsContainer}>
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>{userInfo.rating ?? "-"}</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.reviews ?? "-"}</Text>
             <Text style={styles.workerStatLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statDivider} />

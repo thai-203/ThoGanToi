@@ -104,20 +104,20 @@ const WorkerDetailScreen = ({
   ];
 
   // Hàm gửi SMS
-  const sendSMS = (phone, message) => {
-    if (!phone || !message) return;
+  // const sendSMS = (phone, message) => {
+  //   if (!phone || !message) return;
 
-    const formattedPhone = phone.startsWith('+')
-      ? phone
-      : `+84${phone.slice(1)}`;
-    const url = `sms:${formattedPhone}${
-      Platform.OS === 'ios' ? '&' : '?'
-    }body=${encodeURIComponent(message)}`;
+  //   const formattedPhone = phone.startsWith('+')
+  //     ? phone
+  //     : `+84${phone.slice(1)}`;
+  //   const url = `sms:${formattedPhone}${
+  //     Platform.OS === 'ios' ? '&' : '?'
+  //   }body=${encodeURIComponent(message)}`;
 
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Lỗi', 'Không thể mở ứng dụng nhắn tin.');
-    });
-  };
+  //   Linking.openURL(url).catch(() => {
+  //     Alert.alert('Lỗi', 'Không thể mở ứng dụng nhắn tin.');
+  //   });
+  // };
 
   const handleBooking = async () => {
     if (!selectedDate || !selectedTime || !address) {
@@ -160,10 +160,10 @@ const WorkerDetailScreen = ({
               Alert.alert('Thành công', 'Đặt lịch thành công!');
 
               // Nội dung tin nhắn gửi cho worker
-              const smsContent = `Chào ${worker?.name}, khách hàng ${customer?.name} đã đặt lịch dịch vụ "${service?.name}" vào ${selectedDate} lúc ${selectedTime}. Địa chỉ: ${address}.`;
+              // const smsContent = `Chào ${worker?.name}, khách hàng ${customer?.name} đã đặt lịch dịch vụ "${service?.name}" vào ${selectedDate} lúc ${selectedTime}. Địa chỉ: ${address}.`;
 
-              // Gửi SMS
-              sendSMS(worker?.phone, smsContent);
+              // // Gửi SMS
+              // sendSMS(worker?.phone, smsContent);
 
               onBack && onBack();
             } catch (error) {
@@ -333,28 +333,6 @@ const WorkerDetailScreen = ({
             </View>
           </View>
 
-          {/* Chỗ lấy gps  */}
-          {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Địa chỉ</Text>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <TouchableOpacity
-              style={styles.locateButton}
-              onPress={getCurrentLocation}
-            >
-              <Text style={styles.locateButtonText}>
-                {gettingLocation ? 'Đang lấy...' : '📍 Dùng vị trí hiện tại'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            style={styles.addressInput}
-            placeholder='Nhập địa chỉ chi tiết'
-            value={address}
-            onChangeText={setAddress}
-          />
-        </View> */}
 
           {/* Nhập địa chỉ bình thường bằng tay*/}
           <View style={styles.section}>

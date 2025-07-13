@@ -3900,4 +3900,47 @@ export const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+
+  checkboxList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  checkboxItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginRight: 10,
+    marginBottom: 8,
+  },
+
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: '#666',
+    borderRadius: 4,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+
+  checkboxChecked: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+
+  checkboxLabel: {
+    fontSize: 14,
+  },
+
+  checkmark: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
 });
