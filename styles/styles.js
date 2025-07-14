@@ -218,10 +218,17 @@ export const styles = StyleSheet.create({
   },
 
   // Filter Styles
+  filterScroll: {
+    maxWidth: '100%',
+    paddingVertical: 10,
+    maxHeight: 70,
+  },
   filterContainer: {
     flexDirection: 'row',
-    padding: 15,
+    alignItems: 'center',
+    paddingHorizontal: 10,
     gap: 10,
+    minHeight: 50,
   },
   filterChip: {
     backgroundColor: 'white',

@@ -8,6 +8,7 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
+  ScrollView
 } from "react-native";
 import { styles } from "../../styles/styles";
 import { AdminBottomNav } from "../../components/BottomNavigation";
@@ -150,7 +151,11 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
         />
       </View>
 
-      <View style={styles.filterContainer}>
+      <ScrollView   
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.filterScroll}
+      contentContainerStyle={styles.filterContainer}>
         {["all", "admin", "customer", "worker"].map((role) => (
           <TouchableOpacity
             key={role}
@@ -174,7 +179,7 @@ const UserManagementScreen = ({ onTabPress, onBack }) => {
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       {loading ? (
         <ActivityIndicator
