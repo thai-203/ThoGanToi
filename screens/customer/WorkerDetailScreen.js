@@ -104,20 +104,20 @@ const WorkerDetailScreen = ({
   ];
 
   // Hàm gửi SMS
-  // const sendSMS = (phone, message) => {
-  //   if (!phone || !message) return;
+  const sendSMS = (phone, message) => {
+    if (!phone || !message) return;
 
-  //   const formattedPhone = phone.startsWith('+')
-  //     ? phone
-  //     : `+84${phone.slice(1)}`;
-  //   const url = `sms:${formattedPhone}${
-  //     Platform.OS === 'ios' ? '&' : '?'
-  //   }body=${encodeURIComponent(message)}`;
+    const formattedPhone = phone.startsWith('+')
+      ? phone
+      : `+84${phone.slice(1)}`;
+    const url = `sms:${formattedPhone}${
+      Platform.OS === 'ios' ? '&' : '?'
+    }body=${encodeURIComponent(message)}`;
 
-  //   Linking.openURL(url).catch(() => {
-  //     Alert.alert('Lỗi', 'Không thể mở ứng dụng nhắn tin.');
-  //   });
-  // };
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Lỗi', 'Không thể mở ứng dụng nhắn tin.');
+    });
+  };
 
   const handleBooking = async () => {
     if (!selectedDate || !selectedTime || !address) {
@@ -160,10 +160,10 @@ const WorkerDetailScreen = ({
               Alert.alert('Thành công', 'Đặt lịch thành công!');
 
               // Nội dung tin nhắn gửi cho worker
-              // const smsContent = `Chào ${worker?.name}, khách hàng ${customer?.name} đã đặt lịch dịch vụ "${service?.name}" vào ${selectedDate} lúc ${selectedTime}. Địa chỉ: ${address}.`;
+              const smsContent = `Chào ${worker?.name}, khách hàng ${customer?.name} đã đặt lịch dịch vụ "${service?.name}" vào ${selectedDate} lúc ${selectedTime}. Địa chỉ: ${address}.`;
 
               // // Gửi SMS
-              // sendSMS(worker?.phone, smsContent);
+              sendSMS(worker?.phone, smsContent);
 
               onBack && onBack();
             } catch (error) {
