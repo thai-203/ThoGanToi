@@ -72,8 +72,6 @@ class OrderService {
 
   async updateOrderStatus(orderId, status) {
     try {
-      console.log("Order,", orderId);
-      
       await FirebaseService.update(`${this.basePath}/${orderId}`, { status })
       return true
     } catch (error) {
@@ -94,8 +92,6 @@ class OrderService {
 
   // 👇 Real-time listener for all orders
   listenToOrders(callback) {
-    console.log("1111111111111111111111");
-    
     return FirebaseService.listen(this.basePath, (dataArray) => {
       callback(Array.isArray(dataArray) ? dataArray : []);
     });
@@ -117,9 +113,6 @@ class OrderService {
       }));
       
       const filtered = order.filter((item) => item.workerId === workerId);
-      console.log("Filtered orders for worker:", filtered);
-      
-      
       callback(filtered);
     });
   }

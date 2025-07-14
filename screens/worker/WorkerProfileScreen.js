@@ -7,6 +7,8 @@ import WorkerEditProfileScreen from "./WorkerEditProfileScreen"
 import WorkerService from "../../services/workerService"
 import ServiceService from "../../services/serviceService"
 import OrderService from "../../services/orderService"
+import { getCurrentUserId } from "../../utils/auth"
+import userService from "../../services/userService"
 
 const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress }) => {
   const [isAvailable, setIsAvailable] = useState(true)
@@ -14,23 +16,23 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
   const [loading, setLoading] = useState(true)
   const [userInfo, setUserInfo] = useState(null)
   const [monthlyIncome, setMonthlyIncome] = useState(0)
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
     const loadWorkerInfo = async () => {
-      if (!currentUser?.id) {
+      const userId = await getCurrentUserId()
+      setUserId(userId)
+      if (!userId) {
         setLoading(false)
         return
       }
 
       setLoading(true)
       try {
-        const [allWorkers, allServices] = await Promise.all([
-          WorkerService.getAllWorkers(),
-          ServiceService.getAllServices()
+        const [worker, allServices] = await Promise.all([
+          WorkerService.getWorkerByUserId(userId),
+          ServiceService.getAllServices(),
         ])
-
-        const worker = allWorkers.find(w => String(w.userId) === String(currentUser.id))
-
         if (worker) {
           const serviceNames = (worker.serviceId || [])
             .map(id => {
@@ -45,10 +47,11 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
             phone: worker.phone,
             specialty: serviceNames || "N/A",
             experience: worker.experience,
-            hourlyRate: worker.price,
-            address: worker.area,
+            price: worker.price,
+            address: worker.address,
             rating: worker.rating,
-            completedOrders: worker.reviews,
+            reviews: worker.reviews,
+            completedOrders: worker.completedOrders,
             isAvailable: worker.status === "active" || worker.status === true,
           })
           setIsAvailable(worker.status === "active" || worker.status === true)
@@ -102,8 +105,21 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
     }
   }
 
-  const handleSaveProfile = (newUserInfo) => {
-    setUserInfo(newUserInfo)
+  const handleSaveProfile = async (newUserInfo) => {
+    if (!userInfo) return
+    try {
+      await WorkerService.updateWorker(userInfo.id, newUserInfo)
+      const updateUserInfo = {
+        avatar: newUserInfo.avatar,
+        name: newUserInfo.name,
+        phone: newUserInfo.phone,
+        specialty: newUserInfo.specialty,
+        area: newUserInfo.address
+      }
+      await userService.updateUser(userId, updateUserInfo)
+    } catch (err) {
+      Alert.alert("Lỗi", "Không thể cập nhật thông tin.")
+    }
   }
 
   const handleMenuPress = (action) => {
@@ -164,7 +180,7 @@ const WorkerProfileScreen = ({ currentUser, onTabPress, onLogout, onMenuPress })
 
         <View style={styles.workerStatsContainer}>
           <View style={styles.workerStatItem}>
-            <Text style={styles.workerStatNumber}>{userInfo.rating ?? "-"}</Text>
+            <Text style={styles.workerStatNumber}>{userInfo.reviews ?? "-"}</Text>
             <Text style={styles.workerStatLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statDivider} />

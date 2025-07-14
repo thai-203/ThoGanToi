@@ -218,10 +218,17 @@ export const styles = StyleSheet.create({
   },
 
   // Filter Styles
+  filterScroll: {
+    maxWidth: '100%',
+    paddingVertical: 10,
+    maxHeight: 70,
+  },
   filterContainer: {
     flexDirection: 'row',
-    padding: 15,
+    alignItems: 'center',
+    paddingHorizontal: 10,
     gap: 10,
+    minHeight: 50,
   },
   filterChip: {
     backgroundColor: 'white',
@@ -2311,8 +2318,8 @@ export const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
   },
   modalContent: {
     backgroundColor: 'white',
@@ -3718,6 +3725,229 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#111827',
   },
+  // OTP styles
+  resendContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  countdownText: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  resendButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  resendButtonText: {
+    color: '#2563eb',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  // Role selection styles
+  roleContainer: {
+    marginBottom: 24,
+  },
+  roleLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 12,
+  },
+  roleButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  roleButton: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+  },
+  activeRoleButton: {
+    borderColor: '#2563eb',
+    backgroundColor: '#eff6ff',
+  },
+  roleButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  activeRoleButtonText: {
+    color: '#2563eb',
+    fontWeight: '600',
+  },
+  // Worker fields styles
+  workerFieldsContainer: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  workerFieldsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 16,
+  },
+  workerNote: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
+  },
+  workerNoteText: {
+    fontSize: 13,
+    color: '#92400e',
+    lineHeight: 18,
+  },
 
-  
+  multiSelectContainer: {
+    marginVertical: 10,
+  },
+  multiSelectLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  serviceItem: {
+    padding: 10,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  serviceItemSelected: {
+    backgroundColor: '#4CAF50',
+  },
+  serviceText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  serviceTextSelected: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  //phone tab đơn hàng của worker
+  bookingActions: {
+    marginTop: 12,
+    gap: 10,
+  },
+
+  singleRow: {
+    width: '100%',
+  },
+
+  phoneButtonOrder: {
+    backgroundColor: '#facc15',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '100%',
+  },
+
+  phoneButtonTextOrder: {
+    color: '#1f2937',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+
+  cancelButtonOrder: {
+    backgroundColor: '#ef4444',
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+
+  cancelButtonTextOrder: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
+  acceptButtonOrder: {
+    backgroundColor: '#10b981',
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+
+  acceptButtonTextOrder: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
+  completeButtonOrder: {
+    flex: 1,
+    backgroundColor: '#10b981',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  completeButtonTextOrder: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+
+  checkboxList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  checkboxItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginRight: 10,
+    marginBottom: 8,
+  },
+
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: '#666',
+    borderRadius: 4,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+
+  checkboxChecked: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+
+  checkboxLabel: {
+    fontSize: 14,
+  },
+
+  checkmark: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
 });

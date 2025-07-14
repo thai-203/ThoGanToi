@@ -103,24 +103,32 @@ const WorkerDetailScreen = ({
     '18:00',
   ];
 
+  // Hàm gửi SMS
+  // const sendSMS = (phone, message) => {
+  //   if (!phone || !message) return;
+
+  //   const formattedPhone = phone.startsWith('+')
+  //     ? phone
+  //     : `+84${phone.slice(1)}`;
+  //   const url = `sms:${formattedPhone}${
+  //     Platform.OS === 'ios' ? '&' : '?'
+  //   }body=${encodeURIComponent(message)}`;
+
+  //   Linking.openURL(url).catch(() => {
+  //     Alert.alert('Lỗi', 'Không thể mở ứng dụng nhắn tin.');
+  //   });
+  // };
+
   const handleBooking = async () => {
     if (!selectedDate || !selectedTime || !address) {
       Alert.alert('Thông báo', 'Vui lòng chọn ngày, giờ và địa chỉ');
       return;
     }
 
-    // console.log(address)
-
-    // const customerId = await getCurrentUserId();
-
     if (!customer) {
       Alert.alert('Lỗi', 'Không xác định được người dùng.');
       return;
     }
-    // const customer = await userService.getUserById(customerId);
-
-    // console.log(customerId)
-    // console.log(customer)
 
     const orderData = {
       address,
@@ -129,8 +137,11 @@ const WorkerDetailScreen = ({
       customer: customer?.name,
       service: service?.name,
       serviceId: service?.id,
+      avatar: worker?.avatar,
       worker: worker?.name,
       price: worker?.price,
+      estimatedHours: '1',
+      description: 'mô tả',
       status: 'pending',
       customerId: customer?.id,
       workerId: worker?.id,
@@ -147,6 +158,13 @@ const WorkerDetailScreen = ({
             try {
               await orderService.createOrder(orderData);
               Alert.alert('Thành công', 'Đặt lịch thành công!');
+
+              // Nội dung tin nhắn gửi cho worker
+              // const smsContent = `Chào ${worker?.name}, khách hàng ${customer?.name} đã đặt lịch dịch vụ "${service?.name}" vào ${selectedDate} lúc ${selectedTime}. Địa chỉ: ${address}.`;
+
+              // // Gửi SMS
+              // sendSMS(worker?.phone, smsContent);
+
               onBack && onBack();
             } catch (error) {
               console.error('Lỗi tạo booking:', error);
@@ -175,6 +193,12 @@ const WorkerDetailScreen = ({
         },
       ]
     );
+  };
+
+  const formatCurrency = (value) => {
+    const number = Number(value);
+    if (isNaN(number)) return '0 đ/giờ';
+    return `${new Intl.NumberFormat('vi-VN').format(number)} đ/giờ`;
   };
 
   // Tạo danh sách ngày: Hôm nay, Ngày mai, +3 ngày
@@ -240,7 +264,14 @@ const WorkerDetailScreen = ({
                 ({worker.reviews} đánh giá)
               </Text>
             </View>
-            <Text style={styles.detailPrice}>{worker.price}</Text>
+
+            {/* <Text style={styles.detailPrice}>
+              {`${new Intl.NumberFormat('vi-VN').format(worker.price)} đ/giờ`}
+            </Text> */}
+
+            <Text style={styles.detailPrice}>
+              {formatCurrency(worker.price)}
+            </Text>
           </View>
 
           <View style={styles.section}>
@@ -302,28 +333,6 @@ const WorkerDetailScreen = ({
             </View>
           </View>
 
-          {/* Chỗ lấy gps  */}
-          {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Địa chỉ</Text>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <TouchableOpacity
-              style={styles.locateButton}
-              onPress={getCurrentLocation}
-            >
-              <Text style={styles.locateButtonText}>
-                {gettingLocation ? 'Đang lấy...' : '📍 Dùng vị trí hiện tại'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            style={styles.addressInput}
-            placeholder='Nhập địa chỉ chi tiết'
-            value={address}
-            onChangeText={setAddress}
-          />
-        </View> */}
 
           {/* Nhập địa chỉ bình thường bằng tay*/}
           <View style={styles.section}>
