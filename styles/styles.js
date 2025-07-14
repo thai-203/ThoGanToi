@@ -3837,82 +3837,117 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-
-  //phone tab đơn hàng của worker 
+  //phone tab đơn hàng của worker
   bookingActions: {
-  marginTop: 12,
-  gap: 10,
-},
+    marginTop: 12,
+    gap: 10,
+  },
 
-singleRow: {
-  width: '100%',
-},
+  singleRow: {
+    width: '100%',
+  },
 
-phoneButtonOrder: {
-  backgroundColor: '#facc15',
-  paddingVertical: 10,
-  borderRadius: 10,
-  alignItems: 'center',
-  width: '100%',
-},
+  phoneButtonOrder: {
+    backgroundColor: '#facc15',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '100%',
+  },
 
-phoneButtonTextOrder: {
-  color: '#1f2937',
-  fontWeight: '600',
-  fontSize: 16,
-},
+  phoneButtonTextOrder: {
+    color: '#1f2937',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 
-actionRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  gap: 10,
-},
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
 
-cancelButtonOrder: {
-  backgroundColor: '#ef4444',
-  flex: 1,
-  paddingVertical: 10,
-  borderRadius: 10,
-  alignItems: 'center',
-},
+  cancelButtonOrder: {
+    backgroundColor: '#ef4444',
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
 
-cancelButtonTextOrder: {
-  color: '#fff',
-  fontWeight: '600',
-  fontSize: 16,
-},
+  cancelButtonTextOrder: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 
-acceptButtonOrder: {
-  backgroundColor: '#10b981',
-  flex: 1,
-  paddingVertical: 10,
-  borderRadius: 10,
-  alignItems: 'center',
-},
+  acceptButtonOrder: {
+    backgroundColor: '#10b981',
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
 
-acceptButtonTextOrder: {
-  color: '#fff',
-  fontWeight: '600',
-  fontSize: 16,
-},
+  acceptButtonTextOrder: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 
-completeButtonOrder: {
-  flex: 1,
-  backgroundColor: '#10b981',
-  paddingVertical: 10,
-  borderRadius: 8,
-  alignItems: 'center',
-},
+  completeButtonOrder: {
+    flex: 1,
+    backgroundColor: '#10b981',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
 
-completeButtonTextOrder: {
-  color: 'white',
-  fontWeight: 'bold',
-},
+  completeButtonTextOrder: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 
+  checkboxList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  checkboxItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginRight: 10,
+    marginBottom: 8,
+  },
 
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: '#666',
+    borderRadius: 4,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
 
+  checkboxChecked: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
 
+  checkboxLabel: {
+    fontSize: 14,
+  },
 
-
-
+  checkmark: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
 });

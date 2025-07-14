@@ -234,7 +234,7 @@ export default function App() {
       case 'register':
         return <RegisterScreen onRegister={() => setCurrentScreen('login')} onBackToLogin={() => setCurrentScreen('login')} />;
       case 'forgotPassword':
-        return <ForgotPasswordScreen onBackToLogin={() => setCurrentScreen('login')} />;
+        return <ForgotPasswordScreen onBackToLogin={() => setCurrentScreen('login')}  />;
       case 'profile':
         return (
           <ProfileScreen
