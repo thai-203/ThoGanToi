@@ -1,7 +1,6 @@
-"use client"
+'use client';
 
-import { useState, useEffect, useRef } from "react"
-import { useNavigation } from "@react-navigation/native"
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,509 +13,290 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-} from "react-native"
-import { Ionicons } from "@expo/vector-icons"
-import { auth } from "../config/firebase"
-import { PhoneAuthProvider, signInWithCredential } from "firebase/auth"
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha"
-import UserService from "../services/userService"
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import UserService from '../services/userService';
+import OtpService from '../services/otpService';
+import { sendSms } from '../utils/smsService'; 
 
-const ForgotPasswordScreen = ({ onPasswordResetSuccess, onBackToLogin, onNavigateToLogin }) => {
-  const [step, setStep] = useState(1) // 1: Phone, 2: OTP, 3: New Password
-  const [phone, setPhone] = useState("")
-  const [otp, setOtp] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [countdown, setCountdown] = useState(0)
-  const [error, setError] = useState("")
-  const [verificationId, setVerificationId] = useState(null)
-  const recaptchaVerifier = useRef(null)
-  let navigation = null;
-  try {
-    navigation = useNavigation();
-  } catch (e) {
-    navigation = null;
-  }
+const ForgotPasswordScreen = ({ onBackToLogin }) => {
+  const [step, setStep] = useState(1); // 1: Nhập sđt, 2: OTP, 3: Mật khẩu mới
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [error, setError] = useState('');
+  const [userId, setUserId] = useState('');
 
-  // Countdown timer for resend OTP
   useEffect(() => {
-    let interval = null
+    let interval = null;
     if (countdown > 0) {
       interval = setInterval(() => {
-        setCountdown((countdown) => countdown - 1)
-      }, 1000)
-    } else if (countdown === 0) {
-      clearInterval(interval)
+        setCountdown((prev) => prev - 1);
+      }, 1000);
     }
-    return () => clearInterval(interval)
-  }, [countdown])
+    return () => clearInterval(interval);
+  }, [countdown]);
 
-  // Chấp nhận cả 0xxxxxxxxx và +84xxxxxxxxx
   const validatePhone = (phoneNumber) => {
-    const phoneRegex = /^(0[0-9]{9,10}|\+84[0-9]{9,10})$/;
-    return phoneRegex.test(phoneNumber);
-  }
+    const regex = /^(0\d{9}|\+84\d{9})$/;
+    return regex.test(phoneNumber);
+  };
 
-  // Chuyển số về định dạng quốc tế nếu cần
   const getInternationalPhone = (phone) => {
-    if (phone.startsWith("+84")) return phone;
-    if (phone.startsWith("0")) return "+84" + phone.slice(1);
-    return phone;
-  }
+    return phone.startsWith('0') ? '+84' + phone.slice(1) : phone;
+  };
 
   const validatePassword = (password) => {
-    return password.length >= 6
-  }
+    return password.length >= 6;
+  };
 
   const handleSendOTP = async () => {
-    try {
-      setError("")
-      if (!phone.trim()) {
-        setError("Vui lòng nhập số điện thoại")
-        return
-      }
-      if (!validatePhone(phone)) {
-        setError("Số điện thoại không hợp lệ (10-11 số)")
-        return
-      }
-      setLoading(true)
-      // Check if phone exists in database
-      const phoneExists = await UserService.phoneExists(phone)
-      if (!phoneExists) {
-        setError("Số điện thoại không tồn tại trong hệ thống")
-        setLoading(false)
-        return
-      }
-      // Send OTP qua Firebase
-      const provider = new PhoneAuthProvider(auth)
-      const phoneToSend = getInternationalPhone(phone)
-      const id = await provider.verifyPhoneNumber(
-        phoneToSend,
-        recaptchaVerifier.current
-      )
-      setVerificationId(id)
-      setStep(2)
-      setCountdown(60)
-      Alert.alert("Thành công", `Mã OTP đã được gửi đến ${phone}`)
-    } catch (error) {
-      setError("Không thể gửi mã OTP. Vui lòng thử lại.")
-    } finally {
-      setLoading(false)
+    setError('');
+    if (!validatePhone(phone)) {
+      setError('Số điện thoại không hợp lệ');
+      return;
     }
-  }
+
+    setLoading(true);
+    try {
+      const user = await UserService.getUserByPhone(phone);
+      if (!user || !user.id) {
+        setError('Số điện thoại không tồn tại trong hệ thống');
+        return;
+      }
+
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await OtpService.sendOtp(otpCode, user.id);
+      await sendSms(getInternationalPhone(phone), `Mã OTP của bạn là: ${otpCode}`);
+      setUserId(user.id);
+      setCountdown(60);
+      setStep(2);
+      Alert.alert('Đã gửi mã OTP', `OTP đã được gửi đến ${phone}`);
+    } catch (err) {
+      console.error('Lỗi gửi OTP:', err);
+      setError('Không thể gửi mã OTP. Thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleVerifyOTP = async () => {
-    try {
-      setError("")
-      if (!otp.trim()) {
-        setError("Vui lòng nhập mã OTP")
-        return
-      }
-      if (otp.length !== 6) {
-        setError("Mã OTP phải có 6 số")
-        return
-      }
-      setLoading(true)
-      const credential = PhoneAuthProvider.credential(verificationId, otp)
-      await signInWithCredential(auth, credential)
-      setStep(3)
-      Alert.alert("Thành công", "Mã OTP hợp lệ")
-    } catch (error) {
-      setError("Mã OTP không đúng hoặc đã hết hạn")
-    } finally {
-      setLoading(false)
+    setError('');
+    if (otp.length !== 6) {
+      setError('Mã OTP phải gồm 6 số');
+      return;
     }
-  }
 
-  const handleResendOTP = async () => {
-    if (countdown > 0) return
+    setLoading(true);
     try {
-      setError("")
-      setLoading(true)
-      const provider = new PhoneAuthProvider(auth)
-      const phoneToSend = getInternationalPhone(phone)
-      const id = await provider.verifyPhoneNumber(
-        phoneToSend,
-        recaptchaVerifier.current
-      )
-      setVerificationId(id)
-      setCountdown(60)
-      Alert.alert("Thành công", "Mã OTP mới đã được gửi")
-    } catch (error) {
-      setError("Không thể gửi lại mã OTP")
+      const result = await OtpService.verifyOtp(userId, otp);
+      if (result.success) {
+        setStep(3);
+        Alert.alert('Thành công', 'Mã OTP hợp lệ');
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError('Lỗi xác minh OTP');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleResetPassword = async () => {
+    setError('');
+    if (!validatePassword(newPassword)) {
+      setError('Mật khẩu phải từ 6 ký tự');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Xác nhận mật khẩu không khớp');
+      return;
+    }
+
+    setLoading(true);
     try {
-      setError("")
-
-      if (!newPassword.trim()) {
-        setError("Vui lòng nhập mật khẩu mới")
-        return
-      }
-
-      if (!validatePassword(newPassword)) {
-        setError("Mật khẩu phải có ít nhất 6 ký tự")
-        return
-      }
-
-      if (newPassword !== confirmPassword) {
-        setError("Mật khẩu xác nhận không khớp")
-        return
-      }
-
-      setLoading(true)
-
-      // Đặt lại mật khẩu qua số điện thoại
-      const resetSuccess = await UserService.resetPasswordByPhone(phone, newPassword)
-      if (resetSuccess) {
-        Alert.alert("Thành công", "Mật khẩu đã được đặt lại thành công", [
-          {
-            text: "OK",
-            onPress: () => {
-              // if (onPasswordResetSuccess) {
-              //   onPasswordResetSuccess()
-              // } else if (onNavigateToLogin) {
-              //   onNavigateToLogin()
-              // }
-              onBackToLogin()
-            },
-          },
-        ])
+      const success = await UserService.resetPasswordByPhone(phone, newPassword);
+      if (success) {
+        Alert.alert('Đặt lại thành công', 'Mật khẩu đã được cập nhật', [
+          { text: 'OK', onPress: onBackToLogin },
+        ]);
       } else {
-        setError("Không thể đặt lại mật khẩu. Vui lòng thử lại.")
+        setError('Không thể đặt lại mật khẩu. Thử lại.');
       }
-    } catch (error) {
-      console.error("Reset password error:", error)
-      setError("Có lỗi xảy ra khi đặt lại mật khẩu")
+    } catch (err) {
+      setError('Lỗi đặt lại mật khẩu');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleBackToLogin = () => {
-    // Reset lại các state khi quay lại đăng nhập
-    setStep(1);
-    setPhone("");
-    setOtp("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setError("");
-    setCountdown(0);
-    setVerificationId(null);
-    if (onBackToLogin) {
-      onBackToLogin();
-    } else if (navigation && navigation.navigate) {
-      try {
-        navigation.navigate("Login");
-      } catch (e) {
-        // ignore
-      }
-    } else if (onPasswordResetSuccess) {
-      onPasswordResetSuccess();
+  const handleResendOTP = async () => {
+    if (countdown > 0) return;
+
+    setLoading(true);
+    try {
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await OtpService.sendOtp(otpCode, userId);
+      await sendSms(getInternationalPhone(phone), `Mã OTP của bạn là: ${otpCode}`);
+      setCountdown(60);
+      Alert.alert('Gửi lại thành công', 'OTP mới đã được gửi');
+    } catch (err) {
+      setError('Không thể gửi lại OTP');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   const renderStepContent = () => {
     switch (step) {
       case 1:
         return (
-          <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>Nhập số điện thoại</Text>
-            <Text style={styles.stepDescription}>Nhập số điện thoại đã đăng ký để nhận mã OTP</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="call-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Số điện thoại"
-                value={phone}
-                onChangeText={text => setPhone(text.replace(/[^0-9+]/g, ""))}
-                keyboardType="number-pad"
-                autoFocus
-              />
-            </View>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
+          <>
+            <Text style={styles.label}>Số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="Nhập số điện thoại"
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
             <TouchableOpacity
-              style={[styles.primaryButton, loading && styles.disabledButton]}
+              style={styles.button}
               onPress={handleSendOTP}
               disabled={loading}
             >
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Gửi mã OTP</Text>}
+              <Text style={styles.buttonText}>Gửi mã OTP</Text>
             </TouchableOpacity>
-          </View>
-        )
+          </>
+        );
 
       case 2:
         return (
-          <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>Nhập mã OTP</Text>
-            <Text style={styles.stepDescription}>Mã OTP đã được gửi đến {phone}</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập mã OTP (6 số)"
-                value={otp}
-                onChangeText={setOtp}
-                keyboardType="number-pad"
-                maxLength={6}
-                autoFocus
-              />
-            </View>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
+          <>
+            <Text style={styles.label}>Mã OTP</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="number-pad"
+              maxLength={6}
+              value={otp}
+              onChangeText={setOtp}
+              placeholder="Nhập mã OTP"
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
             <TouchableOpacity
-              style={[styles.primaryButton, loading && styles.disabledButton]}
+              style={styles.button}
               onPress={handleVerifyOTP}
               disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.primaryButtonText}>Xác thực OTP</Text>
-              )}
+              <Text style={styles.buttonText}>Xác minh</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
-              style={[styles.secondaryButton, (countdown > 0 || loading) && styles.disabledButton]}
               onPress={handleResendOTP}
               disabled={countdown > 0 || loading}
             >
-              <Text style={[styles.secondaryButtonText, (countdown > 0 || loading) && styles.disabledText]}>
-                {countdown > 0 ? `Gửi lại sau ${countdown}s` : "Gửi lại mã OTP"}
+              <Text style={{ color: countdown > 0 ? '#aaa' : '#007bff' }}>
+                {countdown > 0 ? `Gửi lại sau ${countdown}s` : 'Gửi lại mã OTP'}
               </Text>
             </TouchableOpacity>
-          </View>
-        )
+          </>
+        );
 
       case 3:
         return (
-          <View style={styles.stepContainer}>
-            <Text style={styles.stepTitle}>Đặt mật khẩu mới</Text>
-            <Text style={styles.stepDescription}>Nhập mật khẩu mới cho tài khoản của bạn</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Mật khẩu mới"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry
-                autoFocus
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Xác nhận mật khẩu"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-              />
-            </View>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
+          <>
+            <Text style={styles.label}>Mật khẩu mới</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholder="Nhập mật khẩu mới"
+            />
+            <Text style={styles.label}>Xác nhận mật khẩu</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Xác nhận lại mật khẩu"
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
             <TouchableOpacity
-              style={[styles.primaryButton, loading && styles.disabledButton]}
+              style={styles.button}
               onPress={handleResetPassword}
               disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.primaryButtonText}>Đặt lại mật khẩu</Text>
-              )}
+              <Text style={styles.buttonText}>Đặt lại mật khẩu</Text>
             </TouchableOpacity>
-          </View>
-        )
+          </>
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifier}
-        firebaseConfig={auth.app.options}
-      />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardAvoidingView}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="lock-closed" size={50} color="#4A90E2" />
-            </View>
-            <Text style={styles.title}>Quên mật khẩu</Text>
-            <View style={styles.stepIndicator}>
-              <Text style={styles.stepText}>Bước {step}/3</Text>
-            </View>
-          </View>
-
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.wrapper}
+      >
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.title}>Quên mật khẩu</Text>
           {renderStepContent()}
-
-          <TouchableOpacity style={styles.backButton} onPress={handleBackToLogin}>
-            <Ionicons name="arrow-back" size={20} color="#4A90E2" />
-            <Text style={styles.backButtonText}>Quay lại đăng nhập</Text>
+          <TouchableOpacity onPress={onBackToLogin} style={{ marginTop: 20 }}>
+            <Text style={{ color: '#007bff' }}>Quay lại đăng nhập</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
+  container: { flex: 1, backgroundColor: '#fff' },
+  wrapper: { flex: 1 },
+  content: {
     padding: 20,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 40,
-    marginTop: 20,
-  },
-  iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#E3F2FD",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
+    justifyContent: 'center',
+    flexGrow: 1,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
-  stepIndicator: {
-    backgroundColor: "#4A90E2",
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 15,
-  },
-  stepText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  stepContainer: {
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  stepDescription: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 30,
-    lineHeight: 22,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
+  label: { fontSize: 16, marginBottom: 5 },
   input: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    color: "#333",
-  },
-  primaryButton: {
-    backgroundColor: "#4A90E2",
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    backgroundColor: "transparent",
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 15,
     borderWidth: 1,
-    borderColor: "#4A90E2",
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
   },
-  secondaryButtonText: {
-    color: "#4A90E2",
-    fontSize: 16,
-    fontWeight: "600",
+  button: {
+    backgroundColor: '#007bff',
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 5,
   },
-  disabledButton: {
-    backgroundColor: "#ccc",
-    borderColor: "#ccc",
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
-  disabledText: {
-    color: "#999",
-  },
-  errorText: {
-    color: "#e74c3c",
-    fontSize: 14,
+  error: {
+    color: 'red',
     marginBottom: 10,
-    textAlign: "center",
+    textAlign: 'center',
   },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 30,
-    paddingVertical: 10,
-  },
-  backButtonText: {
-    color: "#4A90E2",
-    fontSize: 16,
-    marginLeft: 5,
-    fontWeight: "500",
-  },
-})
+});
 
-export default ForgotPasswordScreen
+export default ForgotPasswordScreen;

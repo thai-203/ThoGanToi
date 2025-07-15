@@ -17,7 +17,7 @@ const WorkerEditProfileScreen = ({ visible, onClose, onSave, userInfo }) => {
     name: userInfo?.name || 'Thợ Minh Tuấn',
     phone: userInfo?.phone || '0901234567',
     email: userInfo?.email || 'minhtuan@email.com',
-    // specialty: userInfo?.specialty || "Thợ điện chuyên nghiệp",
+    specialty: userInfo?.specialty || "Thợ điện chuyên nghiệp",
     serviceId:
       Array.isArray(userInfo?.serviceId) && userInfo?.serviceId.length > 0
         ? userInfo.serviceId.map((id) => String(id))
