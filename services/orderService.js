@@ -10,57 +10,52 @@ class OrderService {
       const orderId = await FirebaseService.create(this.basePath, orderData)
       return orderId
     } catch (error) {
-      console.error("Error creating order:", error)
+      console.error("❌ Error creating order:", error)
       throw error
     }
   }
 
   async getOrderById(orderId) {
     try {
-      const order = await FirebaseService.read(`${this.basePath}/${orderId}`)
-      return order
+      return await FirebaseService.read(`${this.basePath}/${orderId}`)
     } catch (error) {
-      console.error("Error getting order:", error)
+      console.error("❌ Error getting order:", error)
       throw error
     }
   }
 
   async getAllOrders() {
     try {
-      const orders = await FirebaseService.readAll(this.basePath)
-      return orders
+      return await FirebaseService.readAll(this.basePath)
     } catch (error) {
-      console.error("Error getting all orders:", error)
+      console.error("❌ Error getting all orders:", error)
       throw error
     }
   }
 
   async getOrdersByCustomer(customerId) {
     try {
-      const orders = await FirebaseService.queryByField(this.basePath, "customerId", customerId)
-      return orders
+      return await FirebaseService.queryByField(this.basePath, "customerId", customerId)
     } catch (error) {
-      console.error("Error getting orders by customer:", error)
+      console.error("❌ Error getting orders by customer:", error)
       throw error
     }
   }
 
   async getOrdersByWorker(workerId) {
     try {
-      const orders = await FirebaseService.queryByField(this.basePath, "workerId", workerId)
-      return orders
+      return await FirebaseService.queryByField(this.basePath, "workerId", workerId)
     } catch (error) {
-      console.error("Error getting orders by worker:", error)
+      console.error("❌ Error getting orders by worker:", error)
       throw error
     }
   }
 
   async getOrdersByStatus(status) {
     try {
-      const orders = await FirebaseService.queryByField(this.basePath, "status", status)
-      return orders
+      return await FirebaseService.queryByField(this.basePath, "status", status)
     } catch (error) {
-      console.error("Error getting orders by status:", error)
+      console.error("❌ Error getting orders by status:", error)
       throw error
     }
   }
@@ -70,7 +65,7 @@ class OrderService {
       await FirebaseService.update(`${this.basePath}/${orderId}`, orderData)
       return true
     } catch (error) {
-      console.error("Error updating order:", error)
+      console.error("❌ Error updating order:", error)
       throw error
     }
   }
@@ -80,7 +75,7 @@ class OrderService {
       await FirebaseService.update(`${this.basePath}/${orderId}`, { status })
       return true
     } catch (error) {
-      console.error("Error updating order status:", error)
+      console.error("❌ Error updating order status:", error)
       throw error
     }
   }
@@ -90,40 +85,36 @@ class OrderService {
       await FirebaseService.delete(`${this.basePath}/${orderId}`)
       return true
     } catch (error) {
-      console.error("Error deleting order:", error)
+      console.error("❌ Error deleting order:", error)
       throw error
     }
   }
 
-  // Real-time listener for orders
+  // 👇 Real-time listener for all orders
   listenToOrders(callback) {
-    return FirebaseService.listen(this.basePath, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        const orders = Object.keys(data).map((key) => ({
-          ...data[key],
-          id: key,
-        }))
-        callback(orders)
-      } else {
-        callback([])
-      }
-    })
+    return FirebaseService.listen(this.basePath, (dataArray) => {
+      callback(Array.isArray(dataArray) ? dataArray : []);
+    });
   }
 
-  // Listen to orders by worker
+  // 👇 Real-time listener for a specific worker's order
   listenToWorkerOrders(workerId, callback) {
-    return FirebaseService.listen(this.basePath, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val()
-        const orders = Object.keys(data)
-          .map((key) => ({ ...data[key], id: key }))
-          .filter((order) => order.workerId === workerId)
-        callback(orders)
-      } else {
-        callback([])
+    return FirebaseService.listen(this.basePath, (data) => {
+      
+      
+      if (!data) {
+        callback([]);
+        return;
       }
-    })
+      const order = Object.entries(data).map(([id, item]) => ({
+        id,
+        ...item,
+
+      }));
+      
+      const filtered = order.filter((item) => item.workerId === workerId);
+      callback(filtered);
+    });
   }
 }
 

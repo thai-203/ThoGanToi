@@ -1,91 +1,114 @@
-import { useState } from "react"
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, TextInput } from "react-native"
-import { styles } from "../../styles/styles"
-import { users } from "../../data/mockData"
-import { AdminBottomNav } from "../../components/BottomNavigation"
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  Alert,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { AdminBottomNav } from "../../components/BottomNavigation";
+import userService from "../../services/userService";
 
 const WorkerManagementScreen = ({ onTabPress, onBack }) => {
-  const [workerList, setWorkerList] = useState(users.filter((user) => user.role === "worker"))
-  const [searchText, setSearchText] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [workerList, setWorkerList] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWorkers();
+  }, []);
+
+  const fetchWorkers = async () => {
+    setLoading(true);
+    const users = await userService.getAllUsers();
+    const workers = users.filter((user) => user.role === "worker");
+    setWorkerList(workers);
+    setLoading(false);
+  };
 
   const filteredWorkers = workerList.filter((worker) => {
     const matchesSearch =
-      worker.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      worker.phone.includes(searchText) ||
-      worker.specialty?.toLowerCase().includes(searchText.toLowerCase())
-    const matchesStatus = filterStatus === "all" || worker.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+      worker.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      worker.phone?.includes(searchText) ||
+      worker.specialty?.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus =
+      filterStatus === "all" || worker.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleApproveWorker = (workerId) => {
-    Alert.alert("Duyệt hồ sơ thợ", "Bạn có chắc muốn duyệt hồ sơ này?", [
+    Alert.alert("Duyệt hồ sơ", "Bạn có chắc muốn duyệt hồ sơ này?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Duyệt",
-        onPress: () => {
-          setWorkerList(workerList.map((worker) => (worker.id === workerId ? { ...worker, status: "active" } : worker)))
-          Alert.alert("Thành công", "Đã duyệt hồ sơ thợ")
+        onPress: async () => {
+          await userService.updateUser(workerId, { status: "active" });
+          fetchWorkers();
+          Alert.alert("Thành công", "Đã duyệt hồ sơ.");
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleToggleStatus = (workerId, currentStatus) => {
-    if (currentStatus === "pending") return
+    if (currentStatus === "pending") return;
 
-    const newStatus = currentStatus === "active" ? "blocked" : "active"
-    const action = newStatus === "blocked" ? "khóa" : "mở khóa"
+    const newStatus = currentStatus === "active" ? "blocked" : "active";
+    const action = newStatus === "blocked" ? "khóa" : "mở khóa";
 
     Alert.alert("Xác nhận", `Bạn có chắc muốn ${action} tài khoản này?`, [
       { text: "Hủy", style: "cancel" },
       {
         text: "Xác nhận",
-        onPress: () => {
-          setWorkerList(
-            workerList.map((worker) => (worker.id === workerId ? { ...worker, status: newStatus } : worker)),
-          )
-          Alert.alert("Thành công", `Đã ${action} tài khoản`)
+        onPress: async () => {
+          await userService.updateUser(workerId, { status: newStatus });
+          fetchWorkers();
+          Alert.alert("Thành công", `Đã ${action} tài khoản.`);
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleViewDetails = (worker) => {
     Alert.alert(
       "Chi tiết thợ",
-      `Tên: ${worker.name}\nChuyên môn: ${worker.specialty}\nĐánh giá: ${worker.rating}/5\nĐơn hoàn thành: ${worker.completedOrders}\nChứng chỉ: ${worker.certificate}\nKhu vực: ${worker.area}`,
-    )
-  }
+      `Tên: ${worker.name}\nChuyên môn: ${worker.specialty}\nĐánh giá: ${worker.rating}/5\nĐơn hoàn thành: ${worker.completedOrders}\nChứng chỉ: ${worker.certificate}\nKhu vực: ${worker.area}`
+    );
+  };
 
   const getStatusStyle = (status) => {
     switch (status) {
       case "active":
-        return { backgroundColor: "#d1fae5", color: "#065f46" }
+        return { backgroundColor: "#d1fae5", color: "#065f46" };
       case "pending":
-        return { backgroundColor: "#fef3c7", color: "#92400e" }
+        return { backgroundColor: "#fef3c7", color: "#92400e" };
       case "blocked":
-        return { backgroundColor: "#fee2e2", color: "#dc2626" }
+        return { backgroundColor: "#fee2e2", color: "#dc2626" };
       default:
-        return { backgroundColor: "#f3f4f6", color: "#6b7280" }
+        return { backgroundColor: "#f3f4f6", color: "#6b7280" };
     }
-  }
+  };
 
   const getStatusText = (status) => {
     switch (status) {
       case "active":
-        return "Hoạt động"
+        return "Hoạt động";
       case "pending":
-        return "Chờ duyệt"
+        return "Chờ duyệt";
       case "blocked":
-        return "Đã khóa"
+        return "Đã khóa";
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   const renderWorker = ({ item }) => {
-    const statusStyle = getStatusStyle(item.status)
+    const statusStyle = getStatusStyle(item.status);
 
     return (
       <View style={styles.userCard}>
@@ -100,12 +123,22 @@ const WorkerManagementScreen = ({ onTabPress, onBack }) => {
             </Text>
             <Text style={styles.userPhone}>📍 {item.area}</Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusStyle.backgroundColor }]}>
-            <Text style={[styles.statusText, { color: statusStyle.color }]}>{getStatusText(item.status)}</Text>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: statusStyle.backgroundColor },
+            ]}
+          >
+            <Text style={[styles.statusText, { color: statusStyle.color }]}>
+              {getStatusText(item.status)}
+            </Text>
           </View>
         </View>
         <View style={styles.userActions}>
-          <TouchableOpacity style={styles.editUserButton} onPress={() => handleViewDetails(item)}>
+          <TouchableOpacity
+            style={styles.editUserButton}
+            onPress={() => handleViewDetails(item)}
+          >
             <Text style={styles.editUserButtonText}>Chi tiết</Text>
           </TouchableOpacity>
           {item.status === "pending" ? (
@@ -120,18 +153,21 @@ const WorkerManagementScreen = ({ onTabPress, onBack }) => {
               style={[
                 styles.deleteUserButton,
                 {
-                  backgroundColor: item.status === "active" ? "#ef4444" : "#10b981",
+                  backgroundColor:
+                    item.status === "active" ? "#ef4444" : "#10b981",
                 },
               ]}
               onPress={() => handleToggleStatus(item.id, item.status)}
             >
-              <Text style={styles.deleteUserButtonText}>{item.status === "active" ? "Khóa" : "Mở khóa"}</Text>
+              <Text style={styles.deleteUserButtonText}>
+                {item.status === "active" ? "Khóa" : "Mở khóa"}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
-    )
-  }
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -145,7 +181,6 @@ const WorkerManagementScreen = ({ onTabPress, onBack }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.input}
@@ -155,45 +190,47 @@ const WorkerManagementScreen = ({ onTabPress, onBack }) => {
         />
       </View>
 
-      {/* Filter */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "all" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("all")}
-        >
-          <Text style={[styles.filterText, filterStatus === "all" && styles.activeFilterText]}>
-            Tất cả ({workerList.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "pending" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("pending")}
-        >
-          <Text style={[styles.filterText, filterStatus === "pending" && styles.activeFilterText]}>
-            Chờ duyệt ({workerList.filter((w) => w.status === "pending").length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterChip, filterStatus === "active" && styles.activeFilterChip]}
-          onPress={() => setFilterStatus("active")}
-        >
-          <Text style={[styles.filterText, filterStatus === "active" && styles.activeFilterText]}>
-            Hoạt động ({workerList.filter((w) => w.status === "active").length})
-          </Text>
-        </TouchableOpacity>
+        {["all", "pending", "active"].map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={[
+              styles.filterChip,
+              filterStatus === status && styles.activeFilterChip,
+            ]}
+            onPress={() => setFilterStatus(status)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                filterStatus === status && styles.activeFilterText,
+              ]}
+            >
+              {getStatusText(status)} (
+              {workerList.filter((w) =>
+                status === "all" ? true : w.status === status
+              ).length}
+              )
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <FlatList
-        data={filteredWorkers}
-        renderItem={renderWorker}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={filteredWorkers}
+          renderItem={renderWorker}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
       <AdminBottomNav onTabPress={onTabPress} activeTab="workerManagement" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerManagementScreen
+export default WorkerManagementScreen;

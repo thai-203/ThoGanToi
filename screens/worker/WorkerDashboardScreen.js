@@ -1,21 +1,88 @@
+import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, FlatList } from "react-native"
 import { styles } from "../../styles/styles"
-import { workerOrders } from "../../data/mockData"
 import { statusConfig } from "../../constants/statusConfig"
 import { WorkerBottomNav } from "../../components/BottomNavigation"
+import { getCurrentUserId } from "../../utils/auth"
+import OrderService from "../../services/orderService"
+import WorkerService from "../../services/workerService"
+import ServiceService from "../../services/serviceService"
 
 const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
-  const pendingOrders = workerOrders.filter((order) => order.status === "pending").length
-  const acceptedOrders = workerOrders.filter((order) => order.status === "accepted").length
-  const completedOrders = workerOrders.filter((order) => order.status === "completed").length
-  const totalEarnings = workerOrders
-    .filter((order) => order.status === "completed")
-    .reduce((sum, order) => sum + Number.parseInt(order.price.replace(/[^\d]/g, "")), 0)
+  const [orders, setOrders] = useState([])
+  const [workerInfo, setWorkerInfo] = useState(null)
 
-  const recentOrders = workerOrders.slice(0, 3)
+  useEffect(() => {
+    const fetchAndListenOrders = async () => {
+      try {
+        const userId = await getCurrentUserId()
+        const [worker, allServices] = await Promise.all([
+          WorkerService.getWorkerByUserId(userId),
+          ServiceService.getAllServices(),
+        ])
+
+        if (!worker || !worker.id) {
+          console.warn("Không tìm thấy thông tin worker tương ứng với userId:", userId)
+          setOrders([])
+          return
+        }
+
+        // Xử lý specialty từ serviceId
+        const serviceNames = (worker.serviceId || [])
+          .map((id) => {
+            const svc = allServices.find((s) => String(s.id) === String(id))
+            return svc ? svc.name : `#${id}`
+          })
+          .join(", ")
+
+        setWorkerInfo({
+          ...worker,
+          specialty: serviceNames,
+          rating: worker.rating || "4.8",
+          totalReviews: worker.reviews || 0,
+        })
+
+        const unsubscribe = OrderService.listenToWorkerOrders(worker.id, (workerOrders) => {
+          const sortedOrders = workerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+          setOrders(sortedOrders)
+        })
+
+        return unsubscribe
+      } catch (error) {
+        console.error("Lỗi khi fetch và listen orders:", error)
+      }
+    }
+
+    let unsubscribeFn
+    fetchAndListenOrders().then((unsub) => {
+      if (typeof unsub === "function") {
+        unsubscribeFn = unsub
+      }
+    })
+
+    return () => {
+      if (unsubscribeFn) unsubscribeFn()
+    }
+  }, [])
+
+  const pendingOrders = orders.filter((o) => o.status === "pending").length
+  const acceptedOrders = orders.filter((o) => o.status === "accepted").length
+  const completedOrders = orders.filter((o) => o.status === "completed").length
+  const totalEarnings = orders
+  .filter((o) => o.status === "completed")
+  .reduce((sum, o) => {
+    const rawPrice = o.price?.toLowerCase?.().trim()
+    const price =
+      rawPrice === "thỏa thuận"
+        ? 0
+        : Number.parseInt(rawPrice.replace(/[^\d]/g, ""), 10) || 0
+    return sum + price
+  }, 0)
+
+  const recentOrders = orders.slice(0, 3)
 
   const renderRecentOrder = ({ item }) => {
-    const status = statusConfig[item.status]
+    const status = statusConfig[item.status] || {}
     return (
       <TouchableOpacity style={styles.recentOrderCard} onPress={() => onOrderPress(item)}>
         <View style={styles.recentOrderHeader}>
@@ -25,9 +92,7 @@ const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
           </View>
         </View>
         <Text style={styles.recentOrderService}>{item.service}</Text>
-        <Text style={styles.recentOrderTime}>
-          📅 {item.date} - {item.time}
-        </Text>
+        <Text style={styles.recentOrderTime}>📅 {item.date} - {item.time}</Text>
         <Text style={styles.recentOrderPrice}>💰 {item.price}</Text>
       </TouchableOpacity>
     )
@@ -36,15 +101,16 @@ const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
+        {/* Worker Header */}
         <View style={styles.workerHeader}>
           <View style={styles.workerInfo}>
             <Text style={styles.workerAvatar}>👨‍🔧</Text>
             <View>
-              <Text style={styles.workerName}>Thợ Minh Tuấn</Text>
-              <Text style={styles.workerSpecialty}>Thợ điện chuyên nghiệp</Text>
+              <Text style={styles.workerName}>{workerInfo?.name || "Thợ chưa đặt tên"}</Text>
+              <Text style={styles.workerSpecialty}>{workerInfo?.specialty || "Chuyên ngành chưa xác định"}</Text>
               <View style={styles.workerRating}>
-                <Text style={styles.rating}>⭐ 4.8</Text>
-                <Text style={styles.reviews}>(127 đánh giá)</Text>
+                <Text style={styles.rating}>⭐ {workerInfo?.rating}</Text>
+                <Text style={styles.reviews}>({workerInfo?.totalReviews} đánh giá)</Text>
               </View>
             </View>
           </View>
@@ -116,9 +182,11 @@ const WorkerDashboardScreen = ({ onTabPress, onOrderPress }) => {
             renderItem={renderRecentOrder}
             scrollEnabled={false}
             contentContainerStyle={styles.recentOrdersList}
+            keyExtractor={(item, index) => item.id || index.toString()}
           />
         </View>
       </ScrollView>
+
       <WorkerBottomNav onTabPress={onTabPress} activeTab="dashboard" />
     </SafeAreaView>
   )

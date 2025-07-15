@@ -1,11 +1,14 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from "react-native"
 import { styles } from "../styles/styles"
 import UserService from "../services/userService"
 import DataInitializer from "../utils/dataInitializer"
-import { users } from "../data/mockData" // Fallback data
+import { users } from "../data/mockData"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
-const LoginScreen = ({ onLogin }) => {
+const LoginScreen = ({ onLogin, onRegister, onForgotPassword }) => {
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -51,6 +54,7 @@ const LoginScreen = ({ onLogin }) => {
         // Try Firebase first
         try {
           user = await UserService.authenticateUser(phone, password)
+          await AsyncStorage.setItem("currentUserId", user.id)
         } catch (error) {
           console.error("Firebase authentication error:", error)
           // Fall back to mock data
@@ -115,13 +119,19 @@ const LoginScreen = ({ onLogin }) => {
             secureTextEntry
             editable={!loading}
           />
-          <View style={styles.loginInfo}>
+
+          <TouchableOpacity style={styles.forgotPasswordButton} onPress={onForgotPassword} disabled={loading}>
+            <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
+          </TouchableOpacity>
+
+          {/* <View style={styles.loginInfo}>
             <Text style={styles.loginInfoText}>Tài khoản demo:</Text>
             <Text style={styles.loginInfoText}>• Admin: 0123456789</Text>
             <Text style={styles.loginInfoText}>• Customer: 0111111111</Text>
             <Text style={styles.loginInfoText}>• Worker: 0444444444</Text>
             <Text style={styles.loginInfoText}>Mật khẩu: 123456</Text>
-          </View>
+          </View> */}
+
           <TouchableOpacity
             style={[styles.loginButton, loading && { opacity: 0.7 }]}
             onPress={handleLogin}
@@ -129,7 +139,8 @@ const LoginScreen = ({ onLogin }) => {
           >
             {loading ? <ActivityIndicator color="white" /> : <Text style={styles.loginButtonText}>Đăng nhập</Text>}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.registerButton} disabled={loading}>
+
+          <TouchableOpacity style={styles.registerButton} onPress={onRegister} disabled={loading}>
             <Text style={styles.registerButtonText}>Chưa có tài khoản? Đăng ký</Text>
           </TouchableOpacity>
         </View>

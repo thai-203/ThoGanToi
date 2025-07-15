@@ -1,11 +1,56 @@
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native"
+import { useState, useEffect } from "react"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from "react-native"
 import { styles } from "../../styles/styles"
 import { menuItems } from "../../data/mockData"
 import { CustomerBottomNav } from "../../components/BottomNavigation"
+import userService from "../../services/userService"
+import EditProfileScreen from "./EditProfileScreen"
+import { getCurrentUserId } from "../../utils/auth"
 
-const ProfileScreen = ({ onTabPress, onLogout }) => {
+const ProfileScreen = ({ onTabPress, onLogout, onMenuPress }) => {
+  const [showEditProfile, setShowEditProfile] = useState(false)
+  const [userInfo, setUserInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  const fetchUserInfo = async () => {
+    const userId = await getCurrentUserId()
+    const userData = await userService.getUserById(userId)
+    if (userData) {
+      setUserInfo({ ...userData, id: userId })
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchUserInfo()
+  }, [])
+
   const handleMenuPress = (action) => {
-    Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
+    if (action === "profile" && onMenuPress) {
+      onMenuPress("personalInfo")
+    } else if (action === "address" && onMenuPress) {
+      onMenuPress("addressManagement")
+    } else if (action === "payment" && onMenuPress) {
+      onMenuPress("paymentMethod")
+    } else if (action === "offers" && onMenuPress) {
+      onMenuPress("offers")
+    } else if (action === "support" && onMenuPress) {
+      onMenuPress("helpSupport")
+    } else if (action === "settings" && onMenuPress) {
+      onMenuPress("customerSettings")
+    } else if (action === "about" && onMenuPress) {
+      onMenuPress("aboutUs")
+    } else {
+      Alert.alert("Thông báo", `Chức năng ${action} đang được phát triển`)
+    }
   }
 
   const handleLogout = () => {
@@ -15,6 +60,21 @@ const ProfileScreen = ({ onTabPress, onLogout }) => {
     ])
   }
 
+  const handleSaveProfile = async (newUserInfo) => {
+    await userService.updateUser(userInfo.id, newUserInfo)
+    setUserInfo(newUserInfo)
+    setShowEditProfile(false)
+    Alert.alert("Thành công", "Đã lưu thông tin cá nhân.")
+  }
+
+  if (loading || !userInfo) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 50 }} />
+      </SafeAreaView>
+    )
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -22,22 +82,23 @@ const ProfileScreen = ({ onTabPress, onLogout }) => {
           <View style={styles.profileInfo}>
             <Text style={styles.profileAvatar}>👤</Text>
             <View>
-              <Text style={styles.userName}>Nguyễn Văn A</Text>
-              <Text style={styles.userPhone}>0123 456 789</Text>
+              <Text style={styles.userName}>{userInfo.name}</Text>
+              <Text style={styles.userPhone}>{userInfo.phone}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={() => setShowEditProfile(true)}>
             <Text style={styles.editButtonText}>Sửa</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{userInfo.completedOrders || 0}</Text>
             <Text style={styles.statLabel}>Đơn hoàn thành</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>4.8</Text>
+            <Text style={styles.statNumber}>{userInfo.rating || "Chưa có"}</Text>
             <Text style={styles.statLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statDivider} />
@@ -46,6 +107,7 @@ const ProfileScreen = ({ onTabPress, onLogout }) => {
             <Text style={styles.statLabel}>Ưu đãi</Text>
           </View>
         </View>
+
         <View style={styles.menuContainer}>
           {menuItems.map((item) => (
             <TouchableOpacity key={item.id} style={styles.menuItem} onPress={() => handleMenuPress(item.action)}>
@@ -57,6 +119,7 @@ const ProfileScreen = ({ onTabPress, onLogout }) => {
             </TouchableOpacity>
           ))}
         </View>
+
         <View style={styles.promoContainer}>
           <View style={styles.promoCard}>
             <Text style={styles.promoIcon}>🎉</Text>
@@ -69,10 +132,19 @@ const ProfileScreen = ({ onTabPress, onLogout }) => {
             </TouchableOpacity>
           </View>
         </View>
+
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <EditProfileScreen
+        visible={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        onSave={handleSaveProfile}
+        userInfo={userInfo}
+      />
+
       <CustomerBottomNav onTabPress={onTabPress} activeTab="profile" />
     </SafeAreaView>
   )

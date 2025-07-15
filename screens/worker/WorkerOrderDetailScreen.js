@@ -1,10 +1,17 @@
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from "react-native"
-import { styles } from "../../styles/styles"
-import { statusConfig } from "../../constants/statusConfig"
-import { WorkerBottomNav } from "../../components/BottomNavigation"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { styles } from "../../styles/styles";
+import { statusConfig } from "../../constants/statusConfig";
+import { WorkerBottomNav } from "../../components/BottomNavigation";
 
 const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
-  const status = statusConfig[order.status]
+  const status = statusConfig[order.status];
 
   const handleAcceptOrder = () => {
     Alert.alert("Xác nhận nhận đơn", "Bạn có chắc muốn nhận đơn hàng này?", [
@@ -12,12 +19,12 @@ const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
       {
         text: "Nhận đơn",
         onPress: () => {
-          Alert.alert("Thành công", "Đã nhận đơn hàng!")
-          onBack()
+          Alert.alert("Thành công", "Đã nhận đơn hàng!");
+          onBack();
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleRejectOrder = () => {
     Alert.alert("Xác nhận từ chối", "Bạn có chắc muốn từ chối đơn hàng này?", [
@@ -26,12 +33,12 @@ const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
         text: "Từ chối",
         style: "destructive",
         onPress: () => {
-          Alert.alert("Đã từ chối", "Đơn hàng đã được từ chối")
-          onBack()
+          Alert.alert("Đã từ chối", "Đơn hàng đã được từ chối");
+          onBack();
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleCompleteOrder = () => {
     Alert.alert("Hoàn thành công việc", "Xác nhận đã hoàn thành công việc?", [
@@ -39,16 +46,16 @@ const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
       {
         text: "Hoàn thành",
         onPress: () => {
-          Alert.alert("Thành công", "Đã cập nhật trạng thái hoàn thành!")
-          onBack()
+          Alert.alert("Thành công", "Đã cập nhật trạng thái hoàn thành!");
+          onBack();
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handleCall = () => {
-    Alert.alert("Gọi điện", `Gọi cho ${order.customer}: ${order.phone}`)
-  }
+    Alert.alert("Gọi điện", `Gọi cho ${order.customer}: ${order.phone}`);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,7 +65,9 @@ const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
         </TouchableOpacity>
         <Text style={styles.screenTitle}>Chi tiết đơn hàng</Text>
         <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-          <Text style={[styles.statusText, { color: status.color }]}>{status.label}</Text>
+          <Text style={[styles.statusText, { color: status.color }]}>
+            {status.label}
+          </Text>
         </View>
       </View>
       <ScrollView style={styles.orderDetailContent}>
@@ -94,7 +103,9 @@ const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Giá:</Text>
-              <Text style={[styles.infoValue, styles.priceValue]}>{order.price}</Text>
+              <Text style={[styles.infoValue, styles.priceValue]}>
+                {order.price}
+              </Text>
             </View>
           </View>
         </View>
@@ -132,23 +143,32 @@ const WorkerOrderDetailScreen = ({ order, onBack, onTabPress }) => {
         </TouchableOpacity>
         {order.status === "pending" && (
           <View style={styles.pendingActionButtons}>
-            <TouchableOpacity style={styles.rejectActionButton} onPress={handleRejectOrder}>
+            <TouchableOpacity
+              style={styles.rejectActionButton}
+              onPress={handleRejectOrder}
+            >
               <Text style={styles.rejectActionButtonText}>Từ chối</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.acceptActionButton} onPress={handleAcceptOrder}>
+            <TouchableOpacity
+              style={styles.acceptActionButton}
+              onPress={handleAcceptOrder}
+            >
               <Text style={styles.acceptActionButtonText}>Nhận đơn</Text>
             </TouchableOpacity>
           </View>
         )}
         {order.status === "accepted" && (
-          <TouchableOpacity style={styles.completeActionButton} onPress={handleCompleteOrder}>
+          <TouchableOpacity
+            style={styles.completeActionButton}
+            onPress={handleCompleteOrder}
+          >
             <Text style={styles.completeActionButtonText}>Hoàn thành</Text>
           </TouchableOpacity>
         )}
       </View>
       <WorkerBottomNav onTabPress={onTabPress} activeTab="orders" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default WorkerOrderDetailScreen
+export default WorkerOrderDetailScreen;
